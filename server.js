@@ -5,6 +5,7 @@ const fetch = (...args) =>
 const app = express();
 
 app.use(express.json());
+app.use(express.static("."));
 
 app.get("/", (req, res) => {
   res.send("AI Agent Chatbot is Live 🚀");
