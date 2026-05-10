@@ -33,6 +33,7 @@ app.post("/chat", async (req, res) => {
 
     res.json({
       reply: JSON.stringify(data),
+    });
 
   } catch (error) {
 
