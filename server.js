@@ -16,7 +16,7 @@ app.post("/chat", async (req, res) => {
     const userMessage = req.body.message;
 
     const response = await fetch(
-      "https://api.openai.com/v1/chat/completions",
+      https://api.openai.com/v1/responses
       {
         method: "POST",
         headers: {
@@ -24,17 +24,16 @@ app.post("/chat", async (req, res) => {
           Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [{ role: "user", content: userMessage }],
-        }),
+  model: "gpt-4o-mini",
+  messages: [{ role: "user", content: userMessage }],
+}),
       }
     );
 
     const data = await response.json();
 console.log(data);
     res.json({
-      reply: data.choices[0].message.content,
-    });
+      reply: data.output[0].content[0].text,
   } catch (error) {
     console.error(error);
 
