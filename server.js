@@ -8,9 +8,9 @@ app.use(express.static("."));
 
 app.post("/chat", async (req, res) => {
 
-  const userMessage = req.body.message;
-
   try {
+
+    const userMessage = req.body.message;
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
@@ -37,16 +37,26 @@ app.post("/chat", async (req, res) => {
 
     console.log(data);
 
-    res.json({
-      reply: data.candidates[0].content.parts[0].text,
-    });
+    if (data.candidates) {
+
+      res.json({
+        reply: data.candidates[0].content.parts[0].text,
+      });
+
+    } else {
+
+      res.json({
+        reply: JSON.stringify(data),
+      });
+
+    }
 
   } catch (error) {
 
     console.log(error);
 
     res.json({
-      reply: "Server Error",
+      reply: error.message,
     });
 
   }
