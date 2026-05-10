@@ -13,16 +13,22 @@ app.post("/chat", async (req, res) => {
   try {
 
     const response = await fetch(
-      "https://api.openai.com/v1/responses",
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "gpt-4o-mini",
-          input: userMessage
+          contents: [
+            {
+              parts: [
+                {
+                  text: userMessage
+                }
+              ]
+            }
+          ]
         }),
       }
     );
@@ -32,7 +38,7 @@ app.post("/chat", async (req, res) => {
     console.log(data);
 
     res.json({
-      reply: JSON.stringify(data),
+      reply: data.candidates[0].content.parts[0].text,
     });
 
   } catch (error) {
