@@ -6,6 +6,9 @@ const app = express();
 app.use(express.json());
 app.use(express.static("."));
 
+app.get("/", (req, res) => {
+  res.sendFile(process.cwd() + "/index.html");
+});
 app.post("/chat", async (req, res) => {
 
   try {
