@@ -24,9 +24,14 @@ app.post("/chat", async (req, res) => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "mistralai/mistral-7b-instruct:free",
-          messages: [
-            {
+  model: "openai/gpt-3.5-turbo",
+  messages: [
+    {
+      role: "user",
+      content: userMessage
+    }
+  ]
+})
               role: "user",
               content: userMessage
             }
