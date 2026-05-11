@@ -47,7 +47,7 @@ app.post("/chat", async (req, res) => {
     console.log(error);
 
     res.json({
-      reply: "Server Error"
+      reply: error.message
     });
 
   }
