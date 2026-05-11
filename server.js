@@ -12,6 +12,7 @@ app.get("/", (req, res) => {
 
 app.post("/chat", async (req, res) => {
   try {
+
     const userMessage = req.body.message;
 
     const response = await fetch(
@@ -38,9 +39,19 @@ app.post("/chat", async (req, res) => {
 
     console.log(data);
 
-    res.json({
-      reply: data.choices[0].message.content
-    });
+    if (data.choices && data.choices.length > 0) {
+
+      res.json({
+        reply: data.choices[0].message.content
+      });
+
+    } else {
+
+      res.json({
+        reply: JSON.stringify(data)
+      });
+
+    }
 
   } catch (error) {
 
