@@ -1,407 +1,43 @@
- <!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AI Agency Dashboard</title>
-
-  <style>
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-      font-family:Arial, sans-serif;
-    }
-
-    body{
-      background:#0f172a;
-      color:white;
-      display:flex;
-      min-height:100vh;
-    }
-
-    /* SIDEBAR */
-
-    .sidebar{
-      width:260px;
-      background:#111827;
-      padding:25px;
-      border-right:1px solid #1f2937;
-    }
-
-    .logo{
-      font-size:28px;
-      font-weight:bold;
-      margin-bottom:40px;
-      color:#38bdf8;
-    }
-
-    .menu button{
-      width:100%;
-      padding:15px;
-      margin-bottom:15px;
-      border:none;
-      border-radius:12px;
-      background:#1e293b;
-      color:white;
-      font-size:16px;
-      cursor:pointer;
-      transition:0.3s;
-    }
-
-    .menu button:hover{
-      background:#38bdf8;
-      color:black;
-    }
-
-    /* MAIN */
-
-    .main{
-      flex:1;
-      padding:25px;
-    }
-
-    .top{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:30px;
-    }
-
-    .title{
-      font-size:32px;
-      font-weight:bold;
-    }
-
-    /* CARDS */
-
-    .cards{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-      gap:20px;
-      margin-bottom:30px;
-    }
-
-    .card{
-      background:#111827;
-      padding:25px;
-      border-radius:20px;
-      border:1px solid #1f2937;
-    }
-
-    .card h3{
-      color:#94a3b8;
-      margin-bottom:15px;
-    }
-
-    .card p{
-      font-size:32px;
-      font-weight:bold;
-    }
-
-    /* AI CHAT */
-
-    .chat-box{
-      background:#111827;
-      padding:25px;
-      border-radius:20px;
-      margin-bottom:30px;
-      border:1px solid #1f2937;
-    }
-
-    .chat-title{
-      font-size:26px;
-      margin-bottom:20px;
-      color:#38bdf8;
-    }
-
-    .chat-messages{
-      background:#0f172a;
-      height:220px;
-      border-radius:15px;
-      padding:15px;
-      overflow-y:auto;
-      border:1px solid #334155;
-      margin-bottom:15px;
-    }
-
-    .chat-input{
-      display:flex;
-      gap:10px;
-    }
-
-    .chat-input input{
-      flex:1;
-      padding:15px;
-      border:none;
-      border-radius:12px;
-      background:#1e293b;
-      color:white;
-      font-size:16px;
-    }
-
-    .chat-input button{
-      padding:15px 25px;
-      border:none;
-      border-radius:12px;
-      background:#38bdf8;
-      color:black;
-      font-weight:bold;
-      cursor:pointer;
-    }
-
-    /* TABLE */
-
-    .table-box{
-      background:#111827;
-      padding:25px;
-      border-radius:20px;
-      margin-bottom:30px;
-      border:1px solid #1f2937;
-      overflow-x:auto;
-    }
-
-    .table-title{
-      font-size:26px;
-      margin-bottom:20px;
-      color:#38bdf8;
-    }
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-    }
-
-    th, td{
-      padding:15px;
-      text-align:left;
-      border-bottom:1px solid #1f2937;
-    }
-
-    th{
-      color:#94a3b8;
-    }
-
-    .green{
-      color:#22c55e;
-      font-weight:bold;
-    }
-
-    .yellow{
-      color:#facc15;
-      font-weight:bold;
-    }
-
-    /* MOBILE */
-
-    @media(max-width:900px){
-
-      body{
-        flex-direction:column;
-      }
-
-      .sidebar{
-        width:100%;
-      }
-
-      .menu{
-        display:grid;
-        grid-template-columns:repeat(2,1fr);
-        gap:10px;
-      }
-
-      .menu button{
-        margin-bottom:0;
-      }
-    }
-
-  </style>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-  <!-- SIDEBAR -->
+<div class="sidebar">
 
-  <div class="sidebar">
-
-    <div class="logo">
-      AI Agency 🚀
-    </div>
-
-    <div class="menu">
-      <button>Dashboard</button>
-      <button>AI Agent</button>
-      <button>Orders</button>
-      <button>Payments</button>
-      <button>Websites</button>
-    </div>
-
+  <div class="logo">
+    AI Agency 🚀
   </div>
 
-  <!-- MAIN -->
-
-  <div class="main">
-
-    <div class="top">
-      <div class="title">
-        AI Business Dashboard
-      </div>
-    </div>
-
-    <!-- CARDS -->
-
-    <div class="cards">
-
-      <div class="card">
-        <h3>Total Orders</h3>
-        <p>12</p>
-      </div>
-
-      <div class="card">
-        <h3>Completed Websites</h3>
-        <p>7</p>
-      </div>
-
-      <div class="card">
-        <h3>Pending Payments</h3>
-        <p>₹25K</p>
-      </div>
-
-      <div class="card">
-        <h3>Monthly Earnings</h3>
-        <p>₹80K</p>
-      </div>
-
-    </div>
-
-    <!-- AI CHAT -->
-
-    <div class="chat-box">
-
-      <div class="chat-title">
-        AI Worker Agent 🤖
-      </div>
-
-      <div class="chat-messages" id="chatMessages">
-
-        <p><b>AI:</b> Hello Boss 👋</p>
-        <br>
-        <p>I can:</p>
-        <br>
-        <p>✔ Find Clients</p>
-        <p>✔ Track Orders</p>
-        <p>✔ Manage Payments</p>
-        <p>✔ Build Website Workflow</p>
-
-      </div>
-
-      <div class="chat-input">
-
-        <input 
-          type="text"
-          id="messageInput"
-          placeholder="Tell your AI worker what to do..."
-        >
-
-        <button onclick="sendMessage()">
-          Send
-        </button>
-
-      </div>
-
-    </div>
-
-    <!-- ORDERS -->
-
-    <div class="table-box">
-
-      <div class="table-title">
-        Orders
-      </div>
-
-      <table>
-
-        <tr>
-          <th>Client</th>
-          <th>Website Type</th>
-          <th>Status</th>
-        </tr>
-
-        <tr>
-          <td>Fitness Gym</td>
-          <td>3D Website</td>
-          <td class="yellow">Pending</td>
-        </tr>
-
-        <tr>
-          <td>Salon Studio</td>
-          <td>Template Website</td>
-          <td class="green">Completed</td>
-        </tr>
-
-      </table>
-
-    </div>
-
-    <!-- PAYMENTS -->
-
-    <div class="table-box">
-
-      <div class="table-title">
-        Payment History
-      </div>
-
-      <table>
-
-        <tr>
-          <th>Client</th>
-          <th>Amount</th>
-          <th>Status</th>
-        </tr>
-
-        <tr>
-          <td>Cafe House</td>
-          <td>₹15,000</td>
-          <td class="green">Paid</td>
-        </tr>
-
-        <tr>
-          <td>Tech Startup</td>
-          <td>₹40,000</td>
-          <td class="yellow">Pending</td>
-        </tr>
-
-      </table>
-
-    </div>
-
+  <div class="menu">
+    <a href="index.html">Dashboard</a>
+    <a href="chat.html">Chat</a>
+    <a href="agent.html">AI Agent</a>
+    <a href="orders.html">Orders</a>
   </div>
 
-  <script>
+</div>
 
-    function sendMessage(){
+<div class="main">
 
-      let input = document.getElementById("messageInput");
+  <div class="title">
+    Dashboard
+  </div>
 
-      let message = input.value;
+  <div class="card">
+    <h2>Total Orders</h2>
+    <p>12</p>
+  </div>
 
-      if(message.trim() === "") return;
+  <div class="card">
+    <h2>Total Earnings</h2>
+    <p>₹80,000</p>
+  </div>
 
-      let chat = document.getElementById("chatMessages");
-
-      chat.innerHTML += `
-        <br>
-        <p><b>You:</b> ${message}</p>
-        <br>
-        <p><b>AI:</b> Task received Boss 🚀</p>
-      `;
-
-      input.value = "";
-
-      chat.scrollTop = chat.scrollHeight;
-    }
-
-  </script>
+</div>
 
 </body>
-      </html>     
+</html>         
