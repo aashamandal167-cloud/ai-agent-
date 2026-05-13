@@ -1,0 +1,55 @@
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0f172a;
+  color:white;
+  display:flex;
+}
+
+.sidebar{
+  width:250px;
+  background:#111827;
+  height:100vh;
+  padding:20px;
+  position:fixed;
+}
+
+.logo{
+  font-size:28px;
+  font-weight:bold;
+  color:#38bdf8;
+  margin-bottom:40px;
+}
+
+.menu a{
+  display:block;
+  text-decoration:none;
+  color:white;
+  padding:15px;
+  margin-bottom:10px;
+  border-radius:12px;
+  background:#1e293b;
+}
+
+.menu a:hover{
+  background:#38bdf8;
+  color:black;
+}
+
+.main{
+  margin-left:270px;
+  padding:30px;
+  width:100%;
+}
+
+.card{
+  background:#111827;
+  padding:25px;
+  border-radius:20px;
+  margin-bottom:20px;
+}
+
+.title{
+  font-size:30px;
+  margin-bottom:20px;
+}
