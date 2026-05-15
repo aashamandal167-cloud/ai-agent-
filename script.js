@@ -191,3 +191,29 @@ plusBtn.addEventListener("click", () => {
 
   chatArea.scrollTop = chatArea.scrollHeight;
 });
+
+const fileUpload = document.getElementById("fileUpload");
+
+fileUpload.addEventListener("change", () => {
+
+  const file = fileUpload.files[0];
+
+  if(!file) return;
+
+  const userDiv = document.createElement("div");
+
+  userDiv.className = "user-message";
+
+  userDiv.innerText = `📎 Uploaded: ${file.name}`;
+
+  document.querySelector(".chat-area").appendChild(userDiv);
+
+  const botDiv = document.createElement("div");
+
+  botDiv.className = "bot-message";
+
+  botDiv.innerText = "File received successfully 🚀";
+
+  document.querySelector(".chat-area").appendChild(botDiv);
+
+});
