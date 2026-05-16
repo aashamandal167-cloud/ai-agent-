@@ -8,7 +8,7 @@ function closeSidebar() {
 
 const chatArea = document.querySelector(".chat-area");
 
-/* MENU */
+/* PAGES */
 
 const pages = {
 
@@ -114,9 +114,9 @@ const pages = {
 
 };
 
-const menuItems = document.querySelectorAll(".menu li");
+/* MENU */
 
-const chatArea = document.querySelector(".chat-area");
+const menuItems = document.querySelectorAll(".menu li");
 
 menuItems.forEach(item => {
 
@@ -134,23 +134,23 @@ menuItems.forEach(item => {
       chatArea.innerHTML = pages.dashboard;
     }
 
-    else if(text.includes("leads")){
+    else if(text.includes("lead")){
       chatArea.innerHTML = pages.leads;
     }
 
-    else if(text.includes("clients")){
+    else if(text.includes("client")){
       chatArea.innerHTML = pages.clients;
     }
 
-    else if(text.includes("orders")){
+    else if(text.includes("order")){
       chatArea.innerHTML = pages.orders;
     }
 
-    else if(text.includes("services")){
+    else if(text.includes("service")){
       chatArea.innerHTML = pages.services;
     }
 
-    else if(text.includes("campaigns")){
+    else if(text.includes("campaign")){
       chatArea.innerHTML = pages.campaigns;
     }
 
@@ -158,7 +158,7 @@ menuItems.forEach(item => {
       chatArea.innerHTML = pages.outreach;
     }
 
-    else if(text.includes("invoices")){
+    else if(text.includes("invoice")){
       chatArea.innerHTML = pages.invoices;
     }
 
@@ -166,7 +166,7 @@ menuItems.forEach(item => {
       chatArea.innerHTML = pages.aiagent;
     }
 
-    else if(text.includes("payments")){
+    else if(text.includes("payment")){
       chatArea.innerHTML = pages.payments;
     }
 
@@ -178,28 +178,9 @@ menuItems.forEach(item => {
       chatArea.innerHTML = pages.analytics;
     }
 
-    else if(text.includes("settings")){
+    else if(text.includes("setting")){
       chatArea.innerHTML = pages.settings;
     }
-
-    closeSidebar();
-
-  });
-
-});
-
-    item.classList.add("active-menu");
-
-    const botDiv = document.createElement("div");
-
-    botDiv.className = "bot-message";
-
-    botDiv.innerText =
-      item.innerText + " section opened successfully 🚀";
-
-    chatArea.appendChild(botDiv);
-
-    chatArea.scrollTop = chatArea.scrollHeight;
 
     closeSidebar();
 
