@@ -10,7 +10,113 @@ const chatArea = document.querySelector(".chat-area");
 
 /* MENU */
 
+const pages = {
+
+  dashboard: `
+    <div class="bot-message">
+      📊 Dashboard Opened <br><br>
+      Total Clients: 12 <br>
+      Active Orders: 5 <br>
+      Revenue: ₹85,000 🚀
+    </div>
+  `,
+
+  leads: `
+    <div class="bot-message">
+      📋 Leads Section <br><br>
+      • Gym Owner Delhi <br>
+      • Restaurant Mumbai <br>
+      • Shop Ahmedabad
+    </div>
+  `,
+
+  clients: `
+    <div class="bot-message">
+      👥 Clients Section <br><br>
+      • Raj Fitness <br>
+      • DK Restaurant <br>
+      • Sharma Electronics
+    </div>
+  `,
+
+  orders: `
+    <div class="bot-message">
+      🛒 Orders Section <br><br>
+      3 Website Orders Running 🚀
+    </div>
+  `,
+
+  services: `
+    <div class="bot-message">
+      📦 Services <br><br>
+      • Business Website <br>
+      • 3D Website <br>
+      • Animated Premium Website
+    </div>
+  `,
+
+  campaigns: `
+    <div class="bot-message">
+      🚀 Campaign Manager <br><br>
+      AI Ads Running Successfully ✅
+    </div>
+  `,
+
+  outreach: `
+    <div class="bot-message">
+      📩 Outreach System <br><br>
+      120 Messages Sent Today 🚀
+    </div>
+  `,
+
+  invoices: `
+    <div class="bot-message">
+      🧾 Invoices <br><br>
+      Pending Payments: ₹40,000
+    </div>
+  `,
+
+  aiagent: `
+    <div class="bot-message">
+      🤖 AI Agent Panel <br><br>
+      Raaz Chandrvashi AI is running 24/7 🚀
+    </div>
+  `,
+
+  payments: `
+    <div class="bot-message">
+      💳 Payments <br><br>
+      Today's Revenue: ₹12,000
+    </div>
+  `,
+
+  aitools: `
+    <div class="bot-message">
+      ✨ AI Tools <br><br>
+      • Lead Hunter AI <br>
+      • Website Builder AI <br>
+      • Outreach AI
+    </div>
+  `,
+
+  analytics: `
+    <div class="bot-message">
+      📈 Analytics <br><br>
+      Growth Increased by 230% 🚀
+    </div>
+  `,
+
+  settings: `
+    <div class="bot-message">
+      ⚙️ Settings Opened
+    </div>
+  `
+
+};
+
 const menuItems = document.querySelectorAll(".menu li");
+
+const chatArea = document.querySelector(".chat-area");
 
 menuItems.forEach(item => {
 
@@ -19,6 +125,68 @@ menuItems.forEach(item => {
     menuItems.forEach(i => {
       i.classList.remove("active-menu");
     });
+
+    item.classList.add("active-menu");
+
+    const text = item.innerText.toLowerCase();
+
+    if(text.includes("dashboard")){
+      chatArea.innerHTML = pages.dashboard;
+    }
+
+    else if(text.includes("leads")){
+      chatArea.innerHTML = pages.leads;
+    }
+
+    else if(text.includes("clients")){
+      chatArea.innerHTML = pages.clients;
+    }
+
+    else if(text.includes("orders")){
+      chatArea.innerHTML = pages.orders;
+    }
+
+    else if(text.includes("services")){
+      chatArea.innerHTML = pages.services;
+    }
+
+    else if(text.includes("campaigns")){
+      chatArea.innerHTML = pages.campaigns;
+    }
+
+    else if(text.includes("outreach")){
+      chatArea.innerHTML = pages.outreach;
+    }
+
+    else if(text.includes("invoices")){
+      chatArea.innerHTML = pages.invoices;
+    }
+
+    else if(text.includes("ai agent")){
+      chatArea.innerHTML = pages.aiagent;
+    }
+
+    else if(text.includes("payments")){
+      chatArea.innerHTML = pages.payments;
+    }
+
+    else if(text.includes("ai tools")){
+      chatArea.innerHTML = pages.aitools;
+    }
+
+    else if(text.includes("analytics")){
+      chatArea.innerHTML = pages.analytics;
+    }
+
+    else if(text.includes("settings")){
+      chatArea.innerHTML = pages.settings;
+    }
+
+    closeSidebar();
+
+  });
+
+});
 
     item.classList.add("active-menu");
 
