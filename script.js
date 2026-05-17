@@ -210,6 +210,27 @@ textarea.addEventListener("keydown", function(e){
 
 function sendMessage(){
 
+  const qrUrl = "https://collection.cloudinary.com/dedyoeauv/ecb96aef2f70867a9e902db3ca5233e5
+‎";
+‎
+‎const botDiv = document.createElement("div");
+‎
+‎botDiv.className = "bot-message";
+‎
+‎botDiv.innerHTML = `
+‎💳 Payment ke liye QR scan kare 🙂<br><br>
+‎
+‎<img 
+‎  src="${qrUrl}" 
+‎  width="220"
+‎  style="border-radius:20px;"
+‎>
+‎`;
+‎
+‎chatArea.appendChild(botDiv);
+‎
+‎chatArea.scrollTop = chatArea.scrollHeight;
+‎
   const message = textarea.value.trim();
 
   if(message === "") return;
