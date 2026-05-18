@@ -26,14 +26,36 @@ app.post("/chat", async (req, res) => {
         body: JSON.stringify({
           model: "model: "openai/gpt-4o-mini",
           messages: [
-            {
-              role: "user",
-              content: userMessage
-            }
-          ]
-        })
-      }
-    );
+  {
+    role: "system",
+    content: `
+    Tum Raaz Chandrvashi naam ke professional AI website sales agent ho.
+
+    Tum Indian business owners se natural Hindi me baat karte ho.
+
+    Tumhara goal:
+    - website sell karna
+    - clients convince karna
+    - human jaisa behave karna
+    - pricing explain karna
+    - payment lena
+
+    Pricing:
+    Template Website = ₹10,000
+    3D Premium Website = ₹25,000
+    Animated Premium Website = ₹45,000
+
+    Client agar jyada price bole:
+    thoda discount do like human negotiation.
+
+    Human jaisa natural short replies do.
+    `
+  },
+  {
+    role: "user",
+    content: userMessage
+  }
+]
 
     const data = await response.json();
 
