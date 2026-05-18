@@ -262,8 +262,8 @@ function openSidebar() {
 ‎    ){
 ‎
 ‎      const qrUrl =
-‎      "https://collection.cloudinary.com/dedyoeauv/ecb96aef2f70867a9e902db3ca5233e5
-‎";
+‎      
+‎https://collection.cloudinary.com/dedyoeauv/ecb96aef2f70867a9e902db3ca5233e5
 ‎
 ‎      const paymentDiv =
 ‎      document.createElement("div");
@@ -334,4 +334,4 @@ function openSidebar() {
 ‎  chatArea.scrollHeight;
 ‎
 ‎});
-‎  
+‎‎    ‎    ‎     ‎  
