@@ -1,3 +1,5 @@
+console.log("JS LOADED");
+
 alert("SCRIPT WORKING");
 
 function openSidebar() {
