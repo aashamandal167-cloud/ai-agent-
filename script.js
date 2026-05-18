@@ -262,11 +262,8 @@ function openSidebar() {
 ‎      message.toLowerCase().includes("pay") ||
 ‎      message.toLowerCase().includes("price")
 ‎    ){
-‎
-‎      const qrUrl =
+‎const qrUrl = "https://collection.cloudinary.com/dedyoeauv/ecb96aef2f70867a9e902db3ca5233e5";
 ‎      
-‎https://collection.cloudinary.com/dedyoeauv/ecb96aef2f70867a9e902db3ca5233e5
-‎
 ‎      const paymentDiv =
 ‎      document.createElement("div");
 ‎
