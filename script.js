@@ -1,3 +1,5 @@
+alert("SCRIPT WORKING");
+
 function openSidebar() {
 ‎  document.getElementById("sidebar").classList.add("active");
 ‎}
