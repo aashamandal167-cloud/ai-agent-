@@ -15,18 +15,18 @@ app.get("/find-clients", async (req, res) => {
     const query = req.query.search || "gym owners Ahmedabad";
 
     const response = await fetch(
-      `https://api.apify.com/v2/acts/compass~google-maps-extractor/run-sync-get-dataset-items
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          searchStringsArray: [query],
-          maxCrawledPlacesPerSearch: 10
-        })
-      }
-    );
+  `https://api.apify.com/v2/acts/compass~google-maps-extractor/run-sync-get-dataset-items?token=${process.env.APIFY_API_TOKEN}`,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      searchStringsArray: [query],
+      maxCrawledPlacesPerSearch: 10
+    })
+  }
+);
 
     const data = await response.json();
 
