@@ -48,6 +48,35 @@ app.post("/chat", async (req, res) => {
   try {
     const userMessage = req.body.message;
 
+    if (
+  userMessage.toLowerCase().includes("client") ||
+  userMessage.toLowerCase().includes("dhundo") ||
+  userMessage.toLowerCase().includes("search")
+) {
+
+  const apifyResponse = await fetch(
+    `https://api.apify.com/v2/acts/compass~google-maps-extractor/run-sync-get-dataset-items?token=${process.env.APIFY_API_TOKEN}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        searchStringsArray: ["gym owners Ahmedabad"],
+        maxCrawledPlacesPerSearch: 5
+      })
+    }
+  );
+
+  const leads = await apifyResponse.json();
+
+  const names = leads.map(x => x.title).join("\n");
+
+  return res.json({
+    reply: `Boss 🚀 Clients mil gaye:\n\n${names}`
+  });
+    }
+    
     const response = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
       {
