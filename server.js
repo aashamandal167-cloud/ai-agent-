@@ -10,6 +10,40 @@ app.get("/", (req, res) => {
   res.sendFile(process.cwd() + "/index.html");
 });
 
+app.get("/find-clients", async (req, res) => {
+  try {
+    const query = req.query.search || "gym owners Ahmedabad";
+
+    const response = await fetch(
+      `https://api.apify.com/v2/acts/apify~google-maps-scraper/run-sync-get-dataset-items?token=${process.env.APIFY_API_TOKEN}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          searchStringsArray: [query],
+          maxCrawledPlacesPerSearch: 10
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    res.json({
+      success: true,
+      leads: data
+    });
+
+  } catch (error) {
+    res.json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+
 app.post("/chat", async (req, res) => {
   try {
     const userMessage = req.body.message;
