@@ -69,9 +69,14 @@ app.post("/chat", async (req, res) => {
   );
 
   const leads = await apifyResponse.json();
-
-  const names = leads.map(x => x.title).join("\n");
-
+  
+const names = leads.map(
+  x => `${x.title}
+📍 ${x.address}
+📞 ${x.phone || "No phone"}
+🌐 ${x.website || "No website"}`
+).join("\n\n");
+      
   return res.json({
     reply: `Boss 🚀 Clients mil gaye:\n\n${names}`
   });
