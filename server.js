@@ -15,7 +15,7 @@ app.get("/find-clients", async (req, res) => {
     const query = req.query.search || "gym owners Ahmedabad";
 
     const response = await fetch(
-      `https://api.apify.com/v2/acts/apify~google-maps-scraper/run-sync-get-dataset-items?token=${process.env.APIFY_API_TOKEN}`,
+      `https://api.apify.com/v2/acts/compass~google-maps-extractor/run-sync-get-dataset-items
       {
         method: "POST",
         headers: {
