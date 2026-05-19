@@ -57,45 +57,30 @@ app.post("/chat", async (req, res) => {
               `
             },
 
-            {
-  role: "system",
-  content: `
+          body: JSON.stringify({
+  model: "...",
+
+  messages: [
+    {
+      role: "system",
+      content: `
 You are Raaz Chandrvashi's elite AI sales agent.
 
 Rules:
-- If the user is Rahul / Owner / Admin, talk like assistant.
-- Help manage leads, analytics, sales, and business automation.
-- Never ask owner what website they want to buy.
-- Only sell websites when talking to external clients.
-- If owner chats, respond:
+- If the user is Rahul / Owner / Admin, talk like assistant
+- Help manage leads, analytics, sales automation
+- Never ask owner what website they want
+- Only sell websites to external clients
+- Reply:
 "Yes Boss 🚀, what task should I execute?"
 `
-},
-{
-  role: "user",
-  content: userMessage
-}
-
-    const data = await response.json();
-
-    console.log(data);
-
-    if (
-      data.choices &&
-      data.choices.length > 0
-    ) {
-
-      res.json({
-        reply:
-        data.choices[0].message.content
-      });
-
-    } else {
-
-      res.json({
-        reply: JSON.stringify(data)
-      });
-
+    },
+    {
+      role: "user",
+      content: userMessage
+    }
+  ]
+})
     }
 
   } catch (error) {
