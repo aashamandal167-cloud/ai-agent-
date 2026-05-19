@@ -58,16 +58,23 @@ app.post("/chat", async (req, res) => {
             },
 
             {
-              role: "user",
-              content: userMessage
-            }
+  role: "system",
+  content: `
+You are Raaz Chandrvashi's elite AI sales agent.
 
-          ]
-
-        })
-
-      }
-    );
+Rules:
+- If the user is Rahul / Owner / Admin, talk like assistant.
+- Help manage leads, analytics, sales, and business automation.
+- Never ask owner what website they want to buy.
+- Only sell websites when talking to external clients.
+- If owner chats, respond:
+"Yes Boss 🚀, what task should I execute?"
+`
+},
+{
+  role: "user",
+  content: userMessage
+}
 
     const data = await response.json();
 
