@@ -5,8 +5,8 @@ import { createClient } from "@supabase/supabase-js";
 const app = express();
 
 const supabase = createClient(
-  process.env.SUPABASE_URL?.trim(),
-  process.env.SUPABASE_KEY?.trim()
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
 );
 
 app.use(express.json());
