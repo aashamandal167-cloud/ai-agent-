@@ -4,9 +4,13 @@ import { createClient } from "@supabase/supabase-js";
 
 const app = express();
 
+// Supabase Safe Init
 let supabase = null;
 
-if (process.env.SUPABASE_URL && process.env.SUPABASE_KEY) {
+if (
+  process.env.SUPABASE_URL &&
+  process.env.SUPABASE_KEY
+) {
   supabase = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_KEY
@@ -61,7 +65,7 @@ app.post("/chat", async (req, res) => {
   try {
     const userMessage = req.body.message.toLowerCase();
 
-    // CLIENT SEARCH MODE
+    // Client Search Mode
     if (
       userMessage.includes("client") ||
       userMessage.includes("dhundo") ||
@@ -88,17 +92,20 @@ app.post("/chat", async (req, res) => {
         x => x.phone && x.title
       );
 
-      for (const lead of filteredLeads) {
-  if (supabase) {
-    await supabase.from("clients").insert([
-      {
-        name: lead.title,
-        address: lead.address,
-        phone: lead.phone,
-        website: "No Website"
-      }
-    ]);
-  }
+      // Save to Supabase safely
+      if (supabase) {
+        for (const lead of filteredLeads) {
+          try {
+            await supabase.from("clients").insert([
+              {
+                name: lead.title,
+                address: lead.address,
+                phone: lead.phone,
+                website: lead.website || "No Website"
+              }
+            ]);
+          } catch {}
+        }
       }
 
       if (filteredLeads.length === 0) {
@@ -123,7 +130,7 @@ app.post("/chat", async (req, res) => {
     }
 
 
-    // NORMAL AI CHAT
+    // Normal AI Chat
     const response = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
       {
@@ -179,7 +186,6 @@ Reply naturally in Hindi.
     });
   }
 });
-
 
 const PORT = process.env.PORT || 10000;
 
