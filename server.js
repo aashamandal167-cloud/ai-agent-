@@ -1,5 +1,11 @@
 import express from "express";
 import fetch from "node-fetch";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
 
 const app = express();
 
@@ -68,17 +74,31 @@ app.post("/chat", async (req, res) => {
     }
   );
 
-  const leads = await apifyResponse.json();
-  
-const names = leads.map(
+const leads = await apifyResponse.json();
+
+const filteredLeads = leads.filter(
+  x => !x.website && x.phone && x.title
+);
+
+for (const lead of filteredLeads) {
+  await supabase.from("clients").insert([
+    {
+      name: lead.title,
+      address: lead.address,
+      phone: lead.phone,
+      website: "No Website"
+    }
+  ]);
+}
+
+const names = filteredLeads.map(
   x => `${x.title}
 📍 ${x.address}
-📞 ${x.phone || "No phone"}
-🌐 ${x.website || "No website"}`
+📞 ${x.phone}`
 ).join("\n\n");
       
   return res.json({
-    reply: `Boss 🚀 Clients mil gaye:\n\n${names}`
+    reply: `Boss 🚀 ${filteredLeads.length} aise clients mile jinhe website ki zarurat hai aur database me save kar diye:\n\n${names}`
   });
     }
     
