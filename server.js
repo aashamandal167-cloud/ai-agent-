@@ -89,16 +89,16 @@ app.post("/chat", async (req, res) => {
       );
 
       for (const lead of filteredLeads) {
-        try {
-          await supabase.from("clients").insert([
-            {
-              name: lead.title,
-              address: lead.address,
-              phone: lead.phone,
-              website: lead.website || "No Website"
-            }
-          ]);
-        } catch {}
+  if (supabase) {
+    await supabase.from("clients").insert([
+      {
+        name: lead.title,
+        address: lead.address,
+        phone: lead.phone,
+        website: "No Website"
+      }
+    ]);
+  }
       }
 
       if (filteredLeads.length === 0) {
