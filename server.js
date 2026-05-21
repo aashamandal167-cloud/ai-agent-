@@ -100,7 +100,7 @@ app.post("/chat", async (req, res) => {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            searchStringsArray: ["gym owners Ahmedabad"],
+            searchStringsArray: [req.body.message],
             maxCrawledPlacesPerSearch: 10
           })
         }
