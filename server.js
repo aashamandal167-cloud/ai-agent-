@@ -1,8 +1,13 @@
 import express from "express";
 import fetch from "node-fetch";
 import { createClient } from "@supabase/supabase-js";
+import twilio from "twilio";
 
 const app = express();
+const twilioClient = twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
 
 // Supabase Safe Init
 let supabase = null;
