@@ -132,7 +132,7 @@ app.post("/chat", async (req, res) => {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            searchStringsArray: [req.body.message],
+            searchStringsArray: [cleanSearch],
             maxCrawledPlacesPerSearch: 10
           })
         }
