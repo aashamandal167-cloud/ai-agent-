@@ -67,10 +67,30 @@ app.post("/chat", async (req, res) => {
 
     // Client Search Mode
     if (
-      userMessage.includes("client") ||
-      userMessage.includes("dhundo") ||
-      userMessage.includes("search")
-    ) {
+  userMessage.includes("client") ||
+  userMessage.includes("clients") ||
+  userMessage.includes("dhundo") ||
+  userMessage.includes("dundho") ||
+  userMessage.includes("dhundho") ||
+  userMessage.includes("find") ||
+  userMessage.includes("search") ||
+  userMessage.includes("khojo") ||
+  userMessage.includes("nikalo") ||
+  userMessage.includes("aur") ||
+  userMessage.includes("koi aur") ||
+  userMessage.includes("dusra") ||
+  userMessage.includes("next") ||
+  userMessage.includes("1") ||
+  userMessage.includes("2") ||
+  userMessage.includes("3") ||
+  userMessage.includes("4") ||
+  userMessage.includes("5") ||
+  userMessage.includes("6") ||
+  userMessage.includes("7") ||
+  userMessage.includes("8") ||
+  userMessage.includes("9") ||
+  userMessage.includes("10")
+) {
 
       const apifyResponse = await fetch(
         `https://api.apify.com/v2/acts/compass~google-maps-extractor/run-sync-get-dataset-items?token=${process.env.APIFY_API_TOKEN}`,
