@@ -65,6 +65,38 @@ app.post("/chat", async (req, res) => {
   try {
     const userMessage = req.body.message.toLowerCase();
 
+    const cleanSearch = req.body.message
+  .toLowerCase()
+
+  .replace(/client|clients|dhundo|dundho|dhundho|find|search|khojo|nikalo|dusra|koi aur|aur|next/g, "")
+
+  .replace(/किराना/g, "kirana store")
+  .replace(/फ्रेंचाइजी/g, "franchise store")
+  .replace(/ब्रांड आउटलेट/g, "brand outlet")
+  .replace(/सुपरमार्केट/g, "supermarket")
+  .replace(/फल.*सब्ज़ी/g, "vegetable store")
+  .replace(/कपड़े|बुटीक/g, "clothing boutique")
+  .replace(/जूते/g, "footwear store")
+  .replace(/आभूषण/g, "jewellery shop")
+  .replace(/कॉस्मेटिक्स/g, "cosmetics store")
+  .replace(/मोबाइल/g, "mobile shop")
+  .replace(/कंप्यूटर/g, "computer shop")
+  .replace(/फर्नीचर/g, "furniture showroom")
+  .replace(/हार्डवेयर/g, "hardware store")
+  .replace(/मेडिकल/g, "medical store")
+  .replace(/आयुर्वेदिक/g, "ayurvedic store")
+  .replace(/चश्मा/g, "optical shop")
+  .replace(/बुक/g, "book store")
+  .replace(/खिलौने/g, "toy store")
+  .replace(/स्पोर्ट्स/g, "sports shop")
+  .replace(/जिम/g, "gym")
+  .replace(/सैलून/g, "salon")
+  .replace(/स्पा/g, "spa")
+  .replace(/कॉफ़ी|कैफ़े/g, "coffee shop")
+  .replace(/चाय/g, "tea shop")
+
+  .trim() + " india";
+    
     // Client Search Mode
     if (
   userMessage.includes("client") ||
