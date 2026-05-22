@@ -28,9 +28,6 @@ app.use(express.static("."));
 app.get("/", (req, res) => {
   res.sendFile(process.cwd() + "/index.html");
 });
-app.get("/", (req, res) => {
-  res.sendFile(process.cwd() + "/index.html");
-});
 
 app.get("/test-sms", async (req, res) => {
   try {
@@ -54,9 +51,6 @@ app.get("/test-sms", async (req, res) => {
   }
 });
 
-
-// FIND CLIENTS API
-app.get("/find-clients", async (req, res) => {
 
 // FIND CLIENTS API
 app.get("/find-clients", async (req, res) => {
