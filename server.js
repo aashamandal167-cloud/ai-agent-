@@ -266,6 +266,14 @@ Reply naturally in Hindi.
   }
 });
 
+app.get("/test-twilio", (req, res) => {
+  res.json({
+    sidExists: !!process.env.TWILIO_ACCOUNT_SID,
+    tokenExists: !!process.env.TWILIO_AUTH_TOKEN,
+    phoneExists: !!process.env.TWILIO_PHONE_NUMBER
+  });
+});
+
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
