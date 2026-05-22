@@ -28,7 +28,35 @@ app.use(express.static("."));
 app.get("/", (req, res) => {
   res.sendFile(process.cwd() + "/index.html");
 });
+app.get("/", (req, res) => {
+  res.sendFile(process.cwd() + "/index.html");
+});
 
+app.get("/test-sms", async (req, res) => {
+  try {
+
+    const result = await twilioClient.messages.create({
+      body: "Twilio Connected 🚀",
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: "+918735054297"
+    });
+
+    res.json({
+      success: true,
+      sid: result.sid
+    });
+
+  } catch (err) {
+    res.json({
+      success: false,
+      error: err.message
+    });
+  }
+});
+
+
+// FIND CLIENTS API
+app.get("/find-clients", async (req, res) => {
 
 // FIND CLIENTS API
 app.get("/find-clients", async (req, res) => {
