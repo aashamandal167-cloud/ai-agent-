@@ -46,10 +46,7 @@ app.get("/test-sms", async (req, res) => {
   } catch (err) {
     res.json({
       success: false,
-      code: err.code,
-      status: err.status,
-      message: err.message,
-      moreInfo: err.moreInfo
+      error: err.message
     });
   }
 });
