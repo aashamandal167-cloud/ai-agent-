@@ -46,11 +46,13 @@ app.get("/test-sms", async (req, res) => {
   } catch (err) {
     res.json({
       success: false,
-      error: err.message
+      code: err.code,
+      status: err.status,
+      message: err.message,
+      moreInfo: err.moreInfo
     });
   }
 });
-
 
 // FIND CLIENTS API
 app.get("/find-clients", async (req, res) => {
