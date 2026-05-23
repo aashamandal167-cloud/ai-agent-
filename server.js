@@ -281,6 +281,12 @@ app.get("/check-sid", (req, res) => {
   });
 });
 
+app.get("/check-token", (req, res) => {
+  res.json({
+    tokenLength: process.env.TWILIO_AUTH_TOKEN?.length
+  });
+});
+
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
