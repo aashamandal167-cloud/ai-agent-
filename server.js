@@ -274,6 +274,13 @@ app.get("/test-twilio", (req, res) => {
   });
 });
 
+app.get("/check-sid", (req, res) => {
+  res.json({
+    sidStart: process.env.TWILIO_ACCOUNT_SID?.substring(0, 5),
+    sidLength: process.env.TWILIO_ACCOUNT_SID?.length
+  });
+});
+
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
