@@ -86,10 +86,11 @@ app.get("/find-clients", async (req, res) => {
 });
 
 // MANUAL CLIENT ADD
+
 app.get("/add-client", (req, res) => {
   res.send("Add Client API Working 🚀");
 });
-   
+
 app.get("/test-add-client", async (req, res) => {
   try {
 
@@ -114,6 +115,49 @@ app.get("/test-add-client", async (req, res) => {
     res.json({
       success: true,
       message: "Client saved 🚀"
+    });
+
+  } catch (err) {
+    res.json({
+      success: false,
+      error: err.message
+    });
+  }
+});
+
+app.post("/add-client", async (req, res) => {
+  try {
+
+    const { name, phone, address } = req.body;
+
+    if (!name || !phone || !address) {
+      return res.json({
+        success: false,
+        message: "Name, phone aur address required hai"
+      });
+    }
+
+    const { error } = await supabase
+      .from("clients")
+      .insert([
+        {
+          name,
+          phone,
+          address,
+          website: "Manual Entry"
+        }
+      ]);
+
+    if (error) {
+      return res.json({
+        success: false,
+        error: error.message
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Client save ho gaya Boss 🚀"
     });
 
   } catch (err) {
