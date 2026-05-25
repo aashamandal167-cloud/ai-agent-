@@ -89,11 +89,8 @@ app.get("/find-clients", async (req, res) => {
 app.get("/add-client", (req, res) => {
   res.send("Add Client API Working 🚀");
 });
-
-app.post("/add-client", async (req, res) => {
-  try {
-
-    app.get("/test-add-client", async (req, res) => {
+   
+app.get("/test-add-client", async (req, res) => {
   try {
 
     const { error } = await supabase
