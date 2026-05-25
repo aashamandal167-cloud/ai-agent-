@@ -93,6 +93,40 @@ app.get("/add-client", (req, res) => {
 app.post("/add-client", async (req, res) => {
   try {
 
+    app.get("/test-add-client", async (req, res) => {
+  try {
+
+    const { error } = await supabase
+      .from("clients")
+      .insert([
+        {
+          name: "Test Client",
+          phone: "9999999999",
+          address: "Ahmedabad",
+          website: "Manual Entry"
+        }
+      ]);
+
+    if (error) {
+      return res.json({
+        success: false,
+        error: error.message
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Client saved 🚀"
+    });
+
+  } catch (err) {
+    res.json({
+      success: false,
+      error: err.message
+    });
+  }
+});
+    
     const { name, phone, address } = req.body;
 
     if (!name || !phone || !address) {
