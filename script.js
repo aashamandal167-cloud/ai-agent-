@@ -107,7 +107,29 @@ const pages = {
     <div class="bot-message">
       ⚙️ Settings Opened
     </div>
-  `
+  `,
+
+myhistory: `
+  <div class="bot-message">
+    📜 My Chat History<br><br>
+
+    25 May 2026 - 10:20 AM<br>
+    client dhundo gym owners surat<br><br>
+
+    25 May 2026 - 10:25 AM<br>
+    website price batao
+  </div>
+`,
+
+clienthistory: `
+  <div class="bot-message">
+    👥 Client Chat History<br><br>
+
+    Raj Fitness<br>
+    📞 9876543210<br>
+    📍 Surat
+  </div>
+`
 };
 
 const menuItems = document.querySelectorAll(".menu li");
