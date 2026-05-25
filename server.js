@@ -86,6 +86,10 @@ app.get("/find-clients", async (req, res) => {
 });
 
 // MANUAL CLIENT ADD
+app.get("/add-client", (req, res) => {
+  res.send("Add Client API Working 🚀");
+});
+
 app.post("/add-client", async (req, res) => {
   try {
 
