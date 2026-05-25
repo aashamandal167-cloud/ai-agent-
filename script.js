@@ -152,9 +152,17 @@ menuItems.forEach(item => {
     else if (text.includes("ai agent")) chatArea.innerHTML = pages.aiagent;
     else if (text.includes("payment")) chatArea.innerHTML = pages.payments;
     else if (text.includes("ai tools")) chatArea.innerHTML = pages.aitools;
-    else if (text.includes("analytics")) chatArea.innerHTML = pages.analytics;
-    else if (text.includes("setting")) chatArea.innerHTML = pages.settings;
+    else if (text.includes("analytics"))
+  chatArea.innerHTML = pages.analytics;
 
+else if (text.includes("my chat history"))
+  chatArea.innerHTML = pages.myhistory;
+
+else if (text.includes("client chat history"))
+  chatArea.innerHTML = pages.clienthistory;
+
+else if (text.includes("setting"))
+  chatArea.innerHTML = pages.settings;
     closeSidebar();
   });
 });
