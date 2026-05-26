@@ -342,18 +342,20 @@ const aiReply =
 
 // SAVE MY CHAT HISTORY
 if (supabase) {
-  try {
-    await supabase
-      .from("my_chat_history")
-      .insert([
-        {
-          message: req.body.message,
-          reply: aiReply
-        }
-      ]);
-  } catch (e) {
-    console.log("History Save Error:", e.message);
-  }
+
+  const { data: savedData, error } = await supabase
+    .from("my_chat_history")
+    .insert([
+      {
+        message: req.body.message,
+        reply: aiReply
+      }
+    ])
+    .select();
+
+  console.log("CHAT SAVED =", savedData);
+  console.log("CHAT ERROR =", error);
+
 }
 
 res.json({
