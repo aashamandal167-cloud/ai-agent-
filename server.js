@@ -337,9 +337,28 @@ Reply naturally in Hindi.
 
     const data = await response.json();
 
-    res.json({
-      reply: data.choices?.[0]?.message?.content || "No response"
-    });
+const aiReply =
+  data.choices?.[0]?.message?.content || "No response";
+
+// SAVE MY CHAT HISTORY
+if (supabase) {
+  try {
+    await supabase
+      .from("my_chat_history")
+      .insert([
+        {
+          message: req.body.message,
+          reply: aiReply
+        }
+      ]);
+  } catch (e) {
+    console.log("History Save Error:", e.message);
+  }
+}
+
+res.json({
+  reply: aiReply
+});
 
   } catch (error) {
     res.json({
