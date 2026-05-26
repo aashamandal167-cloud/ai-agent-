@@ -388,6 +388,22 @@ app.get("/check-token", (req, res) => {
   });
 });
 
+app.get("/test-supabase", async (req, res) => {
+
+  if (!supabase) {
+    return res.json({
+      success: false,
+      message: "Supabase NOT Connected"
+    });
+  }
+
+  return res.json({
+    success: true,
+    message: "Supabase Connected 🚀"
+  });
+
+});
+
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
