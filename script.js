@@ -255,3 +255,44 @@ fileUpload.addEventListener("change", function () {
 
   chatArea.scrollTop = chatArea.scrollHeight;
 });
+
+// LOAD CHAT HISTORY
+async function loadHistory() {
+
+  try {
+
+    const response = await fetch("/get-history");
+
+    const data = await response.json();
+
+    if (!data.success) return;
+
+    chatArea.innerHTML = "";
+
+    data.history.reverse().forEach(chat => {
+
+      // USER MESSAGE
+      const userDiv = document.createElement("div");
+      userDiv.className = "user-message";
+      userDiv.innerText = chat.message;
+      chatArea.appendChild(userDiv);
+
+      // BOT MESSAGE
+      const botDiv = document.createElement("div");
+      botDiv.className = "bot-message";
+      botDiv.innerText = chat.reply;
+      chatArea.appendChild(botDiv);
+
+    });
+
+    chatArea.scrollTop = chatArea.scrollHeight;
+
+  } catch (err) {
+
+    console.log(err);
+
+  }
+}
+
+// AUTO LOAD
+loadHistory();
