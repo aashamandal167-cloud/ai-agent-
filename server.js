@@ -340,6 +340,24 @@ Reply naturally in Hindi.
 const aiReply =
   data.choices?.[0]?.message?.content || "No response";
 
+    // SAVE MY CHAT HISTORY
+if (supabase) {
+  try {
+    await supabase
+      .from("my_chat_history")
+      .insert([
+        {
+          message: req.body.message,
+          reply: aiReply
+        }
+      ]);
+
+    console.log("Chat saved 🚀");
+  } catch (e) {
+    console.log("History Save Error:", e.message);
+  }
+}
+    
 // SAVE MY CHAT HISTORY
 if (supabase) {
 
