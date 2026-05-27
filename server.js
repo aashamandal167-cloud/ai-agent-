@@ -406,6 +406,39 @@ app.get("/test-supabase", async (req, res) => {
 
 });
 
+app.get("/test-history-save", async (req, res) => {
+  try {
+
+    const { data, error } = await supabase
+      .from("my_chat_history")
+      .insert([
+        {
+          message: "Test Message",
+          reply: "Test Reply"
+        }
+      ])
+      .select();
+
+    if (error) {
+      return res.json({
+        success: false,
+        error
+      });
+    }
+
+    res.json({
+      success: true,
+      data
+    });
+
+  } catch (err) {
+    res.json({
+      success: false,
+      error: err.message
+    });
+  }
+});
+
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
