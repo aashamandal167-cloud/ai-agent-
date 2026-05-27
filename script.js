@@ -357,6 +357,17 @@ async function showMyHistory() {
 
 }
 
-window.onload = () => {
-chatArea.innerHTML = "";
-};
+window.addEventListener("load", () => {
+
+setTimeout(() => {
+
+chatArea.innerHTML = `
+  <div class="bot-message">
+    Hello Rahul 👋 <br><br>
+    All AI workers are running successfully 🚀
+  </div>
+`;
+
+}, 100);
+
+});
