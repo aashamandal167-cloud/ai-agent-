@@ -356,3 +356,7 @@ async function showMyHistory() {
   }
 
 }
+
+window.onload = () => {
+chatArea.innerHTML = "";
+};
