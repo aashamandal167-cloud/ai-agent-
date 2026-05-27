@@ -306,7 +306,10 @@ async function loadHistory() {
 }
 
 // AUTO LOAD
-loadHistory();
+// CLEAR HOME CHAT
+function clearHomeChat() {
+chatArea.innerHTML = "";
+  }
 
 // SHOW REAL HISTORY
 async function showMyHistory() {
