@@ -109,18 +109,6 @@ const pages = {
     </div>
   `,
 
-myhistory: `
-  <div class="bot-message">
-    📜 My Chat History<br><br>
-
-    25 May 2026 - 10:20 AM<br>
-    client dhundo gym owners surat<br><br>
-
-    25 May 2026 - 10:25 AM<br>
-    website price batao
-  </div>
-`,
-
 clienthistory: `
   <div class="bot-message">
     👥 Client Chat History<br><br>
@@ -158,9 +146,9 @@ menuItems.forEach(item => {
 else if (text.includes("my chat history"))
   chatArea.innerHTML = pages.myhistory;
 
-else if (text.includes("client chat history"))
-  chatArea.innerHTML = pages.clienthistory;
-
+else if (text.includes("my chat history"))
+  showMyHistory();
+  
 else if (text.includes("setting"))
   chatArea.innerHTML = pages.settings;
     closeSidebar();
@@ -296,3 +284,45 @@ async function loadHistory() {
 
 // AUTO LOAD
 loadHistory();
+
+// SHOW REAL HISTORY
+async function showMyHistory() {
+
+  try {
+
+    const response = await fetch("/get-history");
+
+    const data = await response.json();
+
+    if (!data.success) return;
+
+    chatArea.innerHTML = "";
+
+    data.history.forEach(chat => {
+
+      const box = document.createElement("div");
+
+      box.className = "bot-message";
+
+      box.innerHTML = `
+        🕒 ${new Date(chat.created_at).toLocaleString()}
+        <br><br>
+
+        👤 ${chat.message}
+
+        <br><br>
+
+        🤖 ${chat.reply}
+      `;
+
+      chatArea.appendChild(box);
+
+    });
+
+  } catch (err) {
+
+    console.log(err);
+
+  }
+
+}
