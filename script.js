@@ -195,6 +195,8 @@ async function sendMessage() {
 
   if (!message) return;
 
+clearHomeChat();
+  
   const userDiv = document.createElement("div");
   userDiv.className = "user-message";
   userDiv.innerText = message;
@@ -305,11 +307,14 @@ async function loadHistory() {
   }
 }
 
-// AUTO LOAD
+
 // CLEAR HOME CHAT
 function clearHomeChat() {
 chatArea.innerHTML = "";
-  }
+}
+
+// AUTO LOAD
+loadHistory();
 
 // SHOW REAL HISTORY
 async function showMyHistory() {
