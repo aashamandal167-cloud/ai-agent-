@@ -72,6 +72,37 @@ app.get("/find-clients", async (req, res) => {
 
     const data = await response.json();
 
+// SAVE CLIENT SEARCH HISTORY
+
+if (supabase) {
+
+  for (const lead of data) {
+
+    try {
+
+      await supabase
+        .from("client_chat_history")
+        .insert([
+          {
+            client_name: lead.title || "No Name",
+            phone: lead.phone || "No Phone",
+            address: lead.address || "No Address"
+          }
+        ]);
+
+    } catch (e) {
+
+      console.log(
+        "CLIENT HISTORY ERROR:",
+        e.message
+      );
+
+    }
+
+  }
+
+}
+    
     res.json({
       success: true,
       leads: data
