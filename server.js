@@ -488,6 +488,39 @@ app.get("/test-history-save", async (req, res) => {
   }
 });
 
+// GET CHAT HISTORY
+app.get("/get-history", async (req, res) => {
+
+  try {
+
+    const { data, error } = await supabase
+      .from("my_chat_history")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (error) {
+      return res.json({
+        success: false,
+        error: error.message
+      });
+    }
+
+    res.json({
+      success: true,
+      history: data
+    });
+
+  } catch (err) {
+
+    res.json({
+      success: false,
+      error: err.message
+    });
+
+  }
+});
+
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
