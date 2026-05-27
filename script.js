@@ -305,16 +305,15 @@ async function showMyHistory() {
       box.className = "bot-message";
 
       box.innerHTML = `
-        🕒 ${new Date(chat.created_at).toLocaleString()}
-        <br><br>
+  🕒 ${new Date(chat.created_at).toLocaleString()}
+  <br><br>
 
-        👤 ${chat.message}
+  👤 ${chat.message || "No Message"}
 
-        <br><br>
+  <br><br>
 
-        🤖 ${chat.reply}
-      `;
-
+  🤖 ${chat.reply || "No Reply"}
+`;
       chatArea.appendChild(box);
 
     });
