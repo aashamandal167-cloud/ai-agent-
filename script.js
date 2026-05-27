@@ -313,9 +313,6 @@ function clearHomeChat() {
 chatArea.innerHTML = "";
 }
 
-// AUTO LOAD
-loadHistory();
-
 // SHOW REAL HISTORY
 async function showMyHistory() {
 
