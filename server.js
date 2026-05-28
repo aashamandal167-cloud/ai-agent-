@@ -521,6 +521,49 @@ app.get("/get-history", async (req, res) => {
   }
 });
 
+// DELETE CHAT
+app.delete("/delete-history/:id", async (req, res) => {
+
+try {
+
+const { error } = await supabase
+.from("my_chat_history")
+.delete()
+.eq("id", req.params.id);
+
+if (error) {
+
+return res.json({
+success:false,
+error:error.message
+});
+
+}
+
+res.json({
+success:true
+});
+
+} catch(err){
+
+res.json({
+success:false,
+error:err.message
+});
+
+}
+
+});
+
+
+
+const PORT = process.env.PORT || 10000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
