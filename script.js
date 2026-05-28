@@ -1,4 +1,6 @@
-function openSidebar() {
+let currentChatId = "chat_" + Date.now();
+
+functionn openSidebar() {
   document.getElementById("sidebar").classList.add("active");
 }
 
@@ -217,8 +219,10 @@ clearHomeChat();
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ message })
-    });
+      body: JSON.stringify({
+  message,
+  chat_id: currentChatId
+})
 
     const data = await response.json();
     botDiv.innerText = data.reply;
