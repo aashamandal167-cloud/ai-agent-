@@ -333,14 +333,20 @@ async function showMyHistory() {
       box.className = "bot-message";
 
       box.innerHTML = `
-  🕒 ${new Date(chat.created_at).toLocaleString()}
-  <br><br>
+🕒 ${new Date(chat.created_at).toLocaleString()}
+<br><br>
 
-  👤 ${chat.message || "No Message"}
+👤 ${chat.message || "No Message"}
 
-  <br><br>
+<br><br>
 
-  🤖 ${chat.reply || "No Reply"}
+🤖 ${chat.reply || "No Reply"}
+
+<br><br>
+
+<button onclick="deleteChat('${chat.id}')">
+🗑 Delete
+</button>
 `;
       chatArea.appendChild(box);
 
