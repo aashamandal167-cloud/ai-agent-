@@ -386,3 +386,51 @@ All AI workers are running successfully 🚀
 `;
 
 }
+
+window.addEventListener("load", () => {
+
+setTimeout(() => {
+
+chatArea.innerHTML = `
+  <div class="bot-message">
+    Hello Rahul 👋 <br><br>
+    All AI workers are running successfully 🚀
+  </div>
+`;
+
+}, 100);
+
+});
+
+// BACK HOME
+function goBackHome() {
+
+chatArea.innerHTML = `
+<div class="bot-message">
+Hello Rahul 👋 <br><br>
+All AI workers are running successfully 🚀
+</div>
+`;
+
+}
+
+
+
+// DELETE CHAT
+async function deleteChat(id) {
+
+try {
+
+await fetch("/delete-history/" + id, {
+method: "DELETE"
+});
+
+showMyHistory();
+
+} catch (err) {
+
+console.log(err);
+
+}
+
+}
