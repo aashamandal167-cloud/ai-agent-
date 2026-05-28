@@ -484,6 +484,7 @@ console.log(err);
 
 }
 
+// OPEN FULL CHAT
 async function openFullChat(chatId) {
 
 try {
@@ -492,27 +493,40 @@ const response = await fetch("/get-history");
 
 const data = await response.json();
 
+if (!data.success) return;
+
 chatArea.innerHTML = "";
 
-data.history
-.filter(chat => chat.chat_id === chatId)
-.forEach(chat => {
+const chats = data.history.filter(
+chat => chat.chat_id === chatId
+);
+
+chats.forEach(chat => {
 
 const userDiv = document.createElement("div");
+
 userDiv.className = "user-message";
+
 userDiv.innerText = chat.message;
 
 chatArea.appendChild(userDiv);
 
 const botDiv = document.createElement("div");
+
 botDiv.className = "bot-message";
+
 botDiv.innerText = chat.reply;
 
 chatArea.appendChild(botDiv);
 
 });
 
-currentChatId = chatId;
+chatArea.innerHTML += `
+<br>
+<button onclick="showMyHistory()">
+🔙 Back
+</button>
+`;
 
 } catch(err) {
 
