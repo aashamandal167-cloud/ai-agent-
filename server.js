@@ -376,10 +376,11 @@ if (supabase) {
   try {
     await supabase
       .from("my_chat_history")
-      .insert([
+      insert([
         {
           message: req.body.message,
-          reply: aiReply
+          reply: aiReply,
+          chat_id: req.body.chat_id
         }
       ]);
 
