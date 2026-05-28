@@ -1,6 +1,6 @@
 let currentChatId = "chat_" + Date.now();
 
-functionn openSidebar() {
+function openSidebar() {
   document.getElementById("sidebar").classList.add("active");
 }
 
