@@ -441,30 +441,57 @@ console.log(err);
 }
 
 // OPEN FULL CHAT
-function openFullChat(message, reply) {
+async function openFullChat(chatId) {
 
-chatArea.innerHTML = `
+try {
 
-<div class="user-message">
-${message}
-</div>
+const response = await fetch("/get-history");
 
-<div class="bot-message">
-${reply}
-</div>
+const data = await response.json();
 
-<br>
+if (!data.success) return;
 
-<button onclick="showMyHistory()">
-🔙 Back
-</button>
+chatArea.innerHTML = "";
 
-`;
+const chats = data.history.filter(
+(chat) => chat.chat_id === chatId
+);
+
+chats.forEach((chat) => {
+
+const userDiv = document.createElement("div");
+
+userDiv.className = "user-message";
+
+userDiv.innerText = chat.message;
+
+chatArea.appendChild(userDiv);
+
+const botDiv = document.createElement("div");
+
+botDiv.className = "bot-message";
+
+botDiv.innerText = chat.reply;
+
+chatArea.appendChild(botDiv);
+
+});
+
+const backBtn = document.createElement("button");
+
+backBtn.innerText = "🔙 Back";
+
+backBtn.onclick = showMyHistory;
+
+chatArea.appendChild(backBtn);
+
+} catch(err) {
+
+console.log(err);
 
 }
 
-
-
+  }
 // DELETE CHAT
 async function deleteChat(id) {
 
