@@ -333,7 +333,11 @@ async function showMyHistory() {
       box.className = "bot-message";
 
       box.innerHTML = `
+
+<div onclick="openFullChat('${chat.message}','${chat.reply}')">
+
 🕒 ${new Date(chat.created_at).toLocaleString()}
+
 <br><br>
 
 👤 ${chat.message || "No Message"}
@@ -342,12 +346,17 @@ async function showMyHistory() {
 
 🤖 ${chat.reply || "No Reply"}
 
-<br><br>
+</div>
+
+<br>
 
 <button onclick="deleteChat('${chat.id}')">
 🗑 Delete
 </button>
+
+<hr>
 `;
+
       chatArea.appendChild(box);
 
     });
@@ -410,6 +419,50 @@ chatArea.innerHTML = `
 Hello Rahul 👋 <br><br>
 All AI workers are running successfully 🚀
 </div>
+`;
+
+}
+
+
+
+// DELETE CHAT
+async function deleteChat(id) {
+
+try {
+
+await fetch("/delete-history/" + id, {
+method: "DELETE"
+});
+
+showMyHistory();
+
+} catch (err) {
+
+console.log(err);
+
+}
+
+}
+
+// OPEN FULL CHAT
+function openFullChat(message, reply) {
+
+chatArea.innerHTML = `
+
+<div class="user-message">
+${message}
+</div>
+
+<div class="bot-message">
+${reply}
+</div>
+
+<br>
+
+<button onclick="showMyHistory()">
+🔙 Back
+</button>
+
 `;
 
 }
