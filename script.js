@@ -320,59 +320,51 @@ chatArea.innerHTML = "";
 // SHOW REAL HISTORY
 async function showMyHistory() {
 
-  try {
+try {
 
-    const response = await fetch("/get-history");
+const response = await fetch("/get-history");
 
-    const data = await response.json();
+const data = await response.json();
 
-    if (!data.success) return;
+if (!data.success) return;
 
-    chatArea.innerHTML = "";
+chatArea.innerHTML = "";
 
-    data.history.forEach(chat => {
+const uniqueChats = [...new Set(
+data.history.map(chat => chat.chat_id)
+)];
 
-      const box = document.createElement("div");
+uniqueChats.forEach(chatId => {
 
-      box.className = "bot-message";
+const box = document.createElement("div");
 
-      box.innerHTML = `
+box.className = "bot-message";
 
-<div onclick="openFullChat('${chat.message}','${chat.reply}')">
-
-🕒 ${new Date(chat.created_at).toLocaleString()}
-
-<br><br>
-
-👤 ${chat.message || "No Message"}
+box.innerHTML = `
+💬 ${chatId}
 
 <br><br>
 
-🤖 ${chat.reply || "No Reply"}
-
-</div>
-
-<br>
-
-<button onclick="deleteChat('${chat.id}')">
-🗑 Delete
+<button onclick="openFullChat('${chatId}')">
+Open Chat
 </button>
 
-<hr>
+<button onclick="deleteChat('${chatId}')">
+Delete
+</button>
 `;
 
-      chatArea.appendChild(box);
+chatArea.appendChild(box);
 
-    });
+});
 
-  } catch (err) {
+} catch(err) {
 
-    console.log(err);
-
-  }
+console.log(err);
 
 }
 
+}
 window.addEventListener("load", () => {
 
 setTimeout(() => {
@@ -491,3 +483,41 @@ console.log(err);
 }
 
 }
+
+async function openFullChat(chatId) {
+
+try {
+
+const response = await fetch("/get-history");
+
+const data = await response.json();
+
+chatArea.innerHTML = "";
+
+data.history
+.filter(chat => chat.chat_id === chatId)
+.forEach(chat => {
+
+const userDiv = document.createElement("div");
+userDiv.className = "user-message";
+userDiv.innerText = chat.message;
+
+chatArea.appendChild(userDiv);
+
+const botDiv = document.createElement("div");
+botDiv.className = "bot-message";
+botDiv.innerText = chat.reply;
+
+chatArea.appendChild(botDiv);
+
+});
+
+currentChatId = chatId;
+
+} catch(err) {
+
+console.log(err);
+
+}
+
+  }
