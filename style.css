@@ -317,3 +317,13 @@ body{
 .menu li.active-menu{
   background:#4f46e5;
 }
+
+.back-btn{
+border:none;
+background:#5b4bff;
+color:white;
+padding:8px 12px;
+border-radius:12px;
+font-size:18px;
+cursor:pointer;
+}
