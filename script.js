@@ -368,3 +368,15 @@ chatArea.innerHTML = `
 }, 100);
 
 });
+
+// BACK HOME
+function goBackHome() {
+
+chatArea.innerHTML = `
+<div class="bot-message">
+Hello Rahul 👋 <br><br>
+All AI workers are running successfully 🚀
+</div>
+`;
+
+}
