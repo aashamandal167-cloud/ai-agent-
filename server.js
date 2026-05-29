@@ -405,7 +405,6 @@ if (supabase) {
         chat_id: chat_id
       }
     ])
-  
     .select();
 
   console.log("CHAT SAVED =", savedData);
