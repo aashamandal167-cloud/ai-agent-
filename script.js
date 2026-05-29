@@ -223,8 +223,6 @@ chatArea.scrollTop = chatArea.scrollHeight;
 try {
 
 const response = await fetch("/chat", {
-
-const currentOpenedChat = currentChatId;
   
 method: "POST",
 
