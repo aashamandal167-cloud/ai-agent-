@@ -544,3 +544,11 @@ New Chat Started 🚀
 `;
 
   }
+
+function newChat() {
+
+currentChatId = "chat_" + Date.now();
+
+chatArea.innerHTML = "";
+
+}
