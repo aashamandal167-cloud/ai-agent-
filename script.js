@@ -224,6 +224,8 @@ try {
 
 const response = await fetch("/chat", {
 
+const currentOpenedChat = currentChatId;
+  
 method: "POST",
 
 headers: {
@@ -499,6 +501,8 @@ botDiv.className = "bot-message";
 
 botDiv.innerText = chat.reply;
 
+currentChatId = currentOpenedChat;
+  
 chatArea.appendChild(botDiv);
 
 });
