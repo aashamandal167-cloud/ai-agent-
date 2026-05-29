@@ -269,7 +269,7 @@ chatArea.scrollTop = chatArea.scrollHeight;
 
 botDiv.innerText = "Server error 🚨";
 
-loadHistory();
+chatArea.appendChild(botDiv);
   
 }
 
