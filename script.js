@@ -479,6 +479,8 @@ const chats = data.history.filter(
 (chat) => chat.chat_id === chatId
 );
 
+  currentChatId = chatId;
+  
 chats.forEach((chat) => {
 
 const userDiv = document.createElement("div");
