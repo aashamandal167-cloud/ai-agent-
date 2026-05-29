@@ -193,64 +193,84 @@ textarea.addEventListener("keydown", function (e) {
 });
 
 async function sendMessage() {
-  const message = textarea.value.trim();
 
-  if (!message) return;
+const message = textarea.value.trim();
+
+if (!message) return;
 
 clearHomeChat();
-  
-  const userDiv = document.createElement("div");
-  userDiv.className = "user-message";
-  userDiv.innerText = message;
-  chatArea.appendChild(userDiv);
 
-  textarea.value = "";
+const userDiv = document.createElement("div");
 
-  const botDiv = document.createElement("div");
-  botDiv.className = "bot-message";
-  botDiv.innerText = "Raaz Chandrvashi is processing... 🚀";
-  chatArea.appendChild(botDiv);
+userDiv.className = "user-message";
 
-  chatArea.scrollTop = chatArea.scrollHeight;
+userDiv.innerText = message;
 
-  try {
-    const response = await fetch("/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-  message,
-  chat_id: currentChatId
+chatArea.appendChild(userDiv);
+
+textarea.value = "";
+
+const botDiv = document.createElement("div");
+
+botDiv.className = "bot-message";
+
+botDiv.innerText = "Raaz Chandrvashi is processing... 🚀";
+
+chatArea.appendChild(botDiv);
+
+chatArea.scrollTop = chatArea.scrollHeight;
+
+try {
+
+const response = await fetch("/chat", {
+
+method: "POST",
+
+headers: {
+"Content-Type": "application/json"
+},
+
+body: JSON.stringify({
+message,
+chat_id: currentChatId
 })
 
-    const data = await response.json();
-    botDiv.innerText = data.reply;
+});
 
-    if (
-      message.toLowerCase().includes("payment") ||
-      message.toLowerCase().includes("pay") ||
-      message.toLowerCase().includes("price")
-    ) {
-      const qrUrl =
-        "https://collection.cloudinary.com/dedyoeauv/ecb96aef2f70867a9e902db3ca5233e5";
+const data = await response.json();
 
-      const paymentDiv = document.createElement("div");
-      paymentDiv.className = "bot-message";
+botDiv.innerText = data.reply;
 
-      paymentDiv.innerHTML = `
-        💳 Payment ke liye QR scan kare 🙂<br><br>
-        <img src="${qrUrl}" width="220" style="border-radius:20px;">
-      `;
+if (
+message.toLowerCase().includes("payment") ||
+message.toLowerCase().includes("pay") ||
+message.toLowerCase().includes("price")
+) {
 
-      chatArea.appendChild(paymentDiv);
-    }
+const qrUrl =
+"https://collection.cloudinary.com/dedyoeauv/ecb96aef2f70867a9e902db3ca5233e5";
 
-    chatArea.scrollTop = chatArea.scrollHeight;
+const paymentDiv = document.createElement("div");
 
-  } catch (error) {
-    botDiv.innerText = "Server error 🚨";
-  }
+paymentDiv.className = "bot-message";
+
+paymentDiv.innerHTML = `
+💳 Payment ke liye QR scan kare 🙂<br><br>
+<img src="${qrUrl}" width="220" style="border-radius:20px;">
+`;
+
+chatArea.appendChild(paymentDiv);
+
+}
+
+chatArea.scrollTop = chatArea.scrollHeight;
+
+} catch (error) {
+
+botDiv.innerText = "Server error 🚨";
+
+}
+
 }
 
 const fileUpload = document.getElementById("fileUpload");
