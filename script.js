@@ -351,9 +351,11 @@ if (!data.success) return;
 chatArea.innerHTML = "";
 
 const uniqueChats = [...new Set(
-data.history.map(chat => chat.chat_id)
+data.history
+.filter(chat => chat.chat_id)
+.map(chat => chat.chat_id)
 )];
-
+  
 uniqueChats.forEach(chatId => {
 
 const box = document.createElement("div");
