@@ -462,11 +462,12 @@ app.get("/test-history-save", async (req, res) => {
     const { data, error } = await supabase
       .from("my_chat_history")
       .insert([
-        {
-          message: "Test Message",
-          reply: "Test Reply"
-        }
-      ])
+{
+message: req.body.message,
+reply: aiReply,
+chat_id: req.body.chat_id
+}
+])
       .select();
 
     if (error) {
