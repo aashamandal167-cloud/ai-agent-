@@ -531,3 +531,16 @@ console.log(err);
 }
 
 }
+
+// NEW CHAT
+function newChat() {
+
+currentChatId = "chat_" + Date.now();
+
+chatArea.innerHTML = `
+<div class="bot-message">
+New Chat Started 🚀
+</div>
+`;
+
+  }
