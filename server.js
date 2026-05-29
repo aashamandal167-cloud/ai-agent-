@@ -203,6 +203,9 @@ app.post("/add-client", async (req, res) => {
 // CHAT
 app.post("/chat", async (req, res) => {
   try {
+
+const { message, chat_id } = req.body;
+    
     const userMessage = req.body.message.toLowerCase();
 
     const cleanSearch = req.body.message
@@ -399,8 +402,10 @@ if (supabase) {
       {
         message: req.body.message,
         reply: aiReply
+        chat_id: chat_id
       }
     ])
+  
     .select();
 
   console.log("CHAT SAVED =", savedData);
