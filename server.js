@@ -399,12 +399,12 @@ if (supabase) {
   const { data: savedData, error } = await supabase
     .from("my_chat_history")
     .insert([
-      {
-        message: req.body.message,
-        reply: aiReply
-        chat_id: chat_id
-      }
-    ])
+{
+message: req.body.message,
+reply: aiReply,
+chat_id: req.body.chat_id
+}
+])
     .select();
 
   console.log("CHAT SAVED =", savedData);
