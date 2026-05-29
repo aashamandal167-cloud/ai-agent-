@@ -500,8 +500,6 @@ const botDiv = document.createElement("div");
 botDiv.className = "bot-message";
 
 botDiv.innerText = chat.reply;
-
-currentChatId = currentOpenedChat;
   
 chatArea.appendChild(botDiv);
 
