@@ -575,17 +575,79 @@ error:err.message
 
 app.post("/whatsapp-webhook", async (req, res) => {
 
-  console.log("===== WHATSAPP WEBHOOK HIT =====");
-  console.log(req.body);
+  try {
 
-  const twiml = `
+    const userMessage = req.body.Body;
+
+    const response = await fetch(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "openai/gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content: `
+You are Raaz Chandrvashi's elite AI website sales agent.
+
+Rahul Chandrvashi is OWNER forever.
+
+When Rahul chats:
+Reply only:
+"Yes Boss 🚀, kya task execute karna hai?"
+
+Never sell Rahul website.
+
+Sell websites only to external business clients.
+
+Pricing:
+Template Website = ₹10,000
+3D Premium Website = ₹25,000
+Animated Premium Website = ₹45,000
+
+Reply naturally in Hindi.
+`
+            },
+            {
+              role: "user",
+              content: userMessage
+            }
+          ]
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    const aiReply =
+      data.choices?.[0]?.message?.content || "No response";
+
+    const twiml = `
 <Response>
-<Message>Raj AI Online 🚀</Message>
+<Message>${aiReply}</Message>
 </Response>
 `;
 
-  res.type("text/xml");
-  res.send(twiml);
+    res.type("text/xml");
+    res.send(twiml);
+
+  } catch (err) {
+
+    console.log(err);
+
+    res.type("text/xml");
+    res.send(`
+<Response>
+<Message>Error: ${err.message}</Message>
+</Response>
+`);
+
+  }
 
 });
 
