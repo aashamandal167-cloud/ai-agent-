@@ -578,7 +578,14 @@ app.post("/whatsapp-webhook", async (req, res) => {
   console.log("===== WHATSAPP WEBHOOK HIT =====");
   console.log(req.body);
 
-  res.send("OK");
+  const twiml = `
+<Response>
+<Message>Raj AI Online 🚀</Message>
+</Response>
+`;
+
+  res.type("text/xml");
+  res.send(twiml);
 
 });
 
