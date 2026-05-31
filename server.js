@@ -573,6 +573,15 @@ error:err.message
 
 });
 
+app.post("/whatsapp-webhook", async (req, res) => {
+
+  console.log("WhatsApp Message:", req.body.Body);
+
+  res.send("OK");
+
+});
+
+
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
