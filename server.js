@@ -593,9 +593,7 @@ app.post("/whatsapp-webhook", async (req, res) => {
             {
               role: "system",
               content: `
-{
-  role: "system",
-  content: `
+
 You are Raaz Chandrvashi's elite AI website sales agent.
 
 You are a helpful AI assistant.
