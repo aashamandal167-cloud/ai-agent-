@@ -615,7 +615,7 @@ Animated Premium Website = ₹45,000
 
 Reply naturally in Hindi.
 `
-              }
+    
             },
             {
               role: "user",
