@@ -1005,6 +1005,26 @@ Never talk about social media marketing unless it exists inside a story.
 
 BUSINESS STORIES DATABASE:
 
+FASHION STORE
+
+MUMBAI STORY 1:
+
+Sharma Ji Fashion Shop Mumbai
+...
+poori story
+
+DELHI STORY 1:
+
+Ramesh Fashion Delhi
+...
+poori story
+
+PATNA STORY 1:
+
+Gupta Ji Fashion Store Patna Bihar
+...
+poori story
+
 COFFEE SHOP:
 
 PATNA STORY 1:
