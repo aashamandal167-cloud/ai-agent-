@@ -3,6 +3,8 @@ import fetch from "node-fetch";
 import { createClient } from "@supabase/supabase-js";
 import twilio from "twilio";
 
+const conversations = {};
+
 const app = express();
 const twilioClient = twilio(
   process.env.TWILIO_ACCOUNT_SID,
