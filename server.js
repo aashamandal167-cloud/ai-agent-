@@ -596,6 +596,14 @@ app.post("/whatsapp-webhook", async (req, res) => {
 if (!conversations[userNumber]) {
   conversations[userNumber] = [];
 }
+
+conversations[userNumber].push({
+  role: "user",
+  content: userMessage
+});
+
+const recentHistory =
+  conversations[userNumber].slice(-10);
     
     const response = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
