@@ -68,6 +68,15 @@ app.get("/find-clients", async (req, res) => {
   try {
     const query = req.query.search || "gym owners Ahmedabad";
 
+conversations[userNumber].push({
+  role: "user",
+  content: userMessage
+});
+
+const recentHistory =
+  conversations[userNumber].slice(-10);
+
+    
     const response = await fetch(
       `https://api.apify.com/v2/acts/compass~google-maps-extractor/run-sync-get-dataset-items?token=${process.env.APIFY_API_TOKEN}`,
       {
@@ -579,6 +588,13 @@ app.post("/whatsapp-webhook", async (req, res) => {
 
     const userMessage = req.body.Body;
 
+
+    const userNumber = req.body.From;
+
+if (!conversations[userNumber]) {
+  conversations[userNumber] = [];
+}
+    
     const response = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
       {
@@ -846,10 +862,7 @@ Behave like an experienced business owner talking to another business owner.
             
     
             },
-            {
-              role: "user",
-              content: userMessage
-            }
+            ...recentHistory
           ]
         })
       }
@@ -859,6 +872,11 @@ Behave like an experienced business owner talking to another business owner.
 
     const aiReply =
       data.choices?.[0]?.message?.content || "No response";
+
+    conversations[userNumber].push({
+  role: "assistant",
+  content: aiReply
+});
 
     const twiml = `
 <Response>
