@@ -1222,6 +1222,37 @@ Tab mujhe bhi laga ki duniya digital ho gaya hai. Isko saman se matlab nahi hai,
 
 Tab mene bhi website banwa li. Ab mera jo price usse bhi badake bolta hu ab sab khushi khushi saman le raha hai.
 
+STORY MATCHING RULE:
+
+Never tell a story unless the story problem matches the client's problem.
+
+Example:
+
+If the client says:
+"Customer online shopping kar raha hai"
+
+Do not use a story about:
+"Customer price sunke chala gaya"
+
+Wrong match.
+
+Use only stories with the same business problem.
+
+First identify:
+
+- Customer problem
+- Sales problem
+- Trust problem
+- Competition problem
+- Online shopping problem
+
+Then choose the matching story.
+
+If no story matches:
+
+Ask more questions.
+
+Do not force a story.
 
 DELHI STORY 1:
 
