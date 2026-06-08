@@ -1010,37 +1010,114 @@ FASHION STORE
 MUMBAI STORY 1:
 
 Sharma Ji Fashion Shop Mumbai
-...
-poori story
+
+Ye sir ka kahana hai ki jab bhi customer aata tha tab kapde pasnd kar leta tha lekin jab kapde ka price batata tha tab customer Bolta tha ki bagal wala Shops me itna price me deta hai aap bahut Expensive dete ho aur stuff chhod ke chala jata tha bagal wala dukan me.
+
+Tab me apne ander problem khojne laga to pata chala ki bagal wala ke paas website hai tab sara customer uske paas jata hai.
+
+Tab mujhe bhi laga ki duniya digital ho gaya hai. Isko saman se matlab nahi hai, isko online pe dikhna chahiye. Har cheez log Google kar rahe hai.
+
+Tab mene bhi website banwa li. Ab mera jo price usse bhi badake bolta hu ab sab khushi khushi saman le raha hai.
+
 
 DELHI STORY 1:
 
 Ramesh Fashion Delhi
-...
-poori story
+
+Ye sir ka kahana tha mera shop uss jagah pe tha jaha agal bagal bahut sare kapde ke shop the.
+
+Customer mere shop aane se pahle hi mere competitor ke shop se saman le leta tha.
+
+Mere paas na customer ka trust tha aur na sales.
+
+Phir mene apne dost ko pura problem bataya.
+
+Dost bola ki aaj kal log Google karke dekhte hai. Tumhara shop Google pe dikhta hi nahi.
+
+Tab mene pucha solution kya hai.
+
+Dost bola website bana lo taki tumhara bhi shop Google pe dikhe.
+
+Tab mene thode paise ikattha karke website banwa li.
+
+Ab mera dhanda pehle se bahut achha chal raha hai aur customer trust bhi badh gaya hai.
+
 
 PATNA STORY 1:
 
 Gupta Ji Fashion Store Patna Bihar
-...
-poori story
 
-COFFEE SHOP:
+Ye sir ka kahna hai mera mini shopping mall tha.
 
-PATNA STORY 1:
-(yahan tumhari Patna coffee shop story)
+Customer aate the lekin problem ye thi ki mere customer bade bade shopping mall me chale jate the festival offer aur monthly offer dekhkar.
 
-PATNA STORY 2:
-(yahan dusri Patna story)
+Me bhi offer deta tha lekin kisi ko pata hi nahi chalta tha.
+
+Mene notice kiya ki bade mall Google aur online ke through customer la rahe hai.
+
+Har customer ko trust aur online wali feeling chahiye.
+
+Tab mene bhi apna website banwa liya.
+
+Ab me jab chahu offer laga deta hu.
+
+Website 24/7 kaam karta hai.
+
+Shop band hone ke baad bhi website customer ko information deta rehta hai.
+
+Ab mera dhanda pehle se bahut achha chal raha hai.
+
+
+KIRANA STORE
 
 MUMBAI STORY 1:
-(yahan Mumbai coffee shop story)
 
-MUMBAI STORY 2:
-(yahan dusri Mumbai story)
+Shukl Ji Kirana Store Mumbai
 
-OTHER STATE STORY:
-(yahan Jaipur/Delhi etc story)
+Ye sir ka kahana hai ki jab mere shop me thodi bhi bhid lagti thi tab customer saman ka price puchh ke chala jata tha.
+
+Koi customer rukna nahi chahta tha.
+
+Bagal wale shop me chala jata tha.
+
+Mera shop customer ke jane ke baad khali ho jata tha.
+
+Mera sales kam hota tha.
+
+Phir mene bagal ke ek shop ko dekha jaha har time customer ki bhid lagi rehti thi.
+
+Mene unka Google pe website dekha.
+
+Tab mene bhi website banwa liya.
+
+Aur customer ko bolne laga ki mere paas bhi website hai.
+
+Uske baad mera sales badhne laga aur problem khatam ho gayi.
+
+
+SHRINGAR STORE
+
+PATNA STORY 1:
+
+Manish Shringar Store Patna Bihar
+
+Ye sir ka kahana hai mera gaon me shop tha.
+
+Lekin gaon ki female customer Meesho, Flipkart aur Amazon se saman order karti thi.
+
+Mere shop se koi buy nahi karta tha.
+
+Mera shop band hone ke time pe aa gaya tha.
+
+Phir mene socha ki jab customer online saman dekhna pasand karta hai to me bhi website banwau.
+
+Website ke through female customer mere product ghar baithe dekh sakti thi.
+
+Website banwane ke baad customer aana shuru ho gaya.
+
+Pehle sirf mere gaon se customer aata tha.
+
+Ab agal bagal ke gaon se bhi customer aane laga.
 `
             
     
