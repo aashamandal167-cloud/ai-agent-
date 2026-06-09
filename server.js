@@ -1222,6 +1222,40 @@ Tab mujhe bhi laga ki duniya digital ho gaya hai. Isko saman se matlab nahi hai,
 
 Tab mene bhi website banwa li. Ab mera jo price usse bhi badake bolta hu ab sab khushi khushi saman le raha hai.
 
+ONLINE SHOPPING STORY 1:
+
+Manoj Fashion Store Mumbai
+
+Ye Sir ka kahna hai ki pehle customer mere shop par aata tha aur kapde dekh kar kharid leta tha.
+
+Lekin dheere dheere sab customer Myntra aur Amazon se order karne lage.
+
+Customer bolta tha ki pehle online dekh lenge.
+
+Mera sale aadha ho gaya tha.
+
+Tab mujhe samajh aaya ki customer ko online dekhne ki aadat lag gayi hai.
+
+Maine apne fashion store ki website banwayi.
+
+Ab customer pehle website par collection dekhta hai aur phir shop par aata hai.
+
+Ab mera sale pehle se bahut better hai.
+
+ONLINE SHOPPING STORY 2:
+
+Vikas Fashion Store Delhi
+
+Ye Sir ka kahna hai ki mera customer Flipkart aur Myntra ki taraf ja raha tha.
+
+Log bolte the online me zyada variety dikhti hai.
+
+Tab maine website banwayi aur apna collection online dikhana shuru kiya.
+
+Ab customer pehle mera collection dekhta hai phir shop par aata hai.
+
+Isse customer trust aur sale dono badh gaye.
+
 STORY MATCHING RULE:
 
 Never tell a story unless the story problem matches the client's problem.
