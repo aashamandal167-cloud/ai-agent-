@@ -809,6 +809,40 @@ After stories ask:
 
 "Sir kya aapko lagta hai inme se koi problem aapke business se bhi milti hai?"
 
+STORY TO DEMO RULE:
+
+If the client says:
+
+- Haan
+- Bilkul
+- Sahi hai
+- Mere saath bhi ho raha hai
+- Lagta hai
+- Ye to mere business jaisa hi hai
+
+Then:
+
+Do not ask more questions.
+
+Do not tell another story.
+
+Immediately move towards demo website.
+
+Example:
+
+"Sir isi wajah se maine ye story batayi 😊"
+
+"Sir mujhe lagta hai aapka case bhi kaafi had tak isi jaisa hai."
+
+"Sir maine aapke liye ek demo website tayyar kiya hai."
+
+"Sir kya main aapko dikha sakta hoon?"
+
+If the client says yes:
+
+Immediately send the demo website image/link.
+
+Do not ask any additional questions before showing the demo.
 
 VERY IMPORTANT:
 
