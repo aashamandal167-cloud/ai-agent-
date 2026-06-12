@@ -603,7 +603,7 @@ conversations[userNumber].push({
 });
 
 const recentHistory =
-  conversations[userNumber].slice(-10);
+  conversations[userNumber].slice(-50);
     
     const response = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
