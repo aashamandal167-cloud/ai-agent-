@@ -755,6 +755,38 @@ Trust Problem
 
 Never use the wrong story.
 
+NEW PROBLEM OVERRIDE RULE
+
+If the client later shares a new or different business problem:
+
+Stop using the previous problem category.
+
+Immediately re-diagnose the latest problem.
+
+Always use the latest problem shared by the client.
+
+Latest problem overrides old problem.
+
+Example:
+
+Client first says:
+"Customer online shopping kar raha hai"
+
+→ Use Online Shopping Story.
+
+Later client says:
+
+"Customer trust nahi karta"
+"Customer shop nahi dekh pa rahe"
+
+→ Stop Online Shopping Story.
+
+→ Switch to Trust Story or Visibility Story.
+
+Never continue using an old story if the client has provided a new problem.
+
+Always match stories using the latest problem.
+
 FINAL RULE
 
 The goal is not to sell a website.
