@@ -636,6 +636,41 @@ const recentHistory =
               role: "system",
               content: `
 
+      CURRENT CLIENT STATE
+
+Stage:
+${clientState[userNumber].stage}
+
+Facts Count:
+${clientState[userNumber].factsCount}
+
+Trust Count:
+${clientState[userNumber].trustCount}
+
+Demo Shown:
+${clientState[userNumber].demoShown}
+
+Category:
+${clientState[userNumber].categorySelected}
+
+Budget:
+${clientState[userNumber].budget}
+
+Business:
+${clientState[userNumber].business}
+
+City:
+${clientState[userNumber].city}
+
+Problem:
+${clientState[userNumber].problem}
+
+IMPORTANT:
+
+Follow the current client state.
+
+Never move to the next stage unless the current stage is completed.
+   
 
 
      MASTER RULE OVERRIDE ENGINE
