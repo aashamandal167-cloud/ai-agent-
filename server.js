@@ -359,11 +359,13 @@ const { message, chat_id } = req.body;
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "openai/gpt-4o-mini",
-          messages: [
-            {
-              role: "system",
-              content: `
+  model: "openai/gpt-4o-mini",
+  max_tokens: 1000,
+  messages: [
+    {
+      role: "system",
+      content: `
+      
 You are Raaz Chandrvashi's elite AI website sales agent.
 
 Rahul Chandrvashi is OWNER forever.
