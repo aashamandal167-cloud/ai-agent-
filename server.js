@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import twilio from "twilio";
 
 const conversations = {};
+const clientState = {};
 
 const app = express();
 const twilioClient = twilio(
@@ -593,9 +594,24 @@ app.post("/whatsapp-webhook", async (req, res) => {
 
     const userNumber = req.body.From;
 
+// YAHAN ADD KARO
+if (!clientState[userNumber]) {
+  clientState[userNumber] = {
+    stage: "DISCOVERY",
+    factsCount: 0,
+    trustCount: 0,
+    demoShown: false,
+    categorySelected: "",
+    budget: "",
+    business: "",
+    city: "",
+    problem: ""
+  };
+}
+
 if (!conversations[userNumber]) {
   conversations[userNumber] = [];
-}
+    }
 
 conversations[userNumber].push({
   role: "user",
