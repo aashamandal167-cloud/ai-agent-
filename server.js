@@ -4335,9 +4335,14 @@ MASTER HUMAN RULE
 
     const data = await response.json();
 
-    const aiReply =
-      data.choices?.[0]?.message?.content || "No response";
+console.log("OPENROUTER RESPONSE:");
+console.log(JSON.stringify(data, null, 2));
 
+const aiReply =
+  data?.choices?.[0]?.message?.content ||
+  data?.error?.message ||
+  "No response";
+    
     conversations[userNumber].push({
   role: "assistant",
   content: aiReply
