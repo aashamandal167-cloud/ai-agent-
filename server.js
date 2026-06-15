@@ -632,8 +632,9 @@ const recentHistory =
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "openai/gpt-4o-mini",
-          messages: [
+  model: "openai/gpt-4o-mini",
+  max_tokens: 500,
+  messages: [
             {
               role: "system",
               content: `
