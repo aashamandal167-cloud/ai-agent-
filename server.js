@@ -620,6 +620,52 @@ conversations[userNumber].push({
   content: userMessage
 });
 
+const state = clientState[userNumber];
+
+if (userMessage.toLowerCase().includes("online shopping")) {
+  state.problem = "online shopping";
+}
+
+if (userMessage.toLowerCase().includes("fashion store")) {
+  state.business = "Fashion Store";
+}
+
+if (userMessage.toLowerCase().includes("mumbai")) {
+  state.city = "Mumbai";
+}
+
+if (
+  userMessage.toLowerCase().includes("online shopping") ||
+  userMessage.toLowerCase().includes("customer") ||
+  userMessage.toLowerCase().includes("competitor") ||
+  userMessage.toLowerCase().includes("sales") ||
+  userMessage.toLowerCase().includes("saal")
+) {
+  state.factsCount++;
+}
+
+let extraRule = "";
+
+if (state.factsCount < 3) {
+
+extraRule = `
+
+IMPORTANT:
+
+Story forbidden.
+
+Demo forbidden.
+
+Category forbidden.
+
+Pricing forbidden.
+
+Ask ONLY ONE discovery question.
+
+`;
+
+}
+    
 const recentHistory =
   conversations[userNumber].slice(-50);
     
@@ -639,7 +685,9 @@ const recentHistory =
               role: "system",
               content: `
 
-      CURRENT CLIENT STATE
+${extraRule}
+
+CURRENT CLIENT STATE
 
 Stage:
 ${clientState[userNumber].stage}
