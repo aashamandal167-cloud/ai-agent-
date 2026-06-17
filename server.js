@@ -4551,14 +4551,65 @@ console.log("OPENROUTER RESPONSE:");
 console.log(JSON.stringify(data, null, 2));
 
 const aiReply =
+const aiReply =
   data?.choices?.[0]?.message?.content ||
   data?.error?.message ||
   "No response";
-    
-    conversations[userNumber].push({
+
+
+// PEHLE STAGE CHANGE
+
+if (
+  state.stage === "DISCOVERY" &&
+  state.factsCount >= 3
+) {
+
+  state.stage = "STORY";
+
+}
+
+else if (
+
+  state.stage === "STORY" &&
+
+  userMessage.toLowerCase().includes("ha")
+
+) {
+
+  state.stage = "DEMO";
+
+}
+
+else if (
+
+  state.stage === "DEMO" &&
+
+  userMessage.toLowerCase().includes("achha")
+
+) {
+
+  state.stage = "CATEGORY";
+
+}
+
+else if (
+
+  state.stage === "CATEGORY"
+
+) {
+
+  state.stage = "PRICE";
+
+}
+
+
+// USKE BAAD HISTORY SAVE
+
+conversations[userNumber].push({
   role: "assistant",
   content: aiReply
 });
+
 
     const twiml = `
 <Response>
