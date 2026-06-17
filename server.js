@@ -646,26 +646,97 @@ if (
 
 let extraRule = "";
 
-if (state.factsCount < 3) {
+if (state.stage === "DISCOVERY") {
 
 extraRule = `
 
-IMPORTANT:
+CURRENT STAGE = DISCOVERY
 
-Story forbidden.
+STRICT RULES:
 
-Demo forbidden.
+1. Ask ONLY ONE question.
 
-Category forbidden.
+2. Never tell story.
 
-Pricing forbidden.
+3. Never show demo.
 
-Ask ONLY ONE discovery question.
+4. Never show category.
+
+5. Never show pricing.
+
+6. Wait for user answer.
 
 `;
 
 }
-    
+
+else if (state.stage === "STORY") {
+
+extraRule = `
+
+CURRENT STAGE = STORY
+
+STRICT RULES:
+
+Tell ONLY one matching story.
+
+No Demo.
+
+No Category.
+
+No Pricing.
+
+`;
+
+}
+
+else if (state.stage === "DEMO") {
+
+extraRule = `
+
+CURRENT STAGE = DEMO
+
+STRICT RULES:
+
+Show demo only.
+
+Do not tell story again.
+
+Do not show pricing.
+
+`;
+
+}
+
+else if (state.stage === "CATEGORY") {
+
+extraRule = `
+
+CURRENT STAGE = CATEGORY
+
+STRICT RULES:
+
+Show categories only.
+
+Never show price.
+
+`;
+
+}
+
+else if (state.stage === "PRICE") {
+
+extraRule = `
+
+CURRENT STAGE = PRICE
+
+STRICT RULES:
+
+Show only selected category price.
+
+`;
+
+}    
 const recentHistory =
   conversations[userNumber].slice(-50);
     
