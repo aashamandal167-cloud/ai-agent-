@@ -4551,7 +4551,6 @@ console.log("OPENROUTER RESPONSE:");
 console.log(JSON.stringify(data, null, 2));
 
 const aiReply =
-const aiReply =
   data?.choices?.[0]?.message?.content ||
   data?.error?.message ||
   "No response";
