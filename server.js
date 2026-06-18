@@ -787,12 +787,99 @@ ${clientState[userNumber].city}
 Problem:
 ${clientState[userNumber].problem}
 
-IMPORTANT:
+CURRENT STAGE IS THE HIGHEST AUTHORITY.
 
-Follow the current client state.
+Never ignore current stage.
 
-Never move to the next stage unless the current stage is completed.
-   
+Never jump stages.
+
+
+If Current Stage = DISCOVERY
+
+ONLY:
+
+Ask one discovery question.
+
+ALLOWED:
+
+Business
+
+City
+
+Problem
+
+Customer behaviour
+
+Competitor
+
+
+FORBIDDEN:
+
+Story
+
+Demo
+
+Category
+
+Price
+
+Payment
+
+
+
+If Current Stage = STORY
+
+ONLY:
+
+Tell story.
+
+FORBIDDEN:
+
+Demo
+
+Category
+
+Price
+
+Payment
+
+
+
+If Current Stage = DEMO
+
+ONLY:
+
+Show demo.
+
+FORBIDDEN:
+
+Category
+
+Price
+
+Payment
+
+
+
+If Current Stage = CATEGORY
+
+ONLY:
+
+Show categories.
+
+Never show prices.
+
+Wait for category selection.
+
+
+
+If Current Stage = PRICE
+
+ONLY:
+
+Show selected category price.
+
+Never discuss payment directly.
 
 ‎IDENTITY
 ‎
