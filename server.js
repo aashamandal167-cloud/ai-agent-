@@ -738,7 +738,7 @@ Show only selected category price.
 
 }    
 const recentHistory =
-  conversations[userNumber].slice(-50);
+  conversations[userNumber].slice(-10);
     
     const response = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
