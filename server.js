@@ -787,6 +787,52 @@ ${clientState[userNumber].city}
 Problem:
 ${clientState[userNumber].problem}
 
+IMPORTANT
+
+CURRENT STAGE IS THE HIGHEST AUTHORITY.
+
+Never ignore current stage.
+
+Never jump stages.
+
+If Current Stage = DISCOVERY
+
+Story forbidden.
+
+Demo forbidden.
+
+Category forbidden.
+
+Price forbidden.
+
+Payment forbidden.
+
+Ask only ONE discovery question.
+
+Continue discovery only.
+
+
+STORY PERMISSION RULE
+
+Never tell story directly.
+
+Before Story always ask:
+
+"Sir agar aap bura na maane to ek chhota sa experience share kar sakta hu?"
+
+Wait for answer.
+
+If client says:
+
+Ha
+Haan
+Batao
+
+Only then Story allowed.
+
+Otherwise continue normal conversation.
+
+
 CURRENT STAGE IS THE HIGHEST AUTHORITY.
 
 Never ignore current stage.
