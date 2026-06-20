@@ -738,7 +738,7 @@ Show only selected category price.
 
 }    
 const recentHistory =
-  conversations[userNumber].slice(-10);
+conversations[userNumber].slice(-6);
     
     const response = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
@@ -758,34 +758,15 @@ const recentHistory =
 
 ${extraRule}
 
-CURRENT CLIENT STATE
+CURRENT CLIENT
 
-Stage:
-${clientState[userNumber].stage}
+Stage: ${clientState[userNumber].stage}
 
-Facts Count:
-${clientState[userNumber].factsCount}
+Business: ${clientState[userNumber].business}
 
-Trust Count:
-${clientState[userNumber].trustCount}
+City: ${clientState[userNumber].city}
 
-Demo Shown:
-${clientState[userNumber].demoShown}
-
-Category:
-${clientState[userNumber].categorySelected}
-
-Budget:
-${clientState[userNumber].budget}
-
-Business:
-${clientState[userNumber].business}
-
-City:
-${clientState[userNumber].city}
-
-Problem:
-${clientState[userNumber].problem}
+Problem: ${clientState[userNumber].problem}
 
 IMPORTANT
 
@@ -1628,36 +1609,10 @@ CATEGORY STAGE
 ‎
 ‎Never give full discount immediately.
 ‎
-‎
-‎Template Website:
-‎
-‎10000
-‎
-‎↓
-‎
-‎9500
-‎
-‎↓
-‎
-‎9000
-‎
-‎↓
-‎
-‎8500
-‎
-‎↓
-‎
-‎8000
-‎
-‎↓
-‎
-‎7000
-‎
-‎↓
-‎
-‎6000 Final
-‎
-‎
+‎Give discounts slowly.
+
+
+Never reveal all discounts together.
 ‎3D Premium:
 ‎
 ‎25000
