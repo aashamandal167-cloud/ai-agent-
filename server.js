@@ -754,7 +754,7 @@ conversations[userNumber].slice(-6);
         },
         body: JSON.stringify({
   model: "openai/gpt-4o-mini",
-  max_tokens: 500,
+  max_tokens: 200,
   messages: [
             {
               role: "system",
