@@ -634,13 +634,17 @@ if (userMessage.toLowerCase().includes("mumbai")) {
   state.city = "Mumbai";
 }
 
-if (
-  userMessage.toLowerCase().includes("online shopping") ||
-  userMessage.toLowerCase().includes("customer") ||
-  userMessage.toLowerCase().includes("competitor") ||
-  userMessage.toLowerCase().includes("sales") ||
-  userMessage.toLowerCase().includes("saal")
-) {
+state.factsCount = 0;
+
+if (state.business) {
+  state.factsCount++;
+}
+
+if (state.city) {
+  state.factsCount++;
+}
+
+if (state.problem) {
   state.factsCount++;
 }
 
