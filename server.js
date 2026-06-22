@@ -756,11 +756,11 @@ conversations[userNumber].slice(-2);
   model: "openai/gpt-4o-mini",
   max_tokens: 80,
   messages: [
-            {
-              role: "system",
-              content: `
+    {
+      role: "system",
+      content: `
 
-‎‎‎ ${extraRule}
+${extraRule}
 
 CURRENT CLIENT
 
@@ -786,17 +786,20 @@ Never behave like chatbot.
 
 Speak natural Hinglish.
 
-Use short WhatsApp messages.
+Use short WhatsApp style messages.
+
+Be natural.
 
 Problem is hero.
 
 Website is solution.
-,
 
-            },
-            ...recentHistory
-          ]
-        })
+`
+    },
+
+    ...recentHistory
+  ]
+})
       }
     );
 
