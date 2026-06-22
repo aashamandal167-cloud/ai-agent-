@@ -818,7 +818,7 @@ const aiReply =
 
 if (
   state.stage === "DISCOVERY" &&
-  state.factsCount >= 3
+  state.factsCount >= 4
 ) {
 
   state.stage = "STORY";
