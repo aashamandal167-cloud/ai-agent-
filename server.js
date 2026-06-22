@@ -742,7 +742,7 @@ Show only selected category price.
 
 }    
 const recentHistory =
-conversations[userNumber].slice(-6);
+conversations[userNumber].slice(-2);
     
     const response = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
@@ -754,7 +754,7 @@ conversations[userNumber].slice(-6);
         },
         body: JSON.stringify({
   model: "openai/gpt-4o-mini",
-  max_tokens: 200,
+  max_tokens: 80,
   messages: [
             {
               role: "system",
