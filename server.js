@@ -660,21 +660,21 @@ if (state.problem) {
 
 if (
   state.stage === "DISCOVERY" &&
-  state.factsCount < 4
+  !state.problem
 ) {
 
-  const aiReply =
-    "Sir, aapko sabse badi problem kya lagti hai? 😊";
+const aiReply =
+"Sir, aapko sabse badi problem kya lagti hai? 😊";
 
-  const twiml = `
+const twiml = `
 <Response>
 <Message>${aiReply}</Message>
 </Response>
 `;
 
-  return res.type("text/xml").send(twiml);
+return res.type("text/xml").send(twiml);
 
-    }
+  }
     
 let extraRule = "";
 
