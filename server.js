@@ -647,6 +647,16 @@ if (userMessage.toLowerCase().includes("mumbai")) {
   state.city = "Mumbai";
 }
 
+    if (
+  userMessage.toLowerCase() === "ha" ||
+  userMessage.toLowerCase() === "haan"
+) {
+
+  state.customerBehaviour = "Customers pehle aate the";
+
+    }
+    
+    
 state.factsCount = 0;
 
 if (state.business) {
