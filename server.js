@@ -652,6 +652,14 @@ if (userMessage.toLowerCase().includes("mumbai")) {
   userMessage.toLowerCase() === "haan"
 ) {
 
+      if (
+  userMessage.toLowerCase().includes("pata nahi")
+) {
+
+  state.competitor = "Unknown";
+
+      }
+      
   state.customerBehaviour = "Customers pehle aate the";
 
     }
@@ -671,6 +679,15 @@ if (state.problem) {
   state.factsCount++;
 }
 
+    if (state.customerBehaviour) {
+  state.factsCount++;
+}
+
+if (state.competitor) {
+  state.factsCount++;
+}
+
+    
 // DISCOVERY QUESTIONS FIX
 
 if (
