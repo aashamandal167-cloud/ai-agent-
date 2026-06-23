@@ -648,6 +648,25 @@ if (state.problem) {
   state.factsCount++;
 }
 
+// DISCOVERY QUESTIONS FIX
+
+if (state.stage === "DISCOVERY") {
+
+  if (!state.problem) {
+
+    const aiReply = "Sir, aapko sabse badi problem kya lagti hai? 😊";
+
+    const twiml = `
+<Response>
+<Message>${aiReply}</Message>
+</Response>
+`;
+
+    return res.type("text/xml").send(twiml);
+  }
+
+}
+    
 let extraRule = "";
 
 if (state.stage === "DISCOVERY") {
