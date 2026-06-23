@@ -771,6 +771,43 @@ Show only selected category price.
 }    
 const recentHistory =
 conversations[userNumber].slice(-2);
+
+if (state.stage === "DISCOVERY") {
+
+  if (!state.problem) {
+
+    const aiReply = "Sir, aapko sabse badi problem kya lagti hai? 😊";
+
+    return res.type("text/xml").send(`
+<Response>
+<Message>${aiReply}</Message>
+</Response>
+`);
+  }
+
+  if (!state.customerBehaviour) {
+
+    const aiReply = "Kya customers pehle aapke paas aate the? 😊";
+
+    return res.type("text/xml").send(`
+<Response>
+<Message>${aiReply}</Message>
+</Response>
+`);
+  }
+
+  if (!state.competitor) {
+
+    const aiReply = "Kya competitors ke paas website hai? 😊";
+
+    return res.type("text/xml").send(`
+<Response>
+<Message>${aiReply}</Message>
+</Response>
+`);
+  }
+
+}
     
     const response = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
