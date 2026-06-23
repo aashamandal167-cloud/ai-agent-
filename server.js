@@ -603,11 +603,16 @@ if (!clientState[userNumber]) {
     factsCount: 0,
     trustCount: 0,
     demoShown: false,
+
     categorySelected: "",
     budget: "",
+
     business: "",
     city: "",
-    problem: ""
+
+    problem: "",
+    customerBehaviour: "",
+    competitor: ""
   };
 }
 
