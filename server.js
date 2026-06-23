@@ -626,6 +626,14 @@ if (userMessage.toLowerCase().includes("online shopping")) {
   state.problem = "online shopping";
 }
 
+    if (
+  userMessage.toLowerCase().includes("sales") ||
+  userMessage.toLowerCase().includes("kam")
+) {
+  state.problem = "low sales";
+    }
+
+    
 if (userMessage.toLowerCase().includes("fashion store")) {
   state.business = "Fashion Store";
 }
@@ -650,22 +658,23 @@ if (state.problem) {
 
 // DISCOVERY QUESTIONS FIX
 
-if (state.stage === "DISCOVERY") {
+if (
+  state.stage === "DISCOVERY" &&
+  state.factsCount < 4
+) {
 
-  if (!state.problem) {
+  const aiReply =
+    "Sir, aapko sabse badi problem kya lagti hai? 😊";
 
-    const aiReply = "Sir, aapko sabse badi problem kya lagti hai? 😊";
-
-    const twiml = `
+  const twiml = `
 <Response>
 <Message>${aiReply}</Message>
 </Response>
 `;
 
-    return res.type("text/xml").send(twiml);
-  }
+  return res.type("text/xml").send(twiml);
 
-}
+    }
     
 let extraRule = "";
 
