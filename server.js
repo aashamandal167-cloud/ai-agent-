@@ -980,7 +980,6 @@ Website is solution.
 
 `
 
-`
     },
 
     ...recentHistory
