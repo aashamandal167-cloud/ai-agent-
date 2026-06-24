@@ -648,30 +648,30 @@ if (userMessage.toLowerCase().includes("mumbai")) {
 }
 
     if (
-  userMessage.toLowerCase() === "ha" ||
-  userMessage.toLowerCase() === "haan"
+  userMessage.toLowerCase().includes("ha")
 ) {
 
-      if (
-  userMessage.toLowerCase().includes("pata nahi")
-) {
+  state.customerBehaviour = "Customers pehle aate the";
 
-  state.competitor = "Unknown";
+}
 
-      }
 
 if (
-  userMessage.toLowerCase() === "nahi"
+  userMessage.toLowerCase().includes("nahi")
 ) {
 
   state.competitor = "No Website";
 
 }
-      
-      
-  state.customerBehaviour = "Customers pehle aate the";
 
-    }
+
+if (
+  userMessage.toLowerCase().includes("pata nahi")
+) {
+
+  state.competitor = "Unknown";
+
+}
     
     
 state.factsCount = 0;
