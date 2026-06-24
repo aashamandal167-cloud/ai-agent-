@@ -699,23 +699,56 @@ if (state.competitor) {
     
 // DISCOVERY QUESTIONS FIX
 
-if (
-  state.stage === "DISCOVERY" &&
-  !state.problem
-) {
+if (state.stage === "DISCOVERY") {
 
-const aiReply =
-"Sir, aapko sabse badi problem kya lagti hai? 😊";
+  if (!state.problem) {
 
-const twiml = `
+    const aiReply =
+    "Sir, aapko sabse badi problem kya lagti hai? 😊";
+
+    const twiml = `
 <Response>
 <Message>${aiReply}</Message>
 </Response>
 `;
 
-return res.type("text/xml").send(twiml);
+    return res.type("text/xml").send(twiml);
 
   }
+
+
+  if (!state.customerBehaviour) {
+
+    const aiReply =
+    "Kya customers pehle aapke paas aate the? 😊";
+
+    const twiml = `
+<Response>
+<Message>${aiReply}</Message>
+</Response>
+`;
+
+    return res.type("text/xml").send(twiml);
+
+  }
+
+
+  if (!state.competitor) {
+
+    const aiReply =
+    "Kya competitors ke paas website hai? 😊";
+
+    const twiml = `
+<Response>
+<Message>${aiReply}</Message>
+</Response>
+`;
+
+    return res.type("text/xml").send(twiml);
+
+  }
+
+      }
     
 let extraRule = "";
 
