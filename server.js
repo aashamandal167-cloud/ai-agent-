@@ -659,6 +659,15 @@ if (userMessage.toLowerCase().includes("mumbai")) {
   state.competitor = "Unknown";
 
       }
+
+if (
+  userMessage.toLowerCase() === "nahi"
+) {
+
+  state.competitor = "No Website";
+
+}
+      
       
   state.customerBehaviour = "Customers pehle aate the";
 
