@@ -704,7 +704,7 @@ if (state.stage === "DISCOVERY") {
   if (!state.problem) {
 
     const aiReply =
-    "Sir, aapko sabse badi problem kya lagti hai? 😊";
+      "Sir, aapko sabse badi problem kya lagti hai? 😊";
 
     const twiml = `
 <Response>
@@ -720,7 +720,7 @@ if (state.stage === "DISCOVERY") {
   if (!state.customerBehaviour) {
 
     const aiReply =
-    "Kya customers pehle aapke paas aate the? 😊";
+      "Kya customers pehle aapke paas aate the? 😊";
 
     const twiml = `
 <Response>
@@ -736,7 +736,7 @@ if (state.stage === "DISCOVERY") {
   if (!state.competitor) {
 
     const aiReply =
-    "Kya competitors ke paas website hai? 😊";
+      "Kya competitors ke paas website hai? 😊";
 
     const twiml = `
 <Response>
@@ -745,6 +745,24 @@ if (state.stage === "DISCOVERY") {
 `;
 
     return res.type("text/xml").send(twiml);
+
+  }
+
+
+  // DISCOVERY COMPLETE
+
+  state.stage = "STORY";
+
+  const aiReply =
+    "Sir agar aap bura na maane to ek chhota sa experience share kar sakta hu? 😊";
+
+  const twiml = `
+<Response>
+<Message>${aiReply}</Message>
+</Response>
+`;
+
+  return res.type("text/xml").send(twiml);
 
   }
 
