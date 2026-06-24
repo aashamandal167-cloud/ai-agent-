@@ -766,7 +766,6 @@ if (state.stage === "DISCOVERY") {
 
   }
 
-      }
     
 let extraRule = "";
 
