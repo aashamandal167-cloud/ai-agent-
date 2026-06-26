@@ -866,44 +866,8 @@ Show only selected category price.
 
 }    
 const recentHistory =
-conversations[userNumber].slice(-2);
+conversations[userNumber].slice(-10);
 
-if (state.stage === "DISCOVERY") {
-
-  if (!state.problem) {
-
-    const aiReply = "Sir, aapko sabse badi problem kya lagti hai? 😊";
-
-    return res.type("text/xml").send(`
-<Response>
-<Message>${aiReply}</Message>
-</Response>
-`);
-  }
-
-  if (!state.customerBehaviour) {
-
-    const aiReply = "Kya customers pehle aapke paas aate the? 😊";
-
-    return res.type("text/xml").send(`
-<Response>
-<Message>${aiReply}</Message>
-</Response>
-`);
-  }
-
-  if (!state.competitor) {
-
-    const aiReply = "Kya competitors ke paas website hai? 😊";
-
-    return res.type("text/xml").send(`
-<Response>
-<Message>${aiReply}</Message>
-</Response>
-`);
-  }
-
-}
     
     const result = await ai.models.generateContent({
   model: "gemini-2.0-flash-lite",
