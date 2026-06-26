@@ -938,10 +938,13 @@ Website is solution.
 console.log("GEMINI RESPONSE:");
 console.log(result);
 
+console.log("TEXT:", result.text);
+console.log("CANDIDATE:", result.candidates?.[0]?.content?.parts?.[0]?.text);
+
 const aiReply =
   result.text ||
+  result.candidates?.[0]?.content?.parts?.[0]?.text ||
   "Sorry Sir, response generate nahi ho paya.";
-
 
 // PEHLE STAGE CHANGE
 
