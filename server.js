@@ -905,22 +905,10 @@ if (state.stage === "DISCOVERY") {
 
 }
     
-    const response = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-  model: "openai/gpt-4o-mini",
-  max_tokens: 80,
-  messages: [
-    {
-      role: "system",
-      content: `
+    const result = await ai.models.generateContent({
+  model: "gemini-2.5-flash",
 
+  systemInstruction: `
 ${extraRule}
 
 CURRENT CLIENT
@@ -962,46 +950,33 @@ RESPECT RULE
 Always address client respectfully.
 
 Use:
-
 Sir
 Aap
 Aapka
 Aapko
 
 Never use:
-
 Tum
 Tumhe
 Tera
 Tujhe
 
-This rule is STRICT.
-
-Never break this rule.
-
 Problem is hero.
 
 Website is solution.
+`,
 
-`
+  contents: recentHistory
+    .map(m => `${m.role}: ${m.content}`)
+    .join("\n")
+});
 
-    },
-
-    ...recentHistory
-  ]
-})
-      }
-    );
-
-    const data = await response.json();
-
-console.log("OPENROUTER RESPONSE:");
-console.log(JSON.stringify(data, null, 2));
+console.log("GEMINI RESPONSE:");
+console.log(result);
 
 const aiReply =
-  data?.choices?.[0]?.message?.content ||
-  data?.error?.message ||
-  "No response";
+  result.text ||
+  "Sorry Sir, response generate nahi ho paya.";
 
 
 // PEHLE STAGE CHANGE
