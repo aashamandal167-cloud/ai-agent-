@@ -870,7 +870,7 @@ conversations[userNumber].slice(-10);
 
     
     const result = await ai.models.generateContent({
-  model: "gemini-2.0-flash-lite",
+  model: "gemini-2.5-flash",
 
   systemInstruction: `
 ${extraRule}
@@ -1006,12 +1006,17 @@ conversations[userNumber].push({
     res.type("text/xml");
     res.send(twiml);
 
-  } catch (err) {
+} catch (err) {
 
-    console.log(err);
+  console.error("===== GEMINI ERROR =====");
+  console.error(err);
 
-    res.type("text/xml");
-    res.send(`
+  if (err.stack) {
+    console.error(err.stack);
+  }
+
+  res.type("text/xml");
+  res.send(`
 <Response>
 <Message>Error: ${err.message}</Message>
 </Response>
