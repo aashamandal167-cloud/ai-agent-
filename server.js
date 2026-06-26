@@ -906,7 +906,7 @@ if (state.stage === "DISCOVERY") {
 }
     
     const result = await ai.models.generateContent({
-  model: "gemini-2.5-flash",
+  model: "gemini-2.0-flash"
 
   systemInstruction: `
 ${extraRule}
