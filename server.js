@@ -4,6 +4,8 @@ import { createClient } from "@supabase/supabase-js";
 import twilio from "twilio";
 import ai from "./config/gemini.js";
 
+import discoveryBrain from "./brains/discoveryBrain.js";
+
 const conversations = {};
 const clientState = {};
 
@@ -869,6 +871,8 @@ conversations[userNumber].slice(-10);
   model: "gemini-2.5-flash",
 
   systemInstruction: `
+${discoveryBrain}
+  
 ${extraRule}
 
 CURRENT CLIENT
