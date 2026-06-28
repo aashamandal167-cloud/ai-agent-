@@ -2,14 +2,10 @@ import express from "express";
 import fetch from "node-fetch";
 import { createClient } from "@supabase/supabase-js";
 import twilio from "twilio";
-import { GoogleGenAI } from "@google/genai";
+import ai from "./config/gemini.js";
 
 const conversations = {};
 const clientState = {};
-
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY
-});
 
 const app = express();
 const twilioClient = twilio(
