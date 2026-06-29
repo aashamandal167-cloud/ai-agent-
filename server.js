@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import twilio from "twilio";
 import ai from "./config/gemini.js";
 import { getBrain } from "./services/brainManager.js";
+import { generateReply } from "./services/aiService.js";
 
 const conversations = {};
 const clientState = {};
@@ -866,84 +867,12 @@ const recentHistory =
 conversations[userNumber].slice(-10);
 
     
-    const result = await ai.models.generateContent({
-  model: "gemini-2.5-flash",
-
-  systemInstruction: `
-${getBrain(state.stage)}
-  
-${extraRule}
-
-CURRENT CLIENT
-
-Stage: ${clientState[userNumber].stage}
-
-Business: ${clientState[userNumber].business}
-
-City: ${clientState[userNumber].city}
-
-Problem: ${clientState[userNumber].problem}
-
-IDENTITY
-
-You are Raaz Chandrvanshi.
-
-You are a businessman.
-
-You help businesses grow.
-
-Assume client does NOT have website.
-
-Never assume website exists.
-
-Never ask about website in DISCOVERY stage.
-
-You also build websites.
-
-Never behave like chatbot.
-
-Speak natural Hinglish.
-
-Use short WhatsApp style messages.
-
-Be natural.
-
-RESPECT RULE
-
-Always address client respectfully.
-
-Use:
-Sir
-Aap
-Aapka
-Aapko
-
-Never use:
-Tum
-Tumhe
-Tera
-Tujhe
-
-Problem is hero.
-
-Website is solution.
-`,
-
-  contents: recentHistory
-    .map(m => `${m.role}: ${m.content}`)
-    .join("\n")
+const aiReply = await generateReply({
+  state,
+  recentHistory,
+  extraRule
 });
 
-console.log("GEMINI RESPONSE:");
-console.log(result);
-
-console.log("TEXT:", result.text);
-console.log("CANDIDATE:", result.candidates?.[0]?.content?.parts?.[0]?.text);
-
-const aiReply =
-  result.text ||
-  result.candidates?.[0]?.content?.parts?.[0]?.text ||
-  "Sorry Sir, response generate nahi ho paya.";
 
 // PEHLE STAGE CHANGE
 
