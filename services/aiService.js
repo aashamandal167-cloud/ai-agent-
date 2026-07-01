@@ -8,6 +8,8 @@ export async function generateReply({
   extraRule
 }) {
 
+  const knowledge = getKnowledge(state);
+  
   const result = await ai.models.generateContent({
     model: "gemini-2.5-flash",
 
@@ -51,6 +53,17 @@ Problem: ${state.problem}
 Customer Behaviour: ${state.customerBehaviour}
 
 Competitor: ${state.competitor}
+
+CURRENT KNOWLEDGE
+
+Business Problems:
+${knowledge.problems.join(", ")}
+
+Website Benefits:
+${knowledge.benefits.join(", ")}
+
+Success Story:
+${knowledge.story ? JSON.stringify(knowledge.story) : "No story available"}
 
 Always speak natural Hinglish.
 
