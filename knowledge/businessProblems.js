@@ -40,7 +40,7 @@ const businessProblems = {
     "Low Trust"
   ],
 
-  Fashion Store: [
+  "Fashion Store": [
     "Low Sales",
     "Less Footfall",
     "Weak Online Presence",
