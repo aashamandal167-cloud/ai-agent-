@@ -1,5 +1,6 @@
 import ai from "../config/gemini.js";
 import { getBrain } from "./brainManager.js";
+import { getKnowledge } from "./knowledgeManager.js";
 
 export async function generateReply({
   state,
