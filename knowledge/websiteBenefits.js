@@ -40,7 +40,7 @@ const websiteBenefits = {
     "Patient Trust"
   ],
 
-  Fashion Store: [
+  "Fashion Store": [
     "Product Showcase",
     "Online Catalogue",
     "Google Visibility",
