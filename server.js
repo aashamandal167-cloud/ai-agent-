@@ -770,7 +770,6 @@ if (state.stage === "DISCOVERY") {
 
   }
 
-    
 let extraRule = "";
 
 if (state.stage === "DISCOVERY") {
@@ -906,39 +905,35 @@ Help after delivery.
 `;
 
 }
-   
-const recentHistory =
-conversations[userNumber].slice(-10);
 
-    
+const recentHistory =
+  conversations[userNumber].slice(-10);
+
 const aiReply = await generateReply({
-  state,
-  recentHistory,
-  extraRule
+state,
+recentHistory,
+extraRule
 });
 
 updateStage(state, userMessage);
 
-
 // USKE BAAD HISTORY SAVE
 
 conversations[userNumber].push({
-  role: "assistant",
-  content: aiReply
+role: "assistant",
+content: aiReply
 });
 
+const twiml = `
 
-    const twiml = `
-<Response>
-<Message>${aiReply}</Message>
-</Response>
-`;
-
-    res.type("text/xml");
-    res.send(twiml);
+<Response>  
+<Message>${aiReply}</Message>  
+</Response>  
+`;  res.type("text/xml");  
+res.send(twiml);
 
 } catch (err) {
-
+    
   console.error("===== GEMINI ERROR =====");
   console.error(err);
 
