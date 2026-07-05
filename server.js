@@ -775,7 +775,7 @@ let extraRule = "";
 
 if (state.stage === "DISCOVERY") {
 
-extraRule = `
+  extraRule = `
 
 CURRENT STAGE = DISCOVERY
 
@@ -799,7 +799,7 @@ STRICT RULES:
 
 else if (state.stage === "STORY") {
 
-extraRule = `
+  extraRule = `
 
 CURRENT STAGE = STORY
 
@@ -819,7 +819,7 @@ No Pricing.
 
 else if (state.stage === "DEMO") {
 
-extraRule = `
+  extraRule = `
 
 CURRENT STAGE = DEMO
 
@@ -835,10 +835,9 @@ Do not show pricing.
 
 }
 
-else if (state.stage === "CATEGORY") {
 else if (state.stage === "DEAL") {
 
-extraRule = `
+  extraRule = `
 
 CURRENT STAGE = DEAL
 
@@ -858,7 +857,7 @@ Never negotiate.
 
 else if (state.stage === "NEGOTIATION") {
 
-extraRule = `
+  extraRule = `
 
 CURRENT STAGE = NEGOTIATION
 
@@ -876,7 +875,7 @@ Follow negotiation rules only.
 
 else if (state.stage === "PAYMENT") {
 
-extraRule = `
+  extraRule = `
 
 CURRENT STAGE = PAYMENT
 
@@ -892,7 +891,7 @@ Never negotiate here.
 
 else if (state.stage === "FOLLOWUP") {
 
-extraRule = `
+  extraRule = `
 
 CURRENT STAGE = FOLLOWUP
 
