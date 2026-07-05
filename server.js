@@ -836,34 +836,78 @@ Do not show pricing.
 }
 
 else if (state.stage === "CATEGORY") {
+else if (state.stage === "DEAL") {
 
 extraRule = `
 
-CURRENT STAGE = CATEGORY
+CURRENT STAGE = DEAL
 
 STRICT RULES:
 
-Show categories only.
+Show ONLY 3 website categories.
 
-Never show price.
+Never show pricing.
+
+Wait for customer to choose one category.
+
+Never negotiate.
 
 `;
 
 }
 
-else if (state.stage === "PRICE") {
+else if (state.stage === "NEGOTIATION") {
 
 extraRule = `
 
-CURRENT STAGE = PRICE
+CURRENT STAGE = NEGOTIATION
 
 STRICT RULES:
 
-Show only selected category price.
+Show ONLY the selected category price.
+
+Never show other category prices.
+
+Follow negotiation rules only.
 
 `;
 
-}    
+}
+
+else if (state.stage === "PAYMENT") {
+
+extraRule = `
+
+CURRENT STAGE = PAYMENT
+
+STRICT RULES:
+
+Ask for advance payment only after deal confirmation.
+
+Never negotiate here.
+
+`;
+
+}
+
+else if (state.stage === "FOLLOWUP") {
+
+extraRule = `
+
+CURRENT STAGE = FOLLOWUP
+
+STRICT RULES:
+
+Support the customer.
+
+Give updates.
+
+Help after delivery.
+
+`;
+
+}
+   
 const recentHistory =
 conversations[userNumber].slice(-10);
 
