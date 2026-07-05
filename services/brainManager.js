@@ -1,27 +1,39 @@
-DISCOVERY
-      ↓
-discoveryBrain
+import discoveryBrain from "../brains/discoveryBrain.js";
+import storyBrain from "../brains/storyBrain.js";
+import demoBrain from "../brains/demoBrain.js";
+import dealBrain from "../brains/dealBrain.js";
+import negotiationBrain from "../brains/negotiationBrain.js";
+import paymentBrain from "../brains/paymentBrain.js";
+import followupBrain from "../brains/followupBrain.js";
 
-STORY
-      ↓
-storyBrain
+export function getBrain(stage) {
 
-DEMO
-      ↓
-demoBrain
+  switch (stage) {
 
-DEAL
-      ↓
-dealBrain
+    case "DISCOVERY":
+      return discoveryBrain;
 
-NEGOTIATION
-      ↓
-negotiationBrain
+    case "STORY":
+      return storyBrain;
 
-PAYMENT
-      ↓
-paymentBrain
+    case "DEMO":
+      return demoBrain;
 
-FOLLOWUP
-      ↓
-followupBrain
+    case "DEAL":
+      return dealBrain;
+
+    case "NEGOTIATION":
+      return negotiationBrain;
+
+    case "PAYMENT":
+      return paymentBrain;
+
+    case "FOLLOWUP":
+      return followupBrain;
+
+    default:
+      return discoveryBrain;
+
+  }
+
+}
