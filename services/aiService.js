@@ -9,6 +9,10 @@ export async function generateReply({
 }) {
 
   const knowledge = getKnowledge(state);
+
+console.log("CURRENT STAGE =", state.stage);
+console.log("CURRENT BRAIN =");
+console.log(getBrain(state.stage));
   
   const result = await ai.models.generateContent({
     model: "gemini-2.5-flash",
