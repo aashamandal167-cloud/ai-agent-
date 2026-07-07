@@ -1,6 +1,7 @@
 import ai from "../config/gemini.js";
 import { getBrain } from "./brainManager.js";
 import { getKnowledge } from "./knowledgeManager.js";
+import masterRules from "./masterRules.js";
 
 export async function generateReply({
   state,
@@ -18,6 +19,8 @@ console.log(getBrain(state.stage));
     model: "gemini-2.5-flash",
 
     systemInstruction: `
+${masterRules}
+
 ${getBrain(state.stage)}
 
 ${extraRule}
