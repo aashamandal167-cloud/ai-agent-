@@ -905,17 +905,116 @@ Help after delivery.
 `;
 
 }
+// Stage pehle update hogi
+updateStage(state, userMessage);
+
+// Stage update hone ke baad extraRule banega
+let extraRule = "";
+
+if (state.stage === "DISCOVERY") {
+
+  extraRule = `
+CURRENT STAGE = DISCOVERY
+
+Ask ONLY discovery questions.
+Never tell story.
+Never show demo.
+Never show category.
+Never show pricing.
+`;
+
+}
+
+else if (state.stage === "STORY") {
+
+  extraRule = `
+CURRENT STAGE = STORY
+
+Tell ONLY one matching story.
+
+Never show demo.
+
+Never show category.
+
+Never show pricing.
+`;
+
+}
+
+else if (state.stage === "DEMO") {
+
+  extraRule = `
+CURRENT STAGE = DEMO
+
+Show ONLY demo.
+
+Never tell story again.
+
+Never show pricing.
+`;
+
+}
+
+else if (state.stage === "DEAL") {
+
+  extraRule = `
+CURRENT STAGE = DEAL
+
+Show ONLY website categories.
+
+Never show pricing.
+
+Wait for category selection.
+`;
+
+}
+
+else if (state.stage === "NEGOTIATION") {
+
+  extraRule = `
+CURRENT STAGE = NEGOTIATION
+
+Show ONLY selected category price.
+
+Follow negotiation roadmap.
+
+Never show other categories.
+`;
+
+}
+
+else if (state.stage === "PAYMENT") {
+
+  extraRule = `
+CURRENT STAGE = PAYMENT
+
+Ask only for advance payment.
+
+Never negotiate.
+`;
+
+}
+
+else if (state.stage === "FOLLOWUP") {
+
+  extraRule = `
+CURRENT STAGE = FOLLOWUP
+
+Support customer.
+
+Give updates only.
+`;
+
+}
 
 const recentHistory =
   conversations[userNumber].slice(-10);
 
 const aiReply = await generateReply({
-state,
-recentHistory,
-extraRule
+  state,
+  recentHistory,
+  extraRule
 });
-
-updateStage(state, userMessage);
 
 // USKE BAAD HISTORY SAVE
 
