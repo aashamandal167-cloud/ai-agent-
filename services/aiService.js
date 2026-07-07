@@ -9,16 +9,31 @@ export async function generateReply({
   extraRule
 }) {
 
-  const knowledge = getKnowledge(state);
+const knowledge = getKnowledge(state);
 
 console.log("CURRENT STAGE =", state.stage);
 console.log("CURRENT BRAIN =");
 console.log(getBrain(state.stage));
-  
-  const result = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
 
-    systemInstruction: `
+console.log("========== AI REQUEST ==========");
+
+console.log("STAGE:", state.stage);
+
+console.log("EXTRA RULE:");
+console.log(extraRule);
+
+console.log("BRAIN:");
+console.log(getBrain(state.stage));
+
+console.log("KNOWLEDGE:");
+console.log(JSON.stringify(knowledge, null, 2));
+
+console.log("================================");
+
+const result = await ai.models.generateContent({
+  model: "gemini-2.5-flash",
+
+  systemInstruction: `
 ${masterRules}
 
 ${getBrain(state.stage)}
