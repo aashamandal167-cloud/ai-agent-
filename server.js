@@ -770,141 +770,6 @@ if (state.stage === "DISCOVERY") {
 
   }
 
-let extraRule = "";
-
-if (state.stage === "DISCOVERY") {
-
-  extraRule = `
-
-CURRENT STAGE = DISCOVERY
-
-STRICT RULES:
-
-1. Ask ONLY ONE question.
-
-2. Never tell story.
-
-3. Never show demo.
-
-4. Never show category.
-
-5. Never show pricing.
-
-6. Wait for user answer.
-
-`;
-
-}
-
-else if (state.stage === "STORY") {
-
-  extraRule = `
-
-CURRENT STAGE = STORY
-
-STRICT RULES:
-
-Tell ONLY one matching story.
-
-No Demo.
-
-No Category.
-
-No Pricing.
-
-`;
-
-}
-
-else if (state.stage === "DEMO") {
-
-  extraRule = `
-
-CURRENT STAGE = DEMO
-
-STRICT RULES:
-
-Show demo only.
-
-Do not tell story again.
-
-Do not show pricing.
-
-`;
-
-}
-
-else if (state.stage === "DEAL") {
-
-  extraRule = `
-
-CURRENT STAGE = DEAL
-
-STRICT RULES:
-
-Show ONLY 3 website categories.
-
-Never show pricing.
-
-Wait for customer to choose one category.
-
-Never negotiate.
-
-`;
-
-}
-
-else if (state.stage === "NEGOTIATION") {
-
-  extraRule = `
-
-CURRENT STAGE = NEGOTIATION
-
-STRICT RULES:
-
-Show ONLY the selected category price.
-
-Never show other category prices.
-
-Follow negotiation rules only.
-
-`;
-
-}
-
-else if (state.stage === "PAYMENT") {
-
-  extraRule = `
-
-CURRENT STAGE = PAYMENT
-
-STRICT RULES:
-
-Ask for advance payment only after deal confirmation.
-
-Never negotiate here.
-
-`;
-
-}
-
-else if (state.stage === "FOLLOWUP") {
-
-  extraRule = `
-
-CURRENT STAGE = FOLLOWUP
-
-STRICT RULES:
-
-Support the customer.
-
-Give updates.
-
-Help after delivery.
-
-`;
-
-}
 // Stage pehle update hogi
 updateStage(state, userMessage);
 
@@ -1015,6 +880,7 @@ const aiReply = await generateReply({
   recentHistory,
   extraRule
 });
+
 
 // USKE BAAD HISTORY SAVE
 
