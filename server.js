@@ -770,9 +770,13 @@ if (state.stage === "DISCOVERY") {
 
   }
 
+console.log("BEFORE UPDATE =", state.stage);
+    
 // Stage pehle update hogi
 updateStage(state, userMessage);
 
+console.log("AFTER UPDATE =", state.stage);
+    
 // Stage update hone ke baad extraRule banega
 let extraRule = "";
 
