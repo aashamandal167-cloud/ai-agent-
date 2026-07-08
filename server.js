@@ -596,6 +596,12 @@ app.post("/whatsapp-webhook", async (req, res) => {
   try {
 
 console.log("🔥 WEBHOOK HIT 🔥");
+
+    console.log("USER:", userMessage);
+console.log("STAGE BEFORE:", clientState[userNumber]?.stage);
+console.log("BODY:", req.body);
+
+    console.log("STATE OBJECT:", state);
     
     const userMessage = req.body.Body;
 
