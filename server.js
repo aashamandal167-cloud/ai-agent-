@@ -596,12 +596,12 @@ app.post("/whatsapp-webhook", async (req, res) => {
   try {
 
 console.log("🔥 WEBHOOK HIT 🔥");
-‎
-‎    const userMessage = req.body.Body;
-‎    const userNumber = req.body.From;
-‎
-‎    console.log("USER:", userMessage);
-‎    console.log("BODY:", req.body);
+
+const userMessage = req.body.Body;
+const userNumber = req.body.From;
+
+console.log("USER:", userMessage);
+console.log("BODY:", req.body);
     
 // YAHAN ADD KARO
 if (!clientState[userNumber]) {
