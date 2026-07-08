@@ -595,6 +595,8 @@ app.post("/whatsapp-webhook", async (req, res) => {
 
   try {
 
+console.log("🔥 WEBHOOK HIT 🔥");
+    
     const userMessage = req.body.Body;
 
 
