@@ -31,6 +31,11 @@ console.log(JSON.stringify(knowledge, null, 2));
 
 console.log("================================");
 
+
+  console.log("===== RECENT HISTORY =====");
+console.log(recentHistory);
+console.log("==========================");
+  
 const result = await ai.models.generateContent({
   model: "gemini-2.5-flash",
 
