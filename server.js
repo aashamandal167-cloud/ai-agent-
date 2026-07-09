@@ -774,24 +774,12 @@ if (state.stage === "DISCOVERY") {
   }
 
 
- if (state.stage === "STORY") {
-  state.storyShown = true;
-    }
-  
-console.log("BEFORE UPDATE =", state.stage);
-console.log("BEFORE UPDATE =", state.stage);
+ console.log("BEFORE UPDATE =", state.stage);
 
-if (state.stage === "STORY" && !state.storyShown) {
-
-  state.storyShown = true;
-
-} else {
-
-  updateStage(state, userMessage);
-
-}
+updateStage(state, userMessage);
 
 console.log("AFTER UPDATE =", state.stage);
+  
 
     // Stage update hone ke baad extraRule banega
 let extraRule = "";
