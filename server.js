@@ -756,22 +756,9 @@ if (state.stage === "DISCOVERY") {
   }
 
 
-  // DISCOVERY COMPLETE
+ // DISCOVERY COMPLETE
 
-  state.stage = "STORY";
-
-  const aiReply =
-    "Sir agar aap bura na maane to ek chhota sa experience share kar sakta hu? 😊";
-
-  const twiml = `
-<Response>
-<Message>${aiReply}</Message>
-</Response>
-`;
-
-  return res.type("text/xml").send(twiml);
-
-  }
+state.stage = "STORY";
 
 console.log("BEFORE UPDATE =", state.stage);
     
