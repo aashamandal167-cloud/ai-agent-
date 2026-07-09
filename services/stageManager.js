@@ -44,7 +44,16 @@ if (state.stage === "STORY") {
     "demo",
     "send",
     "bhejo"
-  ];
+    "ji",
+"haan ji",
+"zarur",
+"jarur",
+"link",
+"website",
+"sample",
+"example",
+"portfolio"
+      ];
 
   const accepted = acceptWords.some(word =>
     message.includes(word)
@@ -78,6 +87,11 @@ if (state.stage === "STORY") {
       message.includes("website banwana hai") ||
       message.includes("banwana hai") ||
       message.includes("interested")
+      ||
+message.includes("price") ||
+message.includes("kitna") ||
+message.includes("kitne") ||
+message.includes("cost")
     )
   ) {
     state.stage = "DEAL";
@@ -96,6 +110,11 @@ if (state.stage === "STORY") {
       message.includes("cost") ||
       message.includes("charge") ||
       message.includes("rate")
+      ||
+message.includes("upi") ||
+message.includes("qr") ||
+message.includes("advance") ||
+message.includes("pay")
     )
   ) {
     state.stage = "NEGOTIATION";
@@ -107,37 +126,52 @@ if (state.stage === "STORY") {
   // Deal confirm
   // -----------------------------
   if (
-    state.stage === "NEGOTIATION" &&
-    (
-      message.includes("thik hai") ||
-      message.includes("theek hai") ||
-      message.includes("deal") ||
-      message.includes("ready") ||
-      message.includes("banaiye") ||
-      message.includes("kar dijiye") ||
-      message.includes("final")
-    )
-  ) {
-    state.stage = "PAYMENT";
-    return;
-  }
+  state.stage === "NEGOTIATION" &&
+  (
+    message.includes("thik hai") ||
+    message.includes("theek hai") ||
+    message.includes("deal") ||
+    message.includes("ready") ||
+    message.includes("banaiye") ||
+    message.includes("kar dijiye") ||
+    message.includes("final") ||
+    message.includes("upi") ||
+    message.includes("qr") ||
+    message.includes("advance") ||
+    message.includes("pay")
+  )
+) {
+  state.stage = "PAYMENT";
+  return;
+    }
 
   // -----------------------------
-  // PAYMENT → FOLLOWUP
-  // Payment complete
-  // -----------------------------
-  if (
-    state.stage === "PAYMENT" &&
-    (
-      message.includes("payment") ||
-      message.includes("paid") ||
-      message.includes("done") ||
-      message.includes("screenshot") ||
-      message.includes("bhej diya")
-    )
-  ) {
-    state.stage = "FOLLOWUP";
-    return;
-  }
+// PAYMENT → FOLLOWUP
+// Payment Complete
+// -----------------------------
+if (
+  state.stage === "PAYMENT" &&
+  (
+    message.includes("payment") ||
+    message.includes("paid") ||
+    message.includes("done") ||
+    message.includes("screenshot") ||
+    message.includes("bhej diya") ||
+    message.includes("transfer") ||
+    message.includes("upi") ||
+    message.includes("qr") ||
+    message.includes("sent") ||
+    message.includes("success") ||
+    message.includes("successful")
+  )
+) {
+
+  state.paymentReceived = true;
+
+  state.stage = "FOLLOWUP";
+
+  return;
+
+}
 
 }
