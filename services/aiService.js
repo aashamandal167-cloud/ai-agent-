@@ -11,8 +11,9 @@ export async function generateReply({
 
 const knowledge = getKnowledge(state);
 
-console.log("CURRENT STAGE =", state.stage);
-console.log("CURRENT BRAIN =");
+console.log("BRAIN TEST START");
+console.log(getBrain(state.stage).substring(0, 200));
+console.log("BRAIN TEST END");
 console.log(getBrain(state.stage));
 
 console.log("========== AI REQUEST ==========");
