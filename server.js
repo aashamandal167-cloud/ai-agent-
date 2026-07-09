@@ -760,6 +760,8 @@ if (state.stage === "DISCOVERY") {
 
 state.stage = "STORY";
 
+  }
+  
 console.log("BEFORE UPDATE =", state.stage);
     
 // Stage pehle update hogi
