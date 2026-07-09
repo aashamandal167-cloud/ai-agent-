@@ -668,8 +668,6 @@ if (
   state.customerBehaviour = "Customers pehle aate the";
   }
 
-const message = userMessage.toLowerCase().trim();
-
 if (
   message === "pata nahi" ||
   message === "nahi pata" ||
@@ -889,6 +887,15 @@ const aiReply = await generateReply({
   extraRule
 });
 
+  // STORY aur DEMO complete mark karo
+
+if (state.stage === "STORY") {
+  state.storyShown = true;
+}
+
+if (state.stage === "DEMO") {
+  state.demoShown = true;
+}
 
 // USKE BAAD HISTORY SAVE
 
