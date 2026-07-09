@@ -3,39 +3,64 @@ export function updateStage(state, userMessage) {
   const message = userMessage.toLowerCase().trim();
 
   // -----------------------------
-  // DISCOVERY → STORY
-  // -----------------------------
-  if (
-    state.stage === "DISCOVERY" &&
-    state.factsCount >= 4
-  ) {
-    state.stage = "STORY";
+// DISCOVERY → STORY
+// -----------------------------
+if (
+  state.stage === "DISCOVERY" &&
+  state.business &&
+  state.city &&
+  state.problem &&
+  state.customerBehaviour &&
+  state.competitor
+) {
+
+  console.log("DISCOVERY COMPLETE ✅");
+
+  state.stage = "STORY";
+
+  state.storyShown = false;
+
+  return;
+
+}
+
+// -----------------------------
+// STORY → DEMO
+// -----------------------------
+if (state.stage === "STORY") {
+
+  const acceptWords = [
+    "ha",
+    "haan",
+    "hanji",
+    "yes",
+    "ok",
+    "okay",
+    "continue",
+    "batao",
+    "sunao",
+    "dikhao",
+    "show",
+    "demo",
+    "send",
+    "bhejo"
+  ];
+
+  const accepted = acceptWords.some(word =>
+    message.includes(word)
+  );
+
+  if (state.storyShown && accepted) {
+
+    console.log("STORY COMPLETE ✅");
+
+    state.stage = "DEMO";
+    state.demoShown = false;
+
     return;
   }
 
-  // -----------------------------
-  // STORY → DEMO
-  // Customer ne story sun li
-  // -----------------------------
-  if (
-    state.stage === "STORY" &&
-    (
-      message === "ha" ||
-      message === "haan" ||
-      message === "ha karo" ||
-      message === "hanji" ||
-      message === "h" ||
-      message === "yes" ||
-      message === "ok" ||
-      message === "okay" ||
-      message === "batao" ||
-      message === "sunao" ||
-      message === "continue"
-    )
-  ) {
-    state.stage = "DEMO";
-    return;
-  }
+}
 
   // -----------------------------
   // DEMO → DEAL
