@@ -609,6 +609,8 @@ if (!clientState[userNumber]) {
     stage: "DISCOVERY",
     factsCount: 0,
     trustCount: 0,
+    
+    storyShown: false,
     demoShown: false,
 
     categorySelected: "",
@@ -654,22 +656,38 @@ if (userMessage.toLowerCase().includes("mumbai")) {
   state.city = "Mumbai";
 }
 
-    if (
-  userMessage.toLowerCase().includes("ha")
-) {
-
-  state.customerBehaviour = "Customers pehle aate the";
-
-}
-
+    const message = userMessage.toLowerCase().trim();
 
 if (
-  userMessage.toLowerCase().includes("nahi")
+  message === "ha" ||
+  message === "haan" ||
+  message === "hanji" ||
+  message === "yes" ||
+  message === "h"
+) {
+  state.customerBehaviour = "Customers pehle aate the";
+  }
+
+const message = userMessage.toLowerCase().trim();
+
+if (
+  message === "pata nahi" ||
+  message === "nahi pata" ||
+  message === "malum nahi"
+) {
+
+  state.competitor = "Unknown";
+
+}
+else if (
+  message === "nahi" ||
+  message === "no" ||
+  message === "n"
 ) {
 
   state.competitor = "No Website";
 
-}
+  }
 
 
 if (
@@ -756,20 +774,26 @@ if (state.stage === "DISCOVERY") {
   }
 
 
- // DISCOVERY COMPLETE
-
-state.stage = "STORY";
-
-  }
+ if (state.stage === "STORY") {
+  state.storyShown = true;
+    }
   
 console.log("BEFORE UPDATE =", state.stage);
-    
-// Stage pehle update hogi
-updateStage(state, userMessage);
+console.log("BEFORE UPDATE =", state.stage);
+
+if (state.stage === "STORY" && !state.storyShown) {
+
+  state.storyShown = true;
+
+} else {
+
+  updateStage(state, userMessage);
+
+}
 
 console.log("AFTER UPDATE =", state.stage);
-    
-// Stage update hone ke baad extraRule banega
+
+    // Stage update hone ke baad extraRule banega
 let extraRule = "";
 
 if (state.stage === "DISCOVERY") {
@@ -869,7 +893,7 @@ Give updates only.
 }
 
 const recentHistory =
-  conversations[userNumber].slice(-10);
+  conversations[userNumber].slice(-6);
 
 const aiReply = await generateReply({
   state,
