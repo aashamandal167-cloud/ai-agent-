@@ -229,10 +229,25 @@ Never break the conversation flow.
 
 `,
 
-    contents: recentHistory
-      .map(m => `${m.role}: ${m.content}`)
-      .join("\n")
-  });
+    contents: `
+CURRENT STAGE: ${state.stage}
+
+LAST CONVERSATION
+
+${recentHistory
+  .map(m => `${m.role}: ${m.content}`)
+  .join("\n")}
+
+IMPORTANT
+
+Reply ONLY to the last user message.
+
+Follow ONLY the current stage.
+
+Do NOT ask discovery questions again if the stage is STORY.
+
+Do NOT become a business consultant.
+`
 
   return (
     result.text ||
