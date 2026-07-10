@@ -771,6 +771,7 @@ if (state.stage === "DISCOVERY") {
 
   }
 
+}
 
  console.log("BEFORE UPDATE =", state.stage);
 
