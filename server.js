@@ -881,7 +881,7 @@ Give updates only.
 const recentHistory =
   conversations[userNumber].slice(-6);
 
-const aiReply = await generateReply({
+let aiReply = await generateReply({
   state,
   recentHistory,
   extraRule
