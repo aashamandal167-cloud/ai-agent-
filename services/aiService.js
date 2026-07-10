@@ -248,6 +248,7 @@ Do NOT ask discovery questions again if the stage is STORY.
 
 Do NOT become a business consultant.
 `
+});
 
   return (
     result.text ||
