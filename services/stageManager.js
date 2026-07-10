@@ -5,7 +5,15 @@ export function updateStage(state, userMessage) {
   // -----------------------------
 // DISCOVERY → STORY
 // -----------------------------
-if (
+console.log("=== DISCOVERY CHECK ===");
+console.log("business =", state.business);
+console.log("city =", state.city);
+console.log("problem =", state.problem);
+console.log("customerBehaviour =", state.customerBehaviour);
+console.log("competitor =", state.competitor);
+console.log("=======================");
+  
+  if (
   state.stage === "DISCOVERY" &&
   state.business &&
   state.city &&
