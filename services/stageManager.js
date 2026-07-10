@@ -30,30 +30,30 @@ if (
 if (state.stage === "STORY") {
 
   const acceptWords = [
-    "ha",
-    "haan",
-    "hanji",
-    "yes",
-    "ok",
-    "okay",
-    "continue",
-    "batao",
-    "sunao",
-    "dikhao",
-    "show",
-    "demo",
-    "send",
-    "bhejo"
-    "ji",
-"haan ji",
-"zarur",
-"jarur",
-"link",
-"website",
-"sample",
-"example",
-"portfolio"
-      ];
+  "ha",
+  "haan",
+  "hanji",
+  "yes",
+  "ok",
+  "okay",
+  "continue",
+  "batao",
+  "sunao",
+  "dikhao",
+  "show",
+  "demo",
+  "send",
+  "bhejo",
+  "ji",
+  "haan ji",
+  "zarur",
+  "jarur",
+  "link",
+  "website",
+  "sample",
+  "example",
+  "portfolio"
+];
 
   const accepted = acceptWords.some(word =>
     message.includes(word)
