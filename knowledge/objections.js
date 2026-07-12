@@ -1,35 +1,99 @@
-const objections = {
+/**
+ * ==========================================================
+ * objections.js
+ * ==========================================================
+ * Customer Objections Knowledge
+ * ==========================================================
+ */
+
+const OBJECTIONS = {
 
   expensive: {
-    objection: "Website bahut mehengi hai.",
-    answer:
-      "Sir, samajh sakta hu. Lekin website ek expense nahi, business investment hai. Ek achhi website saalon tak naye customers la sakti hai."
+    keywords: [
+      "Mahenga",
+      "Bahut Jayda",
+      "Price High",
+      "Costly"
+    ],
+
+    purpose:
+      "Customer ko website ki value samjhana aur negotiation shuru karna."
   },
 
   noNeed: {
-    objection: "Mujhe website ki zarurat nahi hai.",
-    answer:
-      "Sir, aaj kal log kisi bhi business ko visit karne se pehle Google par search karte hain. Website trust build karti hai aur naye customers tak pahunchne me madad karti hai."
+    keywords: [
+      "Jarurat Nahi",
+      "Need Nahi",
+      "Website Nahi Chahiye"
+    ],
+
+    purpose:
+      "Website ki importance aur future benefits samjhana."
   },
 
-  think: {
-    objection: "Main soch kar batata hu.",
-    answer:
-      "Bilkul Sir, aaram se sochiye. Agar aap chahein to main pehle ek free demo bana kar dikha sakta hu, uske baad decision lijiye."
+  thinkLater: {
+    keywords: [
+      "Sochunga",
+      "Baad Me",
+      "Kal Batata Hu"
+    ],
+
+    purpose:
+      "Polite follow-up ke liye customer ko mark karna."
+  },
+
+  noMoney: {
+    keywords: [
+      "Budget Nahi",
+      "Paise Nahi",
+      "Budget Kam Hai"
+    ],
+
+    purpose:
+      "Negotiation ya lower package suggest karna."
+  },
+
+  alreadyWebsite: {
+    keywords: [
+      "Already Website Hai",
+      "Website Bana Hua Hai"
+    ],
+
+    purpose:
+      "Current website ki quality aur improvement discuss karna."
+  },
+
+  trust: {
+    keywords: [
+      "Trust Nahi",
+      "Fake",
+      "Scam"
+    ],
+
+    purpose:
+      "Demo, portfolio aur professionalism se trust build karna."
   },
 
   busy: {
-    objection: "Abhi time nahi hai.",
-    answer:
-      "Koi baat nahi Sir. Main aapke convenient time par baat kar lunga. Bas 5 minute me main website ka idea dikha dunga."
+    keywords: [
+      "Busy Hu",
+      "Time Nahi"
+    ],
+
+    purpose:
+      "Short conversation aur baad me follow-up."
   },
 
-  alreadyCustomers: {
-    objection: "Mere paas already customers aate hain.",
-    answer:
-      "Ye bahut achhi baat hai Sir. Website ka purpose sirf naye customers lana nahi, balki business ki branding aur trust ko aur strong banana bhi hota hai."
+  competitor: {
+    keywords: [
+      "Dusra Sasta De Raha Hai",
+      "Competition"
+    ],
+
+    purpose:
+      "Quality aur value explain karna."
   }
 
 };
 
-export default objections;
+module.exports = OBJECTIONS;
