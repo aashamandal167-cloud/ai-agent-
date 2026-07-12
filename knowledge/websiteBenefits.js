@@ -1,53 +1,136 @@
-const websiteBenefits = {
+/**
+ * ==========================================================
+ * websiteBenefits.js
+ * ==========================================================
+ * Website Benefits by Industry
+ * ==========================================================
+ */
 
-  Gym: [
-    "24x7 Online Presence",
-    "Online Membership Enquiry",
-    "Google Visibility",
-    "WhatsApp Lead Button",
-    "Build Customer Trust"
+const WEBSITE_BENEFITS = {
+
+  common: [
+
+    {
+      id: "google_visibility",
+      title: "Google Visibility",
+      description:
+        "Website hone se business ko Google Search mein dikhne ke aur mauke milte hain."
+    },
+
+    {
+      id: "customer_trust",
+      title: "Customer Trust",
+      description:
+        "Professional website se business zyada professional aur trustworthy lagta hai."
+    },
+
+    {
+      id: "available_24x7",
+      title: "24×7 Presence",
+      description:
+        "Shop band hone ke baad bhi customer website par information dekh sakta hai."
+    },
+
+    {
+      id: "business_information",
+      title: "Business Information",
+      description:
+        "Address, phone number, timing aur services ek jagah mil jaati hain."
+    },
+
+    {
+      id: "whatsapp_contact",
+      title: "WhatsApp Contact",
+      description:
+        "Customer website se seedha WhatsApp par contact kar sakta hai."
+    }
+
   ],
 
-  Restaurant: [
-    "Online Menu",
-    "Table Booking",
-    "Google Visibility",
+  fashion_store: [
+
+    "Product Gallery",
+
+    "Latest Collection",
+
+    "Festival Offers",
+
+    "Brand Image",
+
+    "Customer Trust"
+
+  ],
+
+  kirana_store: [
+
+    "Product Information",
+
+    "Store Timing",
+
+    "Home Delivery Information",
+
     "WhatsApp Ordering",
-    "Increase Customer Trust"
+
+    "Customer Trust"
+
   ],
 
-  Hotel: [
-    "Direct Room Booking",
-    "Google Visibility",
-    "Photo Gallery",
-    "WhatsApp Booking",
-    "Reduce Commission Dependency"
+  restaurant: [
+
+    "Online Menu",
+
+    "Table Booking",
+
+    "Food Gallery",
+
+    "Location & Maps",
+
+    "WhatsApp Ordering"
+
   ],
 
-  Salon: [
-    "Online Appointment Booking",
-    "Service Showcase",
-    "Google Visibility",
-    "WhatsApp Appointment",
-    "Professional Branding"
+  medical_store: [
+
+    "Medicine Availability Information",
+
+    "Store Timing",
+
+    "Emergency Contact",
+
+    "Location",
+
+    "Customer Trust"
+
   ],
 
-  Clinic: [
-    "Online Appointment",
-    "Doctor Profile",
-    "Google Visibility",
-    "WhatsApp Consultation",
-    "Patient Trust"
+  salon: [
+
+    "Service List",
+
+    "Price List",
+
+    "Appointment Booking",
+
+    "Before/After Gallery",
+
+    "Customer Reviews"
+
   ],
 
-  "Fashion Store": [
-    "Product Showcase",
-    "Online Catalogue",
-    "Google Visibility",
-    "WhatsApp Orders",
-    "Professional Brand Image"
+  gym: [
+
+    "Membership Plans",
+
+    "Trainer Details",
+
+    "Transformation Gallery",
+
+    "WhatsApp Inquiry",
+
+    "Location"
+
   ]
 
 };
 
-export default websiteBenefits;
+module.exports = WEBSITE_BENEFITS;
