@@ -1,41 +1,87 @@
-const successStories = {
+/**
+ * ==========================================================
+ * successStories.js
+ * ==========================================================
+ * Category-wise Example Stories
+ * Format:
+ * Problem → Website Solution → Result
+ * ==========================================================
+ */
 
-  Gym: {
-    problem: "Membership kam ho rahi thi.",
-    solution: "Professional website aur Google Presence banayi.",
-    result: "Enquiries aur membership dono badhne lage."
-  },
+const SUCCESS_STORIES = {
 
-  Restaurant: {
-    problem: "Online orders bahut kam the.",
-    solution: "Restaurant website aur WhatsApp ordering system banaya.",
-    result: "Orders aur repeat customers badhe."
-  },
+  fashion_store: [
 
-  Hotel: {
-    problem: "Room booking sirf offline aa rahi thi.",
-    solution: "Direct booking website banayi.",
-    result: "Online bookings aur customer trust dono badhe."
-  },
+    {
+      title: "Price Comparison Problem",
 
-  Salon: {
-    problem: "Appointment booking kam thi.",
-    solution: "Online appointment website banayi.",
-    result: "Daily appointments badhne lagi."
-  },
+      problem:
+        "Kai fashion shops ko problem hoti hai ki customer kapde pasand karta hai, lekin price compare karke competitor ke paas chala jata hai.",
 
-  Clinic: {
-    problem: "Patients Google par clinic nahi dhoondh pa rahe the.",
-    solution: "Professional clinic website banayi.",
-    result: "Patient enquiries badhne lagi."
-  },
+      solution:
+        "Professional website aur Google presence se shop ka trust aur branding improve hota hai. Customer pehle hi products aur shop ke baare mein dekh leta hai.",
 
-  FashionStore: {
-    problem: "Sales kam ho rahi thi.",
-    solution: "Modern fashion website aur online catalogue banaya.",
-    result: "Online enquiries aur sales dono improve hue."
-  }
+      result:
+        "Is tarah ki digital presence se inquiry aur customer trust badhne ke chances badh jaate hain."
+    },
+
+    {
+      title: "Festival Offers",
+
+      problem:
+        "Festival offers hone ke baad bhi customers ko pata nahi chal pata.",
+
+      solution:
+        "Website par offers aur banners publish kiye ja sakte hain aur Google par bhi visibility mil sakti hai.",
+
+      result:
+        "Interested customers ko offers dekhne ka ek aasaan online medium mil jata hai."
+    }
+
+  ],
+
+
+
+  kirana_store: [
+
+    {
+
+      title: "Rush Time",
+
+      problem:
+        "Busy time mein kuch customers wait nahi karna chahte aur doosri shop chale jaate hain.",
+
+      solution:
+        "Website par products aur basic information dekhkar customer pehle se informed hokar aa sakta hai.",
+
+      result:
+        "Customer experience aur trust improve ho sakta hai."
+
+    }
+
+  ],
+
+
+
+  restaurant: [
+
+    {
+
+      title: "Online Search",
+
+      problem:
+        "Log restaurant choose karne se pehle Google par search karte hain.",
+
+      solution:
+        "Website se menu, timing aur contact information aasani se mil sakti hai.",
+
+      result:
+        "Restaurant ki online visibility aur inquiries badhne ke chances rehte hain."
+
+    }
+
+  ]
 
 };
 
-export default successStories;
+module.exports = SUCCESS_STORIES;
