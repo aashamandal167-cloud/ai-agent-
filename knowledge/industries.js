@@ -1,94 +1,126 @@
-const industries = {
+/**
+ * ==========================================================
+ * industries.js
+ * ==========================================================
+ * Supported Business Categories
+ * ==========================================================
+ */
 
-  Retail: [
-    "Fashion Store",
-    "Boutique",
-    "Garment Shop",
-    "Kirana Store",
-    "Supermarket",
-    "Electronics Shop",
-    "Mobile Shop",
-    "Furniture Store",
-    "Jewellery Shop",
-    "Medical Store",
-    "Book Store",
-    "Gift Shop",
-    "Toy Shop",
-    "Footwear Shop",
-    "Cosmetics Shop"
-  ],
+const INDUSTRIES = [
 
-  Food: [
-    "Restaurant",
-    "Cafe",
-    "Hotel",
-    "Bakery",
-    "Sweet Shop",
-    "Fast Food",
-    "Cloud Kitchen",
-    "Tea Stall",
-    "Juice Shop"
-  ],
+  {
+    id: "fashion_store",
+    displayName: "Fashion Store",
+    keywords: [
+      "Fashion Shop",
+      "Clothing Store",
+      "Garments",
+      "Readymade",
+      "Boutique",
+      "Mens Wear",
+      "Ladies Wear",
+      "Kids Wear"
+    ]
+  },
 
-  Health: [
-    "Clinic",
-    "Hospital",
-    "Gym",
-    "Fitness Center",
-    "Yoga Center",
-    "Spa",
-    "Salon",
-    "Dental Clinic",
-    "Physiotherapy Clinic"
-  ],
+  {
+    id: "kirana_store",
+    displayName: "Kirana Store",
+    keywords: [
+      "Kirana",
+      "General Store",
+      "Grocery",
+      "Provision Store"
+    ]
+  },
 
-  Education: [
-    "School",
-    "College",
-    "Coaching Center",
-    "Training Institute",
-    "Computer Institute",
-    "Music Academy"
-  ],
+  {
+    id: "medical_store",
+    displayName: "Medical Store",
+    keywords: [
+      "Medical",
+      "Pharmacy",
+      "Medicine Shop",
+      "Drug Store"
+    ]
+  },
 
-  Professional: [
-    "CA",
-    "Lawyer",
-    "Consultant",
-    "Architect",
-    "Freelancer",
-    "Marketing Agency",
-    "Software Company"
-  ],
+  {
+    id: "restaurant",
+    displayName: "Restaurant",
+    keywords: [
+      "Restaurant",
+      "Hotel",
+      "Cafe",
+      "Dhaba",
+      "Fast Food"
+    ]
+  },
 
-  RealEstate: [
-    "Builder",
-    "Real Estate Agency",
-    "Property Dealer",
-    "Construction Company"
-  ],
+  {
+    id: "salon",
+    displayName: "Salon",
+    keywords: [
+      "Salon",
+      "Beauty Parlour",
+      "Hair Salon",
+      "Barber Shop"
+    ]
+  },
 
-  Automobile: [
-    "Car Showroom",
-    "Bike Showroom",
-    "Garage",
-    "Car Service Center",
-    "Tyre Shop"
-  ],
+  {
+    id: "gym",
+    displayName: "Gym",
+    keywords: [
+      "Gym",
+      "Fitness Center",
+      "Fitness Club"
+    ]
+  },
 
-  Travel: [
-    "Travel Agency",
-    "Tour Operator",
-    "Taxi Service"
-  ],
+  {
+    id: "electronics",
+    displayName: "Electronics Store",
+    keywords: [
+      "Electronics",
+      "Mobile Shop",
+      "Laptop Store",
+      "Computer Shop"
+    ]
+  },
 
-  Manufacturing: [
-    "Factory",
-    "Manufacturer",
-    "Wholesaler",
-    "Distributor"
-  ]
+  {
+    id: "jewellery",
+    displayName: "Jewellery Shop",
+    keywords: [
+      "Jewellery",
+      "Jeweler",
+      "Gold Shop",
+      "Silver Shop"
+    ]
+  },
 
-};
+  {
+    id: "hardware",
+    displayName: "Hardware Store",
+    keywords: [
+      "Hardware",
+      "Paint Shop",
+      "Building Material"
+    ]
+  },
 
-export default industries;
+  {
+    id: "coaching",
+    displayName: "Coaching Institute",
+    keywords: [
+      "Coaching",
+      "Institute",
+      "Tuition",
+      "Training Center"
+    ]
+  }
+
+];
+
+module.exports = INDUSTRIES;
