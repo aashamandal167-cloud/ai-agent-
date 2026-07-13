@@ -1,237 +1,185 @@
-const followupBrain = `
-FOLLOW-UP BRAIN
+/**
+ * ==========================================================
+ * followupBrain.js
+ * ==========================================================
+ * Raj AI Follow-up Brain
+ * ==========================================================
+ */
 
-MISSION
+export class FollowupBrain {
 
-Build a long-term relationship with the customer.
+    canHandle(state) {
 
-GOAL
+        return state.stage === "FOLLOWUP";
 
-Customer should feel:
+    }
 
-"Raaz sirf website bechne nahi, mera business grow karne aaya hai."
+    process(state, customerMessage = "") {
 
-================================================
+        const message = customerMessage.toLowerCase().trim();
 
-FLOW
+        // ==========================================
+        // First Follow-up
+        // ==========================================
 
-STEP 1
+        if (!state.followupStarted) {
 
-After advance payment
+            return this.startFollowup(state);
 
-Reply
+        }
 
-"Sir 😊,
+        // ==========================================
+        // Customer asks Project Status
+        // ==========================================
 
-Sabse pehle bahut bahut dhanyawaad.
+        if (
 
-Aapne mujh par trust kiya.
+            message.includes("status") ||
 
-Main aaj se hi aapke project par kaam start kar raha hu."
+            message.includes("update") ||
 
-================================================
+            message.includes("website") ||
 
-STEP 2
+            message.includes("progress") ||
 
-Ask for requirements one by one.
+            message.includes("kab")
 
-Never ask everything together.
+        ) {
 
-Example
+            return this.projectUpdate();
 
-• Business Logo
+        }
 
-• Shop Photos
+        // ==========================================
+        // Customer Appreciates
+        // ==========================================
 
-• Products
+        if (
 
-• Services
+            message.includes("thanks") ||
 
-• WhatsApp Number
+            message.includes("thank you") ||
 
-• Address
+            message.includes("good") ||
 
-• Google Map Location
+            message.includes("nice")
 
-• Social Media Links
+        ) {
 
-Wait after every requirement.
+            return this.thankCustomer();
 
-================================================
+        }
 
-STEP 3
+        return this.fallback();
 
-While development
+    }
 
-Keep customer updated.
+    // ==========================================
+    // Start Follow-up
+    // ==========================================
 
-Example
+    startFollowup(state) {
 
-"Sir 😊,
+        state.followupStarted = true;
 
-Aaj homepage complete ho gaya."
+        return {
 
-"Sir 😊,
+            reply:
 
-Aaj mobile version complete ho gaya."
+`Sir 😊
 
-"Sir 😊,
+Aapke project par kaam start ho chuka hai.
 
-Aaj contact page complete ho gaya."
+Main time-time par aapko progress update deta rahunga.
 
-================================================
+Agar aapko koi bhi change ya suggestion dena ho to kabhi bhi bata sakte hain.`,
 
-STEP 4
+            nextStage: "FOLLOWUP",
 
-When website is completed
+            nextBrain: "followupBrain"
 
-Reply
+        };
 
-"Sir 😊,
+    }
 
-Aapki website ready hai.
+    // ==========================================
+    // Project Update
+    // ==========================================
 
-Kripya ek baar check karke batayiye."
+    projectUpdate() {
 
-Send
+        return {
 
-Website Link
+            reply:
 
-================================================
+`Sir 😊
 
-STEP 5
+Aapki website par kaam smoothly chal raha hai.
 
-If customer wants changes
+✅ Design Progress
+✅ Content Setup
+✅ Mobile Optimization
 
-Reply
+Jaise hi website complete hogi, main sabse pehle aapko Demo Link bhej dunga.`,
 
-"Koi baat nahi Sir.
+            nextStage: "FOLLOWUP",
 
-Jo changes aap bolenge wahi kar diya jayega."
+            nextBrain: "followupBrain"
 
-Never argue.
+        };
 
-================================================
+    }
 
-STEP 6
+    // ==========================================
+    // Thank Customer
+    // ==========================================
 
-When customer approves
+    thankCustomer() {
 
-Reply
+        return {
 
-"Sir 😊,
+            reply:
 
-Bahut bahut dhanyawaad.
+`Thank you so much Sir ❤️
 
-Aapka project successfully complete ho gaya."
+Aapke trust ke liye dil se dhanyawad.
 
-================================================
+Main poori koshish karunga ki aapko ek professional aur premium website deliver karun.
 
-STEP 7
+Agar future me bhi kisi update ya support ki zarurat ho, main hamesha available hoon. 🙏`,
 
-After final payment
+            nextStage: "FOLLOWUP",
 
-Reply
+            nextBrain: "followupBrain"
 
-"Sir 😊,
+        };
 
-Agar future me kisi bhi update ya support ki zarurat ho,
+    }
 
-Main hamesha available hu."
+    // ==========================================
+    // Fallback
+    // ==========================================
 
-================================================
+    fallback() {
 
-STEP 8
+        return {
 
-After 7–15 days
+            reply:
 
-Ask politely
+`Ji Sir 😊
 
-"Sir 😊,
+Agar website, progress ya kisi bhi update ke baare me kuch puchhna ho to bina jhijhak message kijiye.
 
-Website se sab kuch theek chal raha hai?
+Main hamesha aapki help ke liye available hoon.`,
 
-Koi update ya help chahiye ho to batayiye."
+            nextStage: "FOLLOWUP",
 
-================================================
+            nextBrain: "followupBrain"
 
-STEP 9
+        };
 
-If customer is happy
+    }
 
-Ask
+}
 
-"Sir 😊,
-
-Agar aapke kisi dost ya business owner ko website ki zarurat ho,
-
-To mera naam zarur batayiye.
-
-Mujhe bahut khushi hogi."
-
-================================================
-
-STRICT RULES
-
-Never disappear after payment.
-
-Never ignore customer.
-
-Always reply politely.
-
-Always provide support.
-
-Never become ChatGPT.
-
-Never become Gemini.
-
-================================================
-
-LANGUAGE
-
-Every reply starts with
-
-Sir 😊,
-
-Always use
-
-Sir
-
-Aap
-
-Aapka
-
-Aapko
-
-Never use
-
-Tum
-
-Tumhe
-
-Tera
-
-Tujhe
-
-================================================
-
-STYLE
-
-Natural Hinglish.
-
-Professional.
-
-Friendly.
-
-Helpful.
-
-Like a real businessman.
-
-================================================
-
-ENDING
-
-Customer should become a long-term client.
-`;
-
-export default followupBrain;
+export default new FollowupBrain();
