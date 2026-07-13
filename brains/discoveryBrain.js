@@ -1,288 +1,303 @@
-==========================================================
-discoveryBrain.js
-==========================================================
+/**
+ * ==========================================================
+ * discoveryBrain.js
+ * ==========================================================
+ * Raj AI Discovery Brain
+ * ==========================================================
+ */
 
-PURPOSE
---------
-DiscoveryBrain ka kaam unknown WhatsApp lead se conversation start karna hai.
+import knowledgeManager from "../services/knowledgeManager.js";
 
-Ye kabhi bhi direct website sell nahi karega.
+export class DiscoveryBrain {
 
-Iska objective hai:
+    canHandle(state) {
 
-• Reply lena
-• Trust build karna
-• Business identify karna
-• Business problem samajhna
-• Story sunane ki permission lena
+        return (
+            state.stage === "DISCOVERY" ||
+            !state.stage
+        );
 
-Uske baad StoryBrain ko control de dena.
+    }
 
-----------------------------------------------------------
+    process(state, customerMessage = "") {
 
-INPUT
-------
+        const message = customerMessage.toLowerCase().trim();
 
-customerName
-businessName
-businessCategory
-city
-phoneNumber
-conversationStage
-lastMessage
-replied
-followupCount
+        // ==========================================
+        // First Message
+        // ==========================================
 
-----------------------------------------------------------
+        if (!state.firstMessageSent) {
 
-OUTPUT
--------
+            state.firstMessageSent = true;
 
-reply
-nextStage
-nextBrain
+            return this.sendFirstMessage(state);
 
-----------------------------------------------------------
+        }
 
-RESPONSIBILITIES
-----------------
+        // ==========================================
+        // No Reply Follow-up
+        // ==========================================
 
-✓ First Message
+        if (!state.replied && state.followupCount < 2) {
 
-✓ No Reply Follow-up
+            return this.sendFollowup(state);
 
-✓ Greeting
+        }
 
-✓ Permission
+        // ==========================================
+        // Greeting
+        // ==========================================
 
-✓ Business Discussion
+        if (
+            message.includes("hi") ||
+            message.includes("hello") ||
+            message.includes("haan") ||
+            message.includes("ha") ||
+            message.includes("ji") ||
+            message.includes("yes")
+        ) {
 
-✓ Business Problem Discussion
+            return this.greetCustomer(state);
 
-✓ Industry Detection
+        }
 
-✓ Story Permission
+        // ==========================================
+        // Permission
+        // ==========================================
 
-✓ Next Brain Decide
+        if (
+            message.includes("bolo") ||
+            message.includes("batao") ||
+            message.includes("kahiye") ||
+            message.includes("continue")
+        ) {
 
-✓ Fallback Response
+            return this.askPermission(state);
 
-----------------------------------------------------------
+        }
 
-FUNCTIONS
-----------
+        // ==========================================
+        // Business Discussion
+        // ==========================================
 
-canHandle()
+        if (!state.problem) {
 
-process()
+            return this.askBusinessProblem(state);
 
-sendFirstMessage()
+        }
 
-sendFollowup()
+        // ==========================================
+        // Story Permission
+        // ==========================================
 
-handleReply()
+        return this.askStoryPermission(state);
 
-greetCustomer()
+    }
 
-askPermission()
+    // ==========================================
+    // First WhatsApp Message
+    // ==========================================
 
-askBusinessProblem()
+    sendFirstMessage(state) {
 
-detectIndustry()
+        return {
 
-askStoryPermission()
+            reply:
 
-nextBrain()
+`Hello Sir 😊
 
-fallback()
+Mera naam Raj Chandravanshi hai.
 
-----------------------------------------------------------
+Main businesses ke liye professional websites banata hoon.
 
-STATE FLOW
------------
+Maine Google Maps par aapka business dekha.
 
-START
+Business:
+${state.business || "Your Business"}
 
-↓
+City:
+${state.city || "Your City"}
 
-FIRST_MESSAGE
+Sir, main website bechne ke liye force nahi kar raha.
 
-↓
+Bas 2 minute denge to ek chhoti si baat share karna chahta hoon 🙂`,
 
-WAIT_REPLY
+            nextStage: "DISCOVERY",
 
-↓
+            nextBrain: "discoveryBrain"
 
-NO_REPLY
+        };
 
-↓
+    }
 
-FOLLOWUP
+    // ==========================================
+    // Follow-up Message
+    // ==========================================
 
-↓
+    sendFollowup(state) {
 
-WAIT_REPLY
+        state.followupCount++;
 
-↓
+        return {
 
-REPLY_RECEIVED
+            reply:
 
-↓
+`Sir 😊
 
-GREETING
+Bas ek baar reply kar dijiye.
 
-↓
+Main ye nahi keh raha ki website zarur banwaiye.
 
-ASK_PERMISSION
+Sirf 2 minute baat kar lijiye.
 
-↓
+Uske baad decision poora aapka hoga. 🙏`,
 
-BUSINESS_DISCUSSION
+            nextStage: "DISCOVERY",
 
-↓
+            nextBrain: "discoveryBrain"
 
-BUSINESS_PROBLEM
+        };
 
-↓
+          }
 
-ASK_STORY_PERMISSION
+    // ==========================================
+    // Greeting
+    // ==========================================
 
-↓
+    greetCustomer(state) {
 
-STORY_READY
+        return {
 
-↓
+            reply:
+`Thank you sir 😊
 
-NEXT BRAIN = storyBrain
+Sabse pehle aapka bahut dhanyawad reply dene ke liye.
 
-----------------------------------------------------------
+Sir kya aap mujhe sirf 5 minute de sakte hain?
 
-ENTRY RULE
------------
+Main sirf aapke business ke baare me baat karna chahta hoon.`,
 
-DiscoveryBrain tabhi start hoga jab
+            nextStage: "DISCOVERY",
 
-• Naya Lead aaye
+            nextBrain: "discoveryBrain"
 
-Ya
+        };
 
-• Unknown Customer ho
+    }
 
-Ya
+    // ==========================================
+    // Ask Permission
+    // ==========================================
 
-• WhatsApp Conversation Start karni ho
+    askPermission(state) {
 
-----------------------------------------------------------
+        return {
 
-EXIT RULE
-----------
+            reply:
+`Sir ek chhota sa question tha.
 
-Agar customer bole
+Kya aap apne business ke baare me thoda bata sakte hain?
 
-• Haan
-• Ji
-• Bataiye
-• Batao
-• Continue
-• Sun Raha Hu
-• Okay
+Jaise customer lane me ya sales badhane me koi problem aa rahi hai?`,
 
-To
+            nextStage: "DISCOVERY",
 
-nextBrain = storyBrain
+            nextBrain: "discoveryBrain"
 
-----------------------------------------------------------
+        };
 
-FORBIDDEN
------------
+    }
 
-❌ Price nahi batayega
+    // ==========================================
+    // Ask Business Problem
+    // ==========================================
 
-❌ Package nahi batayega
+    askBusinessProblem(state) {
 
-❌ Discount nahi dega
+        const industry = knowledgeManager.getIndustryById(state.industryId);
 
-❌ Payment nahi mangega
+        return {
 
-❌ Demo Link nahi bhejega
+            reply:
+`Sir ${industry ? industry.displayName : "business"} me aajkal sabse badi problem kya chal rahi hai?
 
-❌ Negotiation nahi karega
+• Customer kam aa rahe hain?
 
-----------------------------------------------------------
+• Customer price compare karta hai?
 
-ALLOWED
----------
+• Google se customer nahi milte?
 
-✅ Greeting
+• Competitor zyada sale kar raha hai?
 
-✅ Respect
+Aap apna experience share kijiye sir.`,
 
-✅ Trust Build
+            nextStage: "DISCOVERY",
 
-✅ Business Discussion
+            nextBrain: "discoveryBrain"
 
-✅ Curiosity Create
+        };
 
-✅ Story Permission
+    }
 
-----------------------------------------------------------
+    // ==========================================
+    // Detect Industry
+    // ==========================================
 
-FALLBACK
-----------
+    detectIndustry(categoryName) {
 
-Agar customer ajeeb reply de
+        return knowledgeManager.getIndustry(categoryName);
 
-Example
+    }
 
-"Hmm"
+    // ==========================================
+    // Ask Story Permission
+    // ==========================================
 
-"Kya"
+    askStoryPermission(state) {
 
-"😂"
+        return {
 
-"Busy"
+            reply:
+`Sir 😊
 
-To Raj politely reply karega aur conversation ko Business Discussion par wapas layega.
+Aapne jo problem batayi hai, bilkul isi tarah ki problem ek aur ${state.business || "business owner"} ko bhi thi.
 
-----------------------------------------------------------
+Agar aap permission dein to main unki ek chhoti si real success story share kar sakta hoon.
 
-SUCCESS CONDITION
-------------------
+Ho sakta hai usme aapko bhi kuch useful idea mil jaye.`,
 
-DiscoveryBrain tab complete mana jayega jab customer Story sunne ke liye ready ho jaye.
+            nextStage: "STORY",
 
-Return
+            nextBrain: "storyBrain"
 
-reply
+        };
 
-nextStage = "story"
+    }
 
-nextBrain = "storyBrain"
+    // ==========================================
+    // Fallback
+    // ==========================================
 
-==========================================================
-DISCOVERY BRAIN STATUS
+    fallback() {
 
-Purpose                ✅
+        return {
 
-Input                  ✅
+            reply:
+`Ji sir 😊
 
-Output                 ✅
+Main samajh gaya.
 
-Responsibilities       ✅
+Bas business ke baare me thoda sa bata dijiye, fir main usi hisaab se baat karunga.`,
 
-Functions              ✅
+            nextStage: "DISCOVERY",
 
-State Flow             ✅
+            nextBrain: "discoveryBrain"
 
-Entry Rule             ✅
+        };
 
-Exit Rule              ✅
+    }
 
-Golden Rules           ✅
+}
 
-Fallback               ✅
-
-Success Condition      ✅
-
-STATUS = COMPLETED ✅
-==========================================================
+export default new DiscoveryBrain();
