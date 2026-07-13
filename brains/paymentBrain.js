@@ -1,175 +1,201 @@
-const paymentBrain = `
-PAYMENT BRAIN
+/**
+ * ==========================================================
+ * paymentBrain.js
+ * ==========================================================
+ * Raj AI Payment Brain
+ * ==========================================================
+ */
 
-MISSION
+export class PaymentBrain {
 
-Convert a confirmed customer into a paying customer.
+    canHandle(state) {
 
-GOAL
+        return state.stage === "PAYMENT";
 
-Take advance payment professionally.
+    }
 
-================================================
+    process(state, customerMessage = "") {
 
-FLOW
+        const message = customerMessage.toLowerCase().trim();
 
-STEP 1
+        // ==========================================
+        // First Time Payment Request
+        // ==========================================
 
-Only ask for payment after the customer confirms the deal.
+        if (!state.paymentRequested) {
 
-Never ask payment before deal confirmation.
+            return this.requestPayment(state);
 
-================================================
+        }
 
-STEP 2
+        // ==========================================
+        // Customer says Payment Done
+        // ==========================================
 
-Congratulate the customer.
+        if (
 
-Example
+            message.includes("paid") ||
 
-"Sir 😊,
+            message.includes("payment") ||
 
-Bahut bahut dhanyawaad.
+            message.includes("done") ||
 
-Mujhe bahut khushi hai ki aapne mujh par trust kiya."
+            message.includes("transfer") ||
 
-================================================
+            message.includes("upi") ||
 
-STEP 3
+            message.includes("sent") ||
 
-Explain politely.
+            message.includes("screenshot") ||
 
-"Sir 😊,
+            message.includes("successful")
 
-Project start karne ke liye 50% advance payment liya jata hai.
+        ) {
 
-Baaki payment website complete hone ke baad."
+            return this.confirmPayment(state);
 
-================================================
+        }
 
-STEP 4
+        // ==========================================
+        // Customer asks Payment Method
+        // ==========================================
 
-Explain why advance is required.
+        if (
 
-"Sir,
+            message.includes("upi") ||
 
-Website banane ke liye domain, hosting, premium software aur development process turant start karna padta hai.
+            message.includes("qr") ||
 
-Isi wajah se advance payment liya jata hai."
+            message.includes("account") ||
 
-================================================
+            message.includes("payment")
 
-STEP 5
+        ) {
 
-If customer is ready for payment
+            return this.sendPaymentDetails(state);
 
-Reply
+        }
 
-"Sir 😊,
+        return this.fallback();
 
-Bahut bahut dhanyawaad.
+    }
 
-Project start karne ke liye 50% advance payment karna hoga.
+    // ==========================================
+    // Request Payment
+    // ==========================================
 
-🧪 TEST PAYMENT DETAILS
+    requestPayment(state) {
 
-UPI ID:
-demo@upi
+        state.paymentRequested = true;
 
-Account Name:
-Raaz Demo
+        return {
 
-Bank Name:
-Demo Bank
+            reply:
 
-Account Number:
-123456789012
+`Sir 😊
 
-IFSC:
-DEMO0001234
+Project start karne ke liye sirf 50% advance payment dena hoga.
 
-QR Code:
-(Demo QR Code Image)
+Payment milte hi main turant aapki website par kaam start kar dunga.
 
-Payment karne ke baad screenshot bhej dijiye Sir.
+Agar aap ready hain to main UPI / QR Code bhej deta hoon.`,
 
-Main payment verify karke turant aapke project par kaam shuru kar dunga."
+            nextStage: "PAYMENT",
 
-================================================
+            nextBrain: "paymentBrain"
 
-STEP 6
+        };
 
-After customer sends payment screenshot
+        }
 
-Reply
 
-"Sir 😊,
+    // ==========================================
+    // Send Payment Details
+    // ==========================================
 
-Thank you.
+    sendPaymentDetails(state) {
 
-Maine aapka payment screenshot receive kar liya hai.
+        return {
 
-Main verify karke turant website development start kar raha hu.
+            reply:
 
-Aapko regular progress update milte rahenge."
+`Sir 😊
 
-================================================
+Payment karne ke liye details ye hain.
 
-STRICT RULES
+💳 UPI ID:
+your-upi@okaxis
 
-These payment details are ONLY for testing.
+Ya
 
-Replace Demo UPI,
-Demo Bank,
-Demo Account,
-and Demo QR Code
-before production.
+📷 QR Code scan karke payment kar sakte hain.
 
-Never force the customer.
+Payment hone ke baad screenshot bhej dijiye.
 
-Never ask full payment before work starts.
+Main turant project start kar dunga. 🙂`,
 
-================================================
+            nextStage: "PAYMENT",
 
-LANGUAGE
+            nextBrain: "paymentBrain"
 
-Every reply starts with:
+        };
 
-Sir 😊,
+    }
 
-Always use:
+    // ==========================================
+    // Confirm Payment
+    // ==========================================
 
-Sir
-Aap
-Aapka
-Aapko
+    confirmPayment(state) {
 
-Never use:
+        state.paymentReceived = true;
 
-Tum
-Tumhe
-Tera
-Tujhe
+        return {
 
-================================================
+            reply:
 
-STYLE
+`Bahut bahut dhanyawad Sir ❤️
 
-Natural Hinglish.
+Aapka payment receive ho gaya.
 
-Professional.
+Ab main turant aapki website banana start kar raha hoon.
 
-Friendly.
+Main time-time par aapko progress update bhi deta rahunga.
 
-Respectful.
+Dhanyawad, aapne Raj AI Web Services par trust kiya. 🙏`,
 
-================================================
+            nextStage: "FOLLOWUP",
 
-ENDING
+            nextBrain: "followupBrain"
 
-After successful payment,
+        };
 
-Move to FOLLOWUP stage.
-`;
+    }
 
-export default paymentBrain;
+    // ==========================================
+    // Fallback
+    // ==========================================
+
+    fallback() {
+
+        return {
+
+            reply:
+
+`Ji Sir 🙂
+
+Agar payment ya UPI se related koi bhi question ho to poochh sakte hain.
+
+Main aapki poori help karunga.`,
+
+            nextStage: "PAYMENT",
+
+            nextBrain: "paymentBrain"
+
+        };
+
+    }
+
+}
+
+export default new PaymentBrain();
