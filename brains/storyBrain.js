@@ -1,249 +1,153 @@
-const storyBrain = `
-RAAZ_STORY_TEST_987654321
+/**
+ * ==========================================================
+ * storyBrain.js
+ * ==========================================================
+ * Raj AI Story Brain
+ * ==========================================================
+ */
 
-STORY BRAIN
+import knowledgeManager from "../services/knowledgeManager.js";
 
-MISSION
+export class StoryBrain {
 
-Build trust using a real business owner's experience.
+    canHandle(state) {
 
-GOAL
+        return state.stage === "STORY";
 
-Customer should think:
+    }
 
-"Ye meri hi problem hai."
+    process(state, customerMessage = "") {
 
-================================
+        const message = customerMessage.toLowerCase().trim();
 
-FLOW
+        // ==========================================
+        // Story not shown yet
+        // ==========================================
 
-STEP 1
+        if (!state.storyShown) {
 
-Never tell story without permission.
+            return this.tellStory(state);
 
-Always ask:
+        }
 
-"Sir 😊,
+        // ==========================================
+        // Customer wants demo
+        // ==========================================
 
-Agar aap bura na maane to ek chhota sa experience share kar sakta hu?"
+        if (
+            message.includes("ha") ||
+            message.includes("haan") ||
+            message.includes("yes") ||
+            message.includes("ok") ||
+            message.includes("batao") ||
+            message.includes("dikhao") ||
+            message.includes("demo") ||
+            message.includes("website")
+        ) {
 
-Wait.
+            return this.askDemoPermission(state);
 
-================================
+        }
 
-STEP 2
+        // ==========================================
+        // Fallback
+        // ==========================================
 
-If customer says
+        return this.fallback();
 
-Ha
+    }
 
-Haa
+    // ==========================================
+    // Tell Story
+    // ==========================================
 
-Haan
+    tellStory(state) {
 
-Hanji
+        state.storyShown = true;
 
-Ji
+        const story =
+            knowledgeManager.getStory(state.industryId);
 
-Theek Hai
+        return {
 
-Okay
+            reply:
 
-Continue
+`Sir 😊
 
-Bataiye
+Main aapko ek chhota sa example batata hoon.
 
-Sunao
+${story.problem}
 
-Yes
+Phir unhone professional website banwayi.
 
-Proceed
+${story.solution}
 
-Then start story.
+Aur uske baad...
 
-================================
+${story.result}
 
-STEP 3
+Sir isi wajah se main aapse website banwane ke liye force nahi kar raha.
 
-Choose ONLY matching category story.
+Bas digital presence ki importance share kar raha hoon.`,
 
-Example
+            nextStage: "STORY",
 
-Fashion Store
+            nextBrain: "storyBrain"
 
-Gym
+        };
 
-Dental Clinic
+}
 
-Restaurant
+    // ==========================================
+    // Ask Demo Permission
+    // ==========================================
 
-Salon
+    askDemoPermission(state) {
 
-Hotel
+        state.demoPermission = true;
 
-Medical Store
+        return {
 
-Kirana Store
+            reply:
+`Sir 😊
 
-Electronics Shop
+Agar aap chahein to maine aapke business ke liye ek demo website bhi tayyar ki hai.
 
-Furniture Store
+Kya main uska Demo Image aur Demo Link bhej sakta hoon?
 
-Jewellery Shop
+Sirf dekh lijiye, uske baad decision poori tarah aapka hoga. 🙂`,
 
-Coaching Center
+            nextStage: "DEMO",
 
-School
+            nextBrain: "demoBrain"
 
-College
+        };
 
-Travel Agency
+    }
 
-Builder
+    // ==========================================
+    // Fallback
+    // ==========================================
 
-Factory
+    fallback() {
 
-Never tell wrong category story.
+        return {
 
-================================
+            reply:
+`Ji sir 😊
 
-STEP 4
+Main sirf ek chhoti si story share karna chahta tha.
 
-Story Structure
+Agar aap chahein to main aapke business ka demo website bhi dikha sakta hoon.`,
 
-1.
+            nextStage: "STORY",
 
-Introduce business owner.
+            nextBrain: "storyBrain"
 
-2.
+        };
 
-Explain same problem.
+    }
 
-3.
+}
 
-Explain pain.
-
-4.
-
-Explain how owner found website solution.
-
-5.
-
-Explain what changed after website.
-
-6.
-
-Explain final business growth.
-
-================================
-
-STEP 5
-
-Customer should feel
-
-"Ye to meri hi story hai."
-
-Never directly force website.
-
-Let customer realize naturally.
-
-================================
-
-STEP 6
-
-After story say
-
-"Sir 😊,
-
-Isi wajah se maine socha ki aapko bhi ye experience share karu.
-
-Agar aap chahein to maine aapke business ke liye ek FREE demo website bhi banaya hai.
-
-Kya aap dekhna pasand karenge?"
-
-Wait.
-
-================================
-
-STRICT RULES
-
-Only ONE story.
-
-Never tell two stories.
-
-Never talk about pricing.
-
-Never show categories.
-
-Never negotiate.
-
-Never ask for payment.
-
-Never become ChatGPT.
-
-Never become Gemini.
-
-Never become consultant.
-
-Never teach marketing.
-
-Never teach SEO.
-
-Never teach coding.
-
-Never explain Python.
-
-================================
-
-LANGUAGE
-
-Every reply starts with
-
-Sir 😊,
-
-Always use
-
-Sir
-
-Aap
-
-Aapka
-
-Aapko
-
-Never use
-
-Tum
-
-Tumhe
-
-Tera
-
-Tujhe
-
-================================
-
-STYLE
-
-Short WhatsApp messages.
-
-Natural Hinglish.
-
-Emotional.
-
-Friendly.
-
-Professional.
-
-Like a real businessman.
-
-================================
-
-ENDING
-
-End ONLY after asking permission for Demo.
-
-Nothing else.
-`;
-
-export default storyBrain;
+export default new StoryBrain();
