@@ -1,209 +1,200 @@
-const dealBrain = `
-DEAL BRAIN
+/**
+ * ==========================================================
+ * dealBrain.js
+ * ==========================================================
+ * Raj AI Deal Brain
+ * ==========================================================
+ */
 
-MISSION
+import pricingKnowledge from "../knowledge/pricingKnowledge.js";
 
-Help the customer choose the correct website category.
+export class DealBrain {
 
-GOAL
+    canHandle(state) {
 
-Customer should choose ONLY ONE website category.
+        return (
+            state.stage === "CATEGORY" ||
+            state.stage === "DEAL"
+        );
 
-Never discuss pricing in this stage.
+    }
 
-================================
+    process(state, customerMessage = "") {
 
-FLOW
+        const message = customerMessage.toLowerCase().trim();
 
-STEP 1
+        // ==========================================
+        // Category Selection
+        // ==========================================
 
-After customer likes the demo
+        if (!state.selectedCategory) {
 
-Say
+            return this.detectCategory(state, message);
 
-"Sir 😊,
+        }
 
-Bahut khushi hui ki aapko demo pasand aaya."
+        // ==========================================
+        // Customer asks Price
+        // ==========================================
 
-Wait.
+        if (
 
-================================
+            message.includes("price") ||
 
-STEP 2
+            message.includes("kitna") ||
 
-Say
+            message.includes("kitne") ||
 
-"Sir,
+            message.includes("cost") ||
 
-Main 3 category ki website banata hu."
+            message.includes("charge") ||
 
-Show ONLY
+            message.includes("rate")
+
+        ) {
+
+            return this.showPrice(state);
+
+        }
+
+        // ==========================================
+        // Fallback
+        // ==========================================
+
+        return this.fallback(state);
+
+    }
+
+    // ==========================================
+    // Detect Category
+    // ==========================================
+
+    detectCategory(state, message) {
+
+        if (message.includes("template")) {
+
+            state.selectedCategory = "templateWebsite";
+
+        }
+
+        else if (message.includes("3d")) {
+
+            state.selectedCategory = "premium3D";
+
+        }
+
+        else if (message.includes("animated")) {
+
+            state.selectedCategory = "animatedPremium";
+
+        }
+
+        else {
+
+            return this.fallback(state);
+
+        }
+
+        const pack = pricingKnowledge[state.selectedCategory];
+
+        return {
+
+            reply:
+
+`Sir 😊
+
+Bahut badhiya choice.
+
+Aapne "${pack.name}" choose kiya hai.
+
+${pack.appreciation}
+
+Agar aap is package ki price ya aur details jana chahte hain to zarur batayiye.`,
+
+            nextStage: "DEAL",
+
+            nextBrain: "dealBrain"
+
+        };
+
+    }
+
+      // ==========================================
+    // Show Price
+    // ==========================================
+
+    showPrice(state) {
+
+        const pack = pricingKnowledge[state.selectedCategory];
+
+        return {
+
+            reply:
+
+`Sir 😊
+
+${pack.name} ka price matra ₹${pack.originalPrice.toLocaleString("en-IN")} hai.
+
+Is package me ye sab include rahega:
+
+${pack.features.map(feature => `✅ ${feature}`).join("\n")}
+
+Agar aapko price ya payment ke baare me baat karni hai to main zarur help karunga.`,
+
+            nextStage: "NEGOTIATION",
+
+            nextBrain: "negotiationBrain"
+
+        };
+
+    }
+
+    // ==========================================
+    // Fallback
+    // ==========================================
+
+    fallback(state) {
+
+        if (!state.selectedCategory) {
+
+            return {
+
+                reply:
+
+`Sir 😊
+
+Inme se kaunsi website category aapko pasand aayi?
 
 1️⃣ Template Website
 
 2️⃣ 3D Premium Website
 
-3️⃣ Animated Premium Website
+3️⃣ Animated Premium Website`,
 
-Never show price.
+                nextStage: "CATEGORY",
 
-================================
+                nextBrain: "dealBrain"
 
-STEP 3
+            };
 
-Ask
+        }
 
-"Sir 😊,
+        return {
 
-Inme se aapko kaunsi website sabse zyada pasand aayi?"
+            reply:
 
-Wait.
+`Sir 😊
 
-================================
+Agar aap is package ka price ya koi aur detail jana chahte hain to bina jhijhak puchhiye.`,
 
-STEP 4
+            nextStage: "DEAL",
 
-If customer selects
+            nextBrain: "dealBrain"
 
-Template Website
+        };
 
-Reply
+    }
 
-"Bahut badhiya choice Sir 😊
+}
 
-Ye website simple, professional aur har business ke liye perfect rehti hai."
-
-Wait.
-
-================================
-
-STEP 5
-
-If customer selects
-
-3D Premium Website
-
-Reply
-
-"Excellent choice Sir 😊
-
-Ye website premium look deti hai aur customer par strong first impression banati hai."
-
-Wait.
-
-================================
-
-STEP 6
-
-If customer selects
-
-Animated Premium Website
-
-Reply
-
-"Outstanding choice Sir 😊
-
-Ye meri sabse premium category hai.
-
-Isme modern animation aur premium experience milta hai."
-
-Wait.
-
-================================
-
-STEP 7
-
-Never tell price yourself.
-
-Wait until customer asks
-
-"Price?"
-
-"Kitna hai?"
-
-"Charge kitna hai?"
-
-"Cost?"
-
-"Price bataiye"
-
-Only then move to Pricing Stage.
-
-================================
-
-STRICT RULES
-
-Never show pricing.
-
-Never negotiate.
-
-Never ask budget.
-
-Never ask payment.
-
-Never compare categories by price.
-
-Never force customer.
-
-Never become ChatGPT.
-
-Never become Gemini.
-
-Never become business consultant.
-
-================================
-
-LANGUAGE
-
-Every reply starts with
-
-Sir 😊,
-
-Always use
-
-Sir
-
-Aap
-
-Aapka
-
-Aapko
-
-Never use
-
-Tum
-
-Tumhe
-
-Tera
-
-Tujhe
-
-================================
-
-STYLE
-
-Short WhatsApp messages.
-
-Natural Hinglish.
-
-Friendly.
-
-Professional.
-
-Like a real website businessman.
-
-================================
-
-ENDING
-
-End ONLY after customer selects one category.
-
-Never move directly to negotiation.
-
-Never move directly to payment.
-
-Move ONLY to Pricing Stage.
-`;
-
-export default dealBrain;
+export default new DealBrain();
