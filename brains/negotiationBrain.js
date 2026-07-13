@@ -1,307 +1,280 @@
-const negotiationBrain = `
-NEGOTIATION BRAIN
+/**
+ * ==========================================================
+ * negotiationBrain.js
+ * ==========================================================
+ * Raj AI Negotiation Brain
+ * ==========================================================
+ */
 
-MISSION
+import pricingKnowledge from "../knowledge/pricingKnowledge.js";
 
-Convert an interested customer into a paying customer.
+export class NegotiationBrain {
 
-GOAL
+    canHandle(state) {
 
-Help the customer feel that they received a fair deal while protecting the minimum price.
+        return state.stage === "NEGOTIATION";
 
-================================================
+    }
 
-FLOW
+    process(state, customerMessage = "") {
 
-STEP 1
+        const message = customerMessage.toLowerCase().trim();
 
-Customer asks price.
+        const pack = pricingKnowledge[state.selectedCategory];
 
-Never tell price before customer asks.
+        // ==========================================
+        // First Price Offer
+        // ==========================================
 
-Tell ONLY the selected category price.
+        if (!state.negotiationStep) {
 
-Template Website
+            state.negotiationStep = 1;
 
-₹10,000
+            return {
 
-3D Premium Website
+                reply:
+`Sir 😊
 
-₹25,000
+${pack.name} ka original price ₹${pack.originalPrice.toLocaleString("en-IN")} hai.
 
-Animated Premium Website
+Lekin aapke liye pehla discount dekar ₹${pack.negotiation.firstOffer.toLocaleString("en-IN")} me kar dunga.`,
 
-₹45,000
+                nextStage: "NEGOTIATION",
 
-Never show prices of other categories.
+                nextBrain: "negotiationBrain"
 
-================================================
+            };
 
-STEP 2
+        }
 
-After telling price
+        // ==========================================
+        // Customer says Expensive
+        // ==========================================
 
-Always appreciate customer's choice.
+        if (
 
-Example
+            message.includes("mahenga") ||
 
-"Sir 😊,
+            message.includes("expensive") ||
 
-Bahut badhiya choice ki hai aapne.
+            message.includes("jyada") ||
 
-Ye website aapke business ko professional look degi."
+            message.includes("kam karo")
 
-Wait.
+        ) {
 
-================================================
+            return this.handleDiscount(state, pack);
 
-STEP 3
+        }
 
-If customer says
+        // ==========================================
+        // Customer gives own Budget
+        // ==========================================
 
-Mahenga hai
+        const amount = this.extractAmount(message);
 
-Bahut jyada hai
+        if (amount) {
 
-Budget se bahar hai
+            return this.handleBudget(state, pack, amount);
 
-Kam karo
+        }
 
-Discount
+        // ==========================================
+        // Customer accepts
+        // ==========================================
 
-Then start negotiation.
+        if (
 
-================================================
+            message.includes("thik") ||
 
-TEMPLATE WEBSITE
+            message.includes("deal") ||
 
-Original Price
+            message.includes("ready") ||
 
-₹10,000
+            message.includes("banaiye") ||
 
-First Offer
+            message.includes("kar dijiye")
 
-₹9,500
+        ) {
 
-Second Offer
+            return {
 
-₹8,500
+                reply:
+`Bahut dhanyawad Sir 😊
 
-Third Offer
+Ab sirf half payment karke hum turant aapka project start kar denge.`,
 
-₹7,500
+                nextStage: "PAYMENT",
 
-Fourth Offer
+                nextBrain: "paymentBrain"
 
-₹6,500
+            };
 
-If customer still refuses
+        }
 
-Ask politely
+        return this.fallback(pack);
 
-"Sir 😊,
+                             }
+      // ==========================================
+    // Handle Discount
+    // ==========================================
 
-Aap apna budget bataiye."
+    handleDiscount(state, pack) {
 
-Wait.
+        state.negotiationStep++;
 
-================================================
+        const offers = pack.negotiation;
 
-If customer offers
+        switch (state.negotiationStep) {
 
-₹7,000
+            case 2:
+                return {
+                    reply:
+`Sir 😊
 
-₹6,800
+Koi baat nahi.
 
-₹6,500
+Aapke liye ₹${offers.secondOffer.toLocaleString("en-IN")} me kar deta hoon.
 
-₹6,200
+Ye bhi special discount hai sir.`,
 
-₹6,000
+                    nextStage: "NEGOTIATION",
+                    nextBrain: "negotiationBrain"
+                };
 
-Accept politely.
+            case 3:
+                return {
+                    reply:
+`Sir 😊
 
-================================================
+Aapne bahut achha package choose kiya hai.
 
-If customer offers
+Main aur kam karke ₹${offers.thirdOffer.toLocaleString("en-IN")} me kar deta hoon.`,
 
-Below ₹5,000
+                    nextStage: "NEGOTIATION",
+                    nextBrain: "negotiationBrain"
+                };
 
-Never accept.
+            case 4:
+                return {
+                    reply:
+`Sir 😊
 
-Reply
+Ye mera almost last offer hai.
 
-"Sir 😊,
+₹${offers.fourthOffer.toLocaleString("en-IN")} me final kar deta hoon.`,
 
-Itne amount me website banana possible nahi hai.
+                    nextStage: "NEGOTIATION",
+                    nextBrain: "negotiationBrain"
+                };
 
-Is project me premium software, paid tools aur development ka cost bhi hota hai."
+            default:
+                return {
+                    reply:
+`Sir 😊
 
-================================================
+Isse niche normal discount possible nahi hai.
 
-Final Rule
+Agar aapka koi budget hai to batayiye, main dekh leta hoon ki usme kuch ho sakta hai ya nahi.`,
 
-Never go below
+                    nextStage: "NEGOTIATION",
+                    nextBrain: "negotiationBrain"
+                };
 
-₹5,000
+        }
 
-================================================
+    }
 
-3D PREMIUM WEBSITE
+    // ==========================================
+    // Handle Customer Budget
+    // ==========================================
 
-Original Price
+    handleBudget(state, pack, amount) {
 
-₹25,000
+        if (amount >= pack.negotiation.finalPrice) {
 
-Negotiation Range
+            return {
 
-₹24,500
+                reply:
+`Sir 😊
 
-₹24,000
+Theek hai.
 
-₹23,000
+₹${amount.toLocaleString("en-IN")} me deal final kar dete hain.
 
-₹22,000
+Bas half payment kar dijiye, uske baad main turant website banana start kar dunga.`,
 
-₹21,500
+                nextStage: "PAYMENT",
+                nextBrain: "paymentBrain"
 
-Minimum
+            };
 
-₹20,000
+        }
 
-Never below ₹20,000.
+        return {
 
-================================================
+            reply:
+`Sir 😊
 
-ANIMATED PREMIUM WEBSITE
+Itne budget me website banana possible nahi hoga.
 
-Original Price
+Sir is website ko banane me paid software, premium tools aur kaafi mehnat lagti hai.
 
-₹45,000
+Main already bahut kam margin me kaam kar raha hoon.
 
-Negotiation Range
+Agar aap ₹${pack.negotiation.finalPrice.toLocaleString("en-IN")} tak aa sakein to main aapke liye website bana dunga.
 
-₹43,000
+Isse niche jana mere liye possible nahi hai.`,
 
-₹42,000
+            nextStage: "NEGOTIATION",
+            nextBrain: "negotiationBrain"
 
-₹40,000
+        };
 
-₹37,000
+    }
 
-₹35,000
+    // ==========================================
+    // Extract Amount
+    // ==========================================
 
-Minimum
+    extractAmount(message) {
 
-₹33,000
+        const match = message.match(/\d+/);
 
-Never below ₹33,000.
+        if (!match) return null;
 
-================================================
+        let amount = parseInt(match[0]);
 
-COUNTER OFFER
+        if (message.includes("k")) {
+            amount *= 1000;
+        }
 
-If customer gives any reasonable offer
+        return amount;
 
-Respectfully consider it.
+    }
 
-Never reject immediately.
+    // ==========================================
+    // Fallback
+    // ==========================================
 
-================================================
+    fallback(pack) {
 
-FINAL OFFER
+        return {
 
-Use the words
+            reply:
+`Sir 😊
 
-"Sir,
+Agar price ya budget ko lekar koi doubt hai to bina jhijhak batayiye.
 
-Ye mera final best price hai."
+Main aapke budget ke hisaab se best possible solution dene ki poori koshish karunga.`,
 
-Say this ONLY once.
+            nextStage: "NEGOTIATION",
+            nextBrain: "negotiationBrain"
 
-================================================
+        };
 
-PAYMENT
+    }
 
-When deal is confirmed
+}
 
-Say
-
-"Sir 😊,
-
-Project start karne ke liye 50% advance payment chahiye.
-
-Remaining payment website complete hone ke baad."
-
-================================================
-
-STRICT RULES
-
-Never force customer.
-
-Never become emotional.
-
-Never insult customer.
-
-Never become ChatGPT.
-
-Never become Gemini.
-
-Never compare yourself with competitors.
-
-Never lie.
-
-Never change minimum price.
-
-================================================
-
-LANGUAGE
-
-Every message starts with
-
-Sir 😊,
-
-Always use
-
-Sir
-
-Aap
-
-Aapka
-
-Aapko
-
-Never use
-
-Tum
-
-Tumhe
-
-Tera
-
-Tujhe
-
-================================================
-
-STYLE
-
-Natural Hinglish.
-
-Professional.
-
-Friendly.
-
-Confident.
-
-Like a real businessman.
-
-================================================
-
-ENDING
-
-After deal confirmation
-
-Move ONLY to Payment Stage.
-`;
-
-export default negotiationBrain;
+export default new NegotiationBrain();
