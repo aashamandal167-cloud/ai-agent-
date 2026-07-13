@@ -1,185 +1,240 @@
-export function updateStage(state, userMessage) {
+/**
+ * ==========================================================
+ * stageManager.js
+ * ==========================================================
+ * Raj AI Conversation Stage Manager
+ * ==========================================================
+ */
 
-  const message = userMessage.toLowerCase().trim();
-
-  // -----------------------------
-// DISCOVERY → STORY
-// -----------------------------
-console.log("=== DISCOVERY CHECK ===");
-console.log("business =", state.business);
-console.log("city =", state.city);
-console.log("problem =", state.problem);
-console.log("customerBehaviour =", state.customerBehaviour);
-console.log("competitor =", state.competitor);
-console.log("=======================");
-  
-  if (
-  state.stage === "DISCOVERY" &&
-  state.business &&
-  state.city &&
-  state.problem &&
-  state.customerBehaviour &&
-  state.competitor
-) {
-
-  console.log("DISCOVERY COMPLETE ✅");
-
-  state.stage = "STORY";
-
-  state.storyShown = false;
-
-  return;
-
-}
-
-// -----------------------------
-// STORY → DEMO
-// -----------------------------
-if (state.stage === "STORY") {
-
-  const acceptWords = [
+const ACCEPT_WORDS = [
   "ha",
   "haan",
+  "han",
   "hanji",
   "yes",
   "ok",
   "okay",
-  "continue",
   "batao",
   "sunao",
-  "dikhao",
+  "continue",
   "show",
+  "dikhao",
   "demo",
-  "send",
   "bhejo",
-  "ji",
-  "haan ji",
-  "zarur",
-  "jarur",
+  "send",
   "link",
-  "website",
   "sample",
-  "example",
-  "portfolio"
+  "portfolio",
+  "website"
 ];
 
-  const accepted = acceptWords.some(word =>
+const PRICE_WORDS = [
+  "price",
+  "kitna",
+  "kitne",
+  "cost",
+  "charge",
+  "rate"
+];
+
+const PAYMENT_WORDS = [
+  "upi",
+  "qr",
+  "pay",
+  "payment",
+  "paid",
+  "advance",
+  "transfer",
+  "sent",
+  "done",
+  "screenshot",
+  "successful"
+];
+
+const CATEGORY_WORDS = [
+  "template",
+  "3d",
+  "premium",
+  "animated"
+];
+
+const REJECT_WORDS = [
+  "nahi",
+  "no",
+  "mana",
+  "interest nahi",
+  "jarurat nahi",
+  "need nahi"
+];
+
+function hasKeyword(message, keywords) {
+
+  return keywords.some(word =>
     message.includes(word)
   );
 
-  if (state.storyShown && accepted) {
+}
 
-    console.log("STORY COMPLETE ✅");
+export function updateStage(state, userMessage) {
+
+  const message = userMessage.toLowerCase().trim();
+
+  // ==========================================
+  // DISCOVERY → STORY
+  // ==========================================
+
+  if (
+    state.stage === "DISCOVERY" &&
+    state.business &&
+    state.city &&
+    state.problem &&
+    state.customerBehaviour &&
+    state.competitor
+  ) {
+
+    state.stage = "STORY";
+    state.storyShown = false;
+    return;
+
+  }
+
+  // ==========================================
+  // STORY → DEMO
+  // ==========================================
+
+  if (
+    state.stage === "STORY" &&
+    state.storyShown &&
+    hasKeyword(message, ACCEPT_WORDS)
+  ) {
 
     state.stage = "DEMO";
     state.demoShown = false;
-
     return;
+
   }
 
-}
+  // ==========================================
+  // DEMO → CATEGORY
+  // ==========================================
 
-  // -----------------------------
-  // DEMO → DEAL
-  // Demo pasand aa gaya
-  // -----------------------------
   if (
     state.stage === "DEMO" &&
     (
       message.includes("achha") ||
       message.includes("accha") ||
-      message.includes("pasand") ||
-      message.includes("nice") ||
       message.includes("good") ||
+      message.includes("nice") ||
       message.includes("mast") ||
-      message.includes("website banwana hai") ||
-      message.includes("banwana hai") ||
-      message.includes("interested")
-      ||
-message.includes("price") ||
-message.includes("kitna") ||
-message.includes("kitne") ||
-message.includes("cost")
+      message.includes("pasand")
     )
   ) {
-    state.stage = "DEAL";
+
+    state.stage = "CATEGORY";
     return;
+
+}
+
+  // ==========================================
+  // CATEGORY → DEAL
+  // ==========================================
+
+  if (
+    state.stage === "CATEGORY" &&
+    hasKeyword(message, CATEGORY_WORDS)
+  ) {
+
+    state.selectedCategory = message;
+
+    state.stage = "DEAL";
+
+    return;
+
   }
 
-  // -----------------------------
+  // ==========================================
   // DEAL → NEGOTIATION
-  // Customer price puchta hai
-  // -----------------------------
+  // ==========================================
+
   if (
     state.stage === "DEAL" &&
     (
-      message.includes("price") ||
-      message.includes("kitna") ||
-      message.includes("cost") ||
-      message.includes("charge") ||
-      message.includes("rate")
-      ||
-message.includes("upi") ||
-message.includes("qr") ||
-message.includes("advance") ||
-message.includes("pay")
+      hasKeyword(message, PRICE_WORDS) ||
+      hasKeyword(message, PAYMENT_WORDS)
     )
   ) {
+
     state.stage = "NEGOTIATION";
+
     return;
+
   }
 
-  // -----------------------------
+  // ==========================================
   // NEGOTIATION → PAYMENT
-  // Deal confirm
-  // -----------------------------
+  // ==========================================
+
   if (
-  state.stage === "NEGOTIATION" &&
-  (
-    message.includes("thik hai") ||
-    message.includes("theek hai") ||
-    message.includes("deal") ||
-    message.includes("ready") ||
-    message.includes("banaiye") ||
-    message.includes("kar dijiye") ||
-    message.includes("final") ||
-    message.includes("upi") ||
-    message.includes("qr") ||
-    message.includes("advance") ||
-    message.includes("pay")
-  )
-) {
-  state.stage = "PAYMENT";
-  return;
+    state.stage === "NEGOTIATION" &&
+    (
+      message.includes("final") ||
+      message.includes("deal") ||
+      message.includes("ready") ||
+      message.includes("banaiye") ||
+      message.includes("kar dijiye") ||
+      hasKeyword(message, PAYMENT_WORDS)
+    )
+  ) {
+
+    state.stage = "PAYMENT";
+
+    return;
+
+  }
+
+  // ==========================================
+  // PAYMENT → FOLLOWUP
+  // ==========================================
+
+  if (
+    state.stage === "PAYMENT" &&
+    (
+      message.includes("paid") ||
+      message.includes("done") ||
+      message.includes("payment") ||
+      message.includes("transfer") ||
+      message.includes("screenshot") ||
+      message.includes("success") ||
+      message.includes("successful")
+    )
+  ) {
+
+    state.paymentReceived = true;
+
+    state.stage = "FOLLOWUP";
+
+    return;
+
+  }
+
+  // ==========================================
+  // Rejection Handling
+  // ==========================================
+
+  if (hasKeyword(message, REJECT_WORDS)) {
+
+    state.rejected = true;
+
+    state.stage = "FOLLOWUP";
+
+    return;
+
+  }
+
+  // ==========================================
+  // Return Current Stage
+  // ==========================================
+
+  return state.stage;
+
     }
-
-  // -----------------------------
-// PAYMENT → FOLLOWUP
-// Payment Complete
-// -----------------------------
-if (
-  state.stage === "PAYMENT" &&
-  (
-    message.includes("payment") ||
-    message.includes("paid") ||
-    message.includes("done") ||
-    message.includes("screenshot") ||
-    message.includes("bhej diya") ||
-    message.includes("transfer") ||
-    message.includes("upi") ||
-    message.includes("qr") ||
-    message.includes("sent") ||
-    message.includes("success") ||
-    message.includes("successful")
-  )
-) {
-
-  state.paymentReceived = true;
-
-  state.stage = "FOLLOWUP";
-
-  return;
-
-}
-
-}
