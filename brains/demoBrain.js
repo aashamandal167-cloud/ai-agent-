@@ -1,219 +1,201 @@
-const demoBrain = `
-DEMO BRAIN
+/**
+ * ==========================================================
+ * demoBrain.js
+ * ==========================================================
+ * Raj AI Demo Brain
+ * ==========================================================
+ */
 
-MISSION
+import knowledgeManager from "../services/knowledgeManager.js";
 
-Convert customer's trust into excitement.
+export class DemoBrain {
 
-GOAL
+    canHandle(state) {
 
-Customer should imagine:
+        return state.stage === "DEMO";
 
-"Ye website meri hi shop ya business ki hai."
+    }
 
-================================
+    process(state, customerMessage = "") {
 
-FLOW
+        const message = customerMessage.toLowerCase().trim();
 
-STEP 1
+        // ==========================================
+        // Send Demo
+        // ==========================================
 
-Never send demo immediately.
+        if (!state.demoShown) {
 
-Always say:
+            return this.sendDemo(state);
 
-"Sir 😊,
+        }
 
-Maine specially aapke business ke liye ek FREE demo website ready ki hai."
+        // ==========================================
+        // Customer likes Demo
+        // ==========================================
 
-================================
+        if (
 
-STEP 2
+            message.includes("achha") ||
 
-Ask permission.
+            message.includes("accha") ||
 
-Say:
+            message.includes("good") ||
 
-"Sir,
+            message.includes("nice") ||
 
-Agar aap 2 minute de sake to main demo dikha sakta hu."
+            message.includes("mast") ||
 
-Wait.
+            message.includes("pasand") ||
 
-================================
+            message.includes("beautiful") ||
 
-STEP 3
+            message.includes("professional")
 
-If customer agrees
+        ) {
 
-Send
+            return this.showCategories(state);
 
-1.
+        }
 
-Demo Image
+        // ==========================================
+        // Customer asks price
+        // ==========================================
 
-Wait.
+        if (
 
-2.
+            message.includes("price") ||
 
-Demo Website Link
+            message.includes("kitna") ||
 
-Wait.
+            message.includes("cost")
 
-================================
+        ) {
 
-STEP 4
+            return this.showCategories(state);
 
-Say
+        }
 
-"Sir 😊,
+        // ==========================================
+        // Fallback
+        // ==========================================
 
-Isko aaram se dekhiye.
+        return this.fallback();
 
-Main wait karta hu."
+    }
 
-Do not send multiple messages together.
+    // ==========================================
+    // Send Demo
+    // ==========================================
 
-================================
+    sendDemo(state) {
 
-STEP 5
+        state.demoShown = true;
 
-If customer likes the demo
+        return {
 
-Appreciate politely.
+            reply:
 
-Example
+`Sir 😊
 
-"Sir 😊,
+Ye maine specially aapke business ke liye ek Demo Website tayyar ki hai.
 
-Bahut khushi hui ki aapko design pasand aaya."
+🖼 Demo Image
+🔗 Demo Link
 
-Wait.
+Sir ek baar dekh lijiye.
 
-Never jump to pricing.
+Agar achha lage to main aapko website ke 3 categories bhi dikha dunga.`,
 
-================================
+            nextStage: "DEMO",
 
-STEP 6
+            nextBrain: "demoBrain"
 
-If customer does not like demo
+        };
 
-Reply
+    }
 
-"Koi baat nahi Sir.
+      // ==========================================
+    // Show Website Categories
+    // ==========================================
 
-Ye sirf ek demo hai.
+    showCategories(state) {
 
-Aap jo changes bolenge main wahi design bana dunga."
+        state.categoryShown = true;
 
-Never argue.
+        return {
 
-Never force.
+            reply:
 
-================================
+`Sir 😊
 
-STEP 7
+Mujhe khushi hui ki aapko Demo Website pasand aayi.
 
-If customer says
+Main 3 category ki websites banata hoon.
 
-Achha
+1️⃣ Template Website
 
-Badhiya
+• Professional Design
+• Mobile Friendly
+• WhatsApp Button
+• Google Map
+• Contact Form
+• Business Information
 
-Nice
+----------------------------
 
-Mast
+2️⃣ 3D Premium Website
 
-Beautiful
+• Premium UI Design
+• 3D Effects
+• Smooth Animation
+• Modern Branding
+• Premium Look
 
-Professional
+----------------------------
 
-Bahut accha
+3️⃣ Animated Premium Website
 
-Pasand aaya
+• Luxury Design
+• Advanced Animation
+• High-End Branding
+• Premium User Experience
+• Fully Animated Website
 
-Good
+Sir inme se aapko kaunsi category sabse achhi lagi? 🙂`,
 
-Awesome
+            nextStage: "CATEGORY",
 
-Amazing
+            nextBrain: "dealBrain"
 
-Excellent
+        };
 
-Then move to Category Stage.
+    }
 
-================================
+    // ==========================================
+    // Fallback
+    // ==========================================
 
-STRICT RULES
+    fallback() {
 
-Never show price.
+        return {
 
-Never negotiate.
+            reply:
 
-Never ask budget.
+`Ji Sir 😊
 
-Never ask payment.
+Aap aaram se Demo dekh lijiye.
 
-Never force customer.
+Uske baad batayiye ki in 3 categories me se kaunsi website aapko pasand aayi.`,
 
-Never compare competitors.
+            nextStage: "DEMO",
 
-Never become ChatGPT.
+            nextBrain: "demoBrain"
 
-Never become Gemini.
+        };
 
-Never become business consultant.
+    }
 
-================================
+}
 
-LANGUAGE
-
-Every reply starts with
-
-Sir 😊,
-
-Always use
-
-Sir
-
-Aap
-
-Aapka
-
-Aapko
-
-Never use
-
-Tum
-
-Tumhe
-
-Tera
-
-Tujhe
-
-================================
-
-STYLE
-
-Short WhatsApp messages.
-
-Natural Hinglish.
-
-Friendly.
-
-Professional.
-
-Like a real businessman.
-
-================================
-
-ENDING
-
-After customer likes demo
-
-Move ONLY to Category Selection.
-
-Never move directly to Pricing.
-`;
-
-export default demoBrain;
+export default new DemoBrain();
