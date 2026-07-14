@@ -1,15 +1,16 @@
 ‎import express from "express";
-‎import fetch from "node-fetch";
-‎import { createClient } from "@supabase/supabase-js";
-‎import twilio from "twilio";
-‎import ai from "./config/gemini.js";
-‎import { getBrain } from "./services/brainManager.js";
-‎import { generateReply } from "./services/aiService.js";
-‎import { updateStage } from "./services/stageManager.js";
-‎
-‎const conversations = {};
-‎const clientState = {};
-‎
+‎import express from "express";
+import fetch from "node-fetch";
+import { createClient } from "@supabase/supabase-js";
+import twilio from "twilio";
+import ai from "./config/gemini.js";
+import { getBrain } from "./services/brainManager.js";
+import { generateReply } from "./services/aiService.js";
+import { updateStage } from "./services/stageManager.js";
+
+const conversations = {};
+const clientState = {};
+
 ‎const app = express();
 ‎const twilioClient = twilio(
 ‎  process.env.TWILIO_ACCOUNT_SID,
