@@ -67,15 +67,7 @@
 ‎  try {
 ‎    const query = req.query.search || "gym owners Ahmedabad";
 ‎
-‎conversations[userNumber].push({
-‎  role: "user",
-‎  content: userMessage
-‎});
-‎
-‎const recentHistory =
-‎  conversations[userNumber].slice(-10);
-‎
-‎    
+
 ‎    const response = await fetch(
 ‎      `https://api.apify.com/v2/acts/compass~google-maps-extractor/run-sync-get-dataset-items?token=${process.env.APIFY_API_TOKEN}`,
 ‎      {
