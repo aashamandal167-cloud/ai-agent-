@@ -1,4 +1,6 @@
 ‎import express from "express";
+
+console.log("TEST");
 ‎import fetch from "node-fetch";
 ‎import { createClient } from "@supabase/supabase-js";
 ‎import twilio from "twilio";
