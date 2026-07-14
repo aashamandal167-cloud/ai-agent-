@@ -217,11 +217,10 @@
 ‎  try {
 ‎
 ‎const { message, chat_id } = req.body;
-‎    
-‎    const userMessage = req.body.message.toLowerCase();
-‎
-‎    const cleanSearch = req.body.message
-‎  .toLowerCase()
+
+const userMessage = message.toLowerCase();
+
+const cleanSearch = message
 ‎
 ‎  .replace(/client|clients|dhundo|dundho|dhundho|find|search|khojo|nikalo|dusra|koi aur|aur|next/g, "")
 ‎
