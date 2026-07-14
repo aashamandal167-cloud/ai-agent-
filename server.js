@@ -41,14 +41,6 @@
 ‎
 ‎app.get("/test-sms", async (req, res) => {
 ‎  
-‎app.post("/whatsapp-webhook", async (req, res) => {
-‎
-‎  console.log("WhatsApp Message:", req.body.Body);
-‎
-‎  res.send("OK");
-‎
-‎});
-‎  
 ‎  try {
 ‎
 ‎    const result = await twilioClient.messages.create({
