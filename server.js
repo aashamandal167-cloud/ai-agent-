@@ -336,98 +336,47 @@ const cleanSearch = message
 ‎    }
 ‎
 ‎
-‎    // Normal AI Chat
-‎    const response = await fetch(
-‎      "https://openrouter.ai/api/v1/chat/completions",
-‎      {
-‎        method: "POST",
-‎        headers: {
-‎          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-‎          "Content-Type": "application/json"
-‎        },
-‎        body: JSON.stringify({
-‎  model: "openai/gpt-4o-mini",
-‎  max_tokens: 1000,
-‎  messages: [
-‎    {
-‎      role: "system",
-‎      content: `
-‎     
-‎You are Raaz Chandrvashi's elite AI website sales agent.
-‎
-‎Rahul Chandrvashi is OWNER forever.
-‎
-‎When Rahul chats:
-‎Reply only:
-‎"Yes Boss 🚀, kya task execute karna hai?"
-‎
-‎Never sell Rahul website.
-‎
-‎Sell websites only to external business clients.
-‎
-‎Pricing:
-‎Template Website = ₹10,000
-‎3D Premium Website = ₹25,000
-‎Animated Premium Website = ₹45,000
-‎
-‎Reply naturally in Hindi.
-‎`
-‎            },
-‎            {
-‎              role: "user",
-‎              content: req.body.message
-‎            }
-‎          ]
-‎        })
-‎      }
-‎    );
-‎
-‎    const data = await response.json();
-‎
-‎const aiReply =
-‎  data.choices?.[0]?.message?.content || "No response";
-‎
-‎    // SAVE MY CHAT HISTORY
-‎if (supabase) {
-‎  try {
-‎    await supabase
-‎      .from("my_chat_history")
-‎      insert([
-‎        {
-‎          message: req.body.message,
-‎          reply: aiReply,
-‎          chat_id: req.body.chat_id
-‎        }
-‎      ]);
-‎
-‎    console.log("Chat saved 🚀");
-‎  } catch (e) {
-‎    console.log("History Save Error:", e.message);
-‎  }
-‎}
-‎    
-‎// SAVE MY CHAT HISTORY
-‎if (supabase) {
-‎
-‎  const { data: savedData, error } = await supabase
-‎    .from("my_chat_history")
-‎    .insert([
-‎{
-‎message: req.body.message,
-‎reply: aiReply,
-‎chat_id: req.body.chat_id
-‎}
-‎])
-‎    .select();
-‎
-‎  console.log("CHAT SAVED =", savedData);
-‎  console.log("CHAT ERROR =", error);
-‎
-‎}
-‎
-‎res.json({
-‎  reply: aiReply
-‎});
+‎   // Boss AI Chat (Gemini)
+
+const state = {
+  stage: "DISCOVERY"
+};
+
+const recentHistory = [
+  {
+    role: "user",
+    content: req.body.message
+  }
+];
+
+const aiReply = await generateReply({
+  state,
+  recentHistory,
+  extraRule: ""
+});
+
+// Save Chat History
+if (supabase) {
+  try {
+    await supabase
+      .from("my_chat_history")
+      .insert([
+        {
+          message: req.body.message,
+          reply: aiReply,
+          chat_id: chat_id
+        }
+      ]);
+
+    console.log("Chat Saved 🚀");
+  } catch (e) {
+    console.log("History Save Error:", e.message);
+  }
+}
+
+res.json({
+  reply: aiReply
+});
 ‎
 ‎  } catch (error) {
 ‎    res.json({
