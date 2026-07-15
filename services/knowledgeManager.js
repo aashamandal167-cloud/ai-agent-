@@ -7,12 +7,12 @@
  * ==========================================================
  */
 
-const INDUSTRIES = require("../knowledge/industries");
-const BUSINESS_PROBLEMS = require("../knowledge/businessProblems");
-const SUCCESS_STORIES = require("../knowledge/successStories");
-const WEBSITE_BENEFITS = require("../knowledge/websiteBenefits");
-const PRICING_KNOWLEDGE = require("../knowledge/pricingKnowledge");
-const OBJECTIONS = require("../knowledge/objections");
+import INDUSTRIES from "../knowledge/industries.js";
+import BUSINESS_PROBLEMS from "../knowledge/businessProblems.js";
+import SUCCESS_STORIES from "../knowledge/successStories.js";
+import WEBSITE_BENEFITS from "../knowledge/websiteBenefits.js";
+import PRICING_KNOWLEDGE from "../knowledge/pricingKnowledge.js";
+import OBJECTIONS from "../knowledge/objections.js";
 
 class KnowledgeManager {
 
@@ -162,7 +162,7 @@ class KnowledgeManager {
 
         };
 
-          }
+    }
 
     // ===========================================
     // Check Industry Exists
@@ -301,4 +301,5 @@ class KnowledgeManager {
 
 }
 
-module.exports = new KnowledgeManager();
+export default new KnowledgeManager();
+                
