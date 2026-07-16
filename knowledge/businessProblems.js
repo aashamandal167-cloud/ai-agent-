@@ -82,4 +82,4 @@ const BUSINESS_PROBLEMS = {
 
 };
 
-module.exports = BUSINESS_PROBLEMS;
+export default BUSINESS_PROBLEMS;
