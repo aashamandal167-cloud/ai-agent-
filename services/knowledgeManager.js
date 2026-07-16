@@ -301,5 +301,39 @@ class KnowledgeManager {
 
 }
 
-export default new KnowledgeManager();
-                
+const knowledgeManager = new KnowledgeManager();
+
+// ===========================================
+// getKnowledge - used by aiService.js
+// Returns a simple bundle: problems, benefits, story
+// for the customer's current industry/state
+// ===========================================
+
+export function getKnowledge(state = {}) {
+
+    const industryId = state.industryId;
+
+    const problemsObj = knowledgeManager.getBusinessProblems(industryId);
+
+    const problems = [
+        ...(problemsObj.customerProblems || []),
+        ...(problemsObj.salesProblems || [])
+    ];
+
+    const benefitsObj = knowledgeManager.getWebsiteBenefits(industryId);
+
+    const benefits = [
+        ...(benefitsObj.common || []),
+        ...(benefitsObj.category || [])
+    ];
+
+    const stories = knowledgeManager.getSuccessStories(industryId);
+
+    const story = (stories && stories.length) ? stories[0] : null;
+
+    return { problems, benefits, story };
+
+}
+
+export default knowledgeManager;
+            
