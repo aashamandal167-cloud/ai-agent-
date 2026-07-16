@@ -202,4 +202,4 @@ const PRICING_KNOWLEDGE = {
 
 };
 
-module.exports = PRICING_KNOWLEDGE;
+export default PRICING_KNOWLEDGE;
