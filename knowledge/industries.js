@@ -123,4 +123,4 @@ const INDUSTRIES = [
 
 ];
 
-module.exports = INDUSTRIES;
+export default INDUSTRIES;
