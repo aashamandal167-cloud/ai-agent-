@@ -96,4 +96,4 @@ const OBJECTIONS = {
 
 };
 
-module.exports = OBJECTIONS;
+export default OBJECTIONS;
