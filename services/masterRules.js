@@ -387,4 +387,4 @@ const MASTER_RULES = {
 
 };
 
-module.exports = MASTER_RULES;
+export default MASTER_RULES;
