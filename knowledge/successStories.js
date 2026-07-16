@@ -84,4 +84,4 @@ const SUCCESS_STORIES = {
 
 };
 
-module.exports = SUCCESS_STORIES;
+export default SUCCESS_STORIES;
