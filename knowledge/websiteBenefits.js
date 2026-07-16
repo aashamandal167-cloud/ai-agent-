@@ -133,4 +133,4 @@ const WEBSITE_BENEFITS = {
 
 };
 
-module.exports = WEBSITE_BENEFITS;
+export default WEBSITE_BENEFITS;
