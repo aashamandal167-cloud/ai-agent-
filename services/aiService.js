@@ -14,7 +14,6 @@ const knowledge = getKnowledge(state);
 console.log("BRAIN TEST START");
 console.log(getBrain(state.stage).substring(0, 200));
 console.log("BRAIN TEST END");
-console.log(getBrain(state.stage));
 
 console.log("========== AI REQUEST ==========");
 
@@ -35,11 +34,8 @@ console.log("================================");
   console.log("===== RECENT HISTORY =====");
 console.log(recentHistory);
 console.log("==========================");
-  
-const result = await ai.models.generateContent({
-  model: "gemini-2.5-flash",
 
-  systemInstruction: `
+const systemInstruction = `
 ${masterRules}
 
 ${getBrain(state.stage)}
@@ -226,10 +222,9 @@ Take advance payment only after deal confirmation.
 Always continue naturally.
 
 Never break the conversation flow.
+`;
 
-`,
-
-    contents: `
+const contents = `
 CURRENT STAGE: ${state.stage}
 
 LAST CONVERSATION
@@ -247,7 +242,14 @@ Follow ONLY the current stage.
 Do NOT ask discovery questions again if the stage is STORY.
 
 Do NOT become a business consultant.
-`
+`;
+
+const result = await ai.models.generateContent({
+  model: "gemini-2.5-flash",
+  contents: contents,
+  config: {
+    systemInstruction: systemInstruction
+  }
 });
 
   return (
@@ -255,4 +257,4 @@ Do NOT become a business consultant.
     result.candidates?.[0]?.content?.parts?.[0]?.text ||
     "Sorry Sir, response generate nahi ho paya."
   );
-    }
+}
