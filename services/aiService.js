@@ -244,17 +244,62 @@ Do NOT ask discovery questions again if the stage is STORY.
 Do NOT become a business consultant.
 `;
 
-const result = await ai.models.generateContent({
-  model: "gemini-2.5-flash",
-  contents: contents,
-  config: {
-    systemInstruction: systemInstruction
+async function callGeminiWithRetry(payload, retries = 2, delayMs = 1500) {
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+
+    try {
+
+      const result = await ai.models.generateContent(payload);
+      return result;
+
+    } catch (err) {
+
+      const isOverloaded =
+        err?.status === 503 ||
+        err?.message?.includes("UNAVAILABLE") ||
+        err?.message?.includes("high demand");
+
+      const isLastAttempt = attempt === retries;
+
+      if (isOverloaded && !isLastAttempt) {
+        console.log(`Gemini overloaded, retrying... (attempt ${attempt + 1})`);
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+        continue;
+      }
+
+      throw err;
+
+    }
+
   }
-});
+
+}
+
+let result;
+
+try {
+
+  result = await callGeminiWithRetry({
+    model: "gemini-2.5-flash",
+    contents: contents,
+    config: {
+      systemInstruction: systemInstruction
+    }
+  });
+
+} catch (err) {
+
+  console.error("GEMINI ERROR:", err.message);
+
+  return "Sir 😊, thoda technical dikkat aa rahi hai abhi. Kripya 1-2 minute baad phir se message kijiye. 🙏";
+
+}
 
   return (
     result.text ||
     result.candidates?.[0]?.content?.parts?.[0]?.text ||
     "Sorry Sir, response generate nahi ho paya."
   );
-}
+              }
+  
