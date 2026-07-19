@@ -58,13 +58,26 @@ const CATEGORY_WORDS = [
   "animated"
 ];
 
+// ==========================================================
+// REJECT_WORDS - IMPORTANT
+// These must be CLEAR, EXPLICIT decline phrases only.
+// A bare "nahi" or "no" is NOT included here on purpose,
+// because "nahi" appears constantly in normal Hinglish
+// answers (e.g. "customer nahi aata", "pata nahi") and is
+// NOT the same as rejecting the website offer.
+// ==========================================================
+
 const REJECT_WORDS = [
-  "nahi",
-  "no",
-  "mana",
+  "nahi chahiye",
+  "nahi banwana",
+  "website nahi",
   "interest nahi",
   "jarurat nahi",
-  "need nahi"
+  "zarurat nahi",
+  "need nahi",
+  "abhi nahi banwana",
+  "mana kar diya",
+  "rehne dijiye"
 ];
 
 function hasKeyword(message, keywords) {
@@ -219,9 +232,20 @@ export function updateStage(state, userMessage) {
 
   // ==========================================
   // Rejection Handling
+  //
+  // Only checked AFTER an actual offer/demo/category/price has
+  // been presented (DEMO, CATEGORY, DEAL, NEGOTIATION, PAYMENT
+  // stages). Never checked during DISCOVERY or STORY, because
+  // customers say "nahi" constantly there just answering
+  // normal questions - that is NOT a rejection of the website.
   // ==========================================
 
-  if (hasKeyword(message, REJECT_WORDS)) {
+  const offerStages = ["DEMO", "CATEGORY", "DEAL", "NEGOTIATION", "PAYMENT"];
+
+  if (
+    offerStages.includes(state.stage) &&
+    hasKeyword(message, REJECT_WORDS)
+  ) {
 
     state.rejected = true;
 
@@ -237,4 +261,4 @@ export function updateStage(state, userMessage) {
 
   return state.stage;
 
-    }
+                       }
