@@ -642,26 +642,38 @@ let extraRule = "";
 
 if (state.stage === "DISCOVERY") {
 
-  const missing = [];
+  const missingItems = [];
 
-  if (!state.problem) missing.push("business ki sabse badi problem");
-  if (!state.customerBehaviour) missing.push("kya customers pehle aate the");
-  if (!state.competitor) missing.push("kya competitor ke paas website hai");
+  if (!state.problem) missingItems.push({ key: "problem", question: "Sir, aapko sabse badi problem kya lagti hai business mein?" });
+  if (!state.customerBehaviour) missingItems.push({ key: "customerBehaviour", question: "Kya customers pehle aapke paas aate the?" });
+  if (!state.competitor) missingItems.push({ key: "competitor", question: "Kya competitors ke paas website hai?" });
 
-  if (missing.length > 0) {
+  if (missingItems.length > 0) {
+
+    const nextQuestion = missingItems[0].question;
+    const alreadyKnownParts = [];
+
+    if (state.business) alreadyKnownParts.push(`Business = ${state.business}`);
+    if (state.city) alreadyKnownParts.push(`City = ${state.city}`);
+    if (state.problem) alreadyKnownParts.push(`Problem = ${state.problem}`);
+    if (state.customerBehaviour) alreadyKnownParts.push(`Customer Behaviour = ${state.customerBehaviour}`);
+    if (state.competitor) alreadyKnownParts.push(`Competitor = ${state.competitor}`);
 
     extraRule = `
 CURRENT STAGE = DISCOVERY
 
-Abhi tak yeh jaankari missing hai: ${missing.join(", ")}.
+ALREADY KNOWN (DO NOT ask about these again, DO NOT ask to "confirm" these again):
+${alreadyKnownParts.length ? alreadyKnownParts.join(", ") : "Nothing yet"}
 
-Customer ke last message ko dhyan se padho.
+STILL MISSING: ${missingItems.map(m => m.key).join(", ")}
 
-Agar customer ne in missing cheezon me se kisi ka jawab diya hai, use samajh kar aage badho.
+YOUR NEXT QUESTION MUST BE (in your own natural Hinglish words, but asking exactly this): "${nextQuestion}"
 
-Agar customer ne kuch aur poocha hai (jaise naam, ya koi off-topic sawal), to usse ek chhoti si polite line me jawab do, aur turant discovery ka agla missing sawal bhi poori tarah poocho.
-
-Sirf ek missing sawal ek baar me poocho.
+Rules:
+- Do NOT re-ask for business name or city if they are already listed above as known.
+- If the customer's last message already answered the next question, acknowledge it briefly and move on - do not repeat the same question.
+- If customer asked something off-topic (like your name), answer in one short line, then still ask the next question above.
+- Ask ONLY ONE question - the one specified above.
 
 Never tell story.
 Never show demo.
@@ -824,4 +836,4 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-                            
+    
