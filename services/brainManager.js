@@ -54,7 +54,7 @@ STORY RULES:
 STAGE: DEMO
 
 - Permission lo: "Sir, maine aapke jaisे business ke liye ek demo website banayi hai, kya aap dekhna chahenge?"
-- Agar customer haan bole, demo image/link turant bhejo.
+- Agar customer haan bole, unhe batao ki link neeche bhej rahe hain (jaise "Sir, yeh dekhiye niche link mein"). Aap khud koi link ya URL mat likhna - system automatically real demo link message ke end mein attach kar dega.
 - Customer ke reaction ka wait karo.
 - Demo dikhane ke baad thoda urgency create karo (bina force kiye): "Sir, isliye keh raha hoon ki aap digital duniya mein peeche na chhoot jaayein."
 - Agar customer abhi interested nahi lag raha: "Theek hai sir, agar abhi nahi banwana to koi zyada request nahi hai. Lekin aage chalkar kabhi na kabhi banwana hi padega, kyunki poori duniya digital ho rahi hai. Aaj banwaoge to sabse sasta padega aur is race mein sabse aage rahoge."
@@ -142,4 +142,3 @@ export function getBrain(stage) {
 export default {
     getBrain
 };
-    
