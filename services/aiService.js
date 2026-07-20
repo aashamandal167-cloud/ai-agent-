@@ -130,7 +130,7 @@ Never jump to another stage.
 
 Always follow the current stage only.
 
-CURRENT CLIENT
+CURRENT CLIENT (these facts are ALREADY CONFIRMED - never ask about them again, never contradict them, never forget them)
 
 Stage: ${state.stage}
 
@@ -301,5 +301,4 @@ try {
     result.candidates?.[0]?.content?.parts?.[0]?.text ||
     "Sorry Sir, response generate nahi ho paya."
   );
-              }
-  
+}
