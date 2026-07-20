@@ -336,4 +336,4 @@ export function getKnowledge(state = {}) {
 }
 
 export default knowledgeManager;
-            
+                
