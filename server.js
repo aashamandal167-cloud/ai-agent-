@@ -523,25 +523,12 @@ error:err.message
 
 });
 
-app.post("/whatsapp-webhook", async (req, res) => {
-
-  try {
-
-console.log("🔥 WEBHOOK HIT 🔥");
-
-const userMessage = req.body.Body;
-const userNumber = req.body.From;
-
-console.log("USER:", userMessage);
-console.log("BODY:", req.body);
-    
-// Client state init (memory based, per WhatsApp number)
-if (!clientState[userNumber]) {
-  clientState[userNumber] = {
+function defaultClientState() {
+  return {
     stage: "DISCOVERY",
     factsCount: 0,
     trustCount: 0,
-    
+
     storyShown: false,
     demoShown: false,
 
@@ -553,20 +540,134 @@ if (!clientState[userNumber]) {
 
     problem: "",
     customerBehaviour: "",
-    competitor: ""
+    competitor: "",
+
+    demoLinkSent: false
   };
 }
 
-if (!conversations[userNumber]) {
-  conversations[userNumber] = [];
-    }
+// Load state: use in-memory cache if present, else try Supabase, else fresh default.
+// This means state survives Render spin-down/restarts as long as Supabase is connected.
+async function getOrLoadState(userNumber) {
 
-conversations[userNumber].push({
+  if (clientState[userNumber]) {
+    return clientState[userNumber];
+  }
+
+  let state = defaultClientState();
+
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from("client_state")
+        .select("state")
+        .eq("phone", userNumber)
+        .maybeSingle();
+
+      if (!error && data && data.state) {
+        state = data.state;
+      }
+    } catch (e) {
+      console.log("STATE LOAD ERROR:", e.message);
+    }
+  }
+
+  clientState[userNumber] = state;
+  return state;
+
+}
+
+async function persistState(userNumber, state) {
+
+  clientState[userNumber] = state;
+
+  if (supabase) {
+    try {
+      await supabase
+        .from("client_state")
+        .upsert({
+          phone: userNumber,
+          state,
+          updated_at: new Date().toISOString()
+        });
+    } catch (e) {
+      console.log("STATE SAVE ERROR:", e.message);
+    }
+  }
+
+}
+
+async function getOrLoadConversation(userNumber) {
+
+  if (conversations[userNumber]) {
+    return conversations[userNumber];
+  }
+
+  let history = [];
+
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from("client_conversations")
+        .select("messages")
+        .eq("phone", userNumber)
+        .maybeSingle();
+
+      if (!error && data && data.messages) {
+        history = data.messages;
+      }
+    } catch (e) {
+      console.log("CONVO LOAD ERROR:", e.message);
+    }
+  }
+
+  conversations[userNumber] = history;
+  return history;
+
+}
+
+async function persistConversation(userNumber, history) {
+
+  const trimmed = history.slice(-30);
+
+  conversations[userNumber] = trimmed;
+
+  if (supabase) {
+    try {
+      await supabase
+        .from("client_conversations")
+        .upsert({
+          phone: userNumber,
+          messages: trimmed,
+          updated_at: new Date().toISOString()
+        });
+    } catch (e) {
+      console.log("CONVO SAVE ERROR:", e.message);
+    }
+  }
+
+}
+
+app.post("/whatsapp-webhook", async (req, res) => {
+
+  try {
+
+console.log("🔥 WEBHOOK HIT 🔥");
+
+const userMessage = req.body.Body;
+const userNumber = req.body.From;
+
+console.log("USER:", userMessage);
+console.log("BODY:", req.body);
+
+const state = await getOrLoadState(userNumber);
+
+let conversationHistory = await getOrLoadConversation(userNumber);
+
+conversationHistory.push({
   role: "user",
   content: userMessage
 });
-
-const state = clientState[userNumber];
 
 // ==========================================================
 // FACT EXTRACTION (the "brain" / rules layer)
@@ -778,7 +879,7 @@ Give updates only.
 }
 
 const recentHistory =
-  conversations[userNumber].slice(-6);
+  conversationHistory.slice(-16);
 
 let aiReply = await generateReply({
   state,
@@ -796,12 +897,26 @@ if (state.stage === "DEMO") {
   state.demoShown = true;
 }
 
+// DEMO STAGE - actual demo link bhejo (ek hi baar)
+if (state.stage === "DEMO" && !state.demoLinkSent) {
+
+  const appUrl = process.env.APP_URL || "https://ai-agent-h5dd.onrender.com";
+
+  aiReply = `${aiReply}\n\n👉 ${appUrl}/demo.html`;
+
+  state.demoLinkSent = true;
+
+}
+
 // USKE BAAD HISTORY SAVE
 
-conversations[userNumber].push({
+conversationHistory.push({
 role: "assistant",
 content: aiReply
 });
+
+await persistState(userNumber, state);
+await persistConversation(userNumber, conversationHistory);
 
 const twiml = `
 
@@ -836,4 +951,4 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-    
+  
