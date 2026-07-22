@@ -311,7 +311,21 @@ const knowledgeManager = new KnowledgeManager();
 
 export function getKnowledge(state = {}) {
 
-    const industryId = state.industryId;
+    let industryId = state.industryId;
+
+    // If industryId wasn't explicitly set, try to detect it from the
+    // business text we already have (e.g. "Fashion Store", "Gym").
+    // This is what makes STORY stage actually use our real knowledge
+    // base instead of always falling back to "no story available".
+    if (!industryId && state.business) {
+
+        const matchedIndustry = knowledgeManager.getIndustry(state.business);
+
+        if (matchedIndustry) {
+            industryId = matchedIndustry.id;
+        }
+
+    }
 
     const problemsObj = knowledgeManager.getBusinessProblems(industryId);
 
@@ -336,4 +350,4 @@ export function getKnowledge(state = {}) {
 }
 
 export default knowledgeManager;
-                
+    
