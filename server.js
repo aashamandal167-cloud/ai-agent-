@@ -6,6 +6,7 @@ import ai from "./config/gemini.js";
 import { getBrain } from "./services/brainManager.js";
 import { generateReply } from "./services/aiService.js";
 import { updateStage } from "./services/stageManager.js";
+import INDUSTRIES from "./knowledge/industries.js";
 
 const conversations = {};
 const clientState = {};
@@ -542,6 +543,7 @@ function defaultClientState() {
     customerBehaviour: "",
     competitor: "",
 
+    industryId: "",
     demoLinkSent: false
   };
 }
@@ -660,6 +662,30 @@ const userNumber = req.body.From;
 console.log("USER:", userMessage);
 console.log("BODY:", req.body);
 
+// ==========================================================
+// RESET COMMAND (for testing / customer restart)
+// Type "reset" to wipe this number's state and start fresh.
+// ==========================================================
+
+if (userMessage && userMessage.trim().toLowerCase() === "reset") {
+
+  clientState[userNumber] = defaultClientState();
+  conversations[userNumber] = [];
+
+  await persistState(userNumber, clientState[userNumber]);
+  await persistConversation(userNumber, []);
+
+  const resetTwiml = `
+<Response>
+<Message>Sir 😊, conversation reset ho gayi hai. Hello bolke phir se shuru kariye! 🙏</Message>
+</Response>
+`;
+
+  res.type("text/xml");
+  return res.send(resetTwiml);
+
+}
+
 const state = await getOrLoadState(userNumber);
 
 let conversationHistory = await getOrLoadConversation(userNumber);
@@ -681,16 +707,53 @@ if (lowerMsg.includes("online shopping")) {
   state.problem = "online shopping";
 }
 
-if (lowerMsg.includes("sales") || lowerMsg.includes("kam")) {
+if (lowerMsg.includes("sales") || lowerMsg.includes("seles") || lowerMsg.includes("kam")) {
   state.problem = "low sales";
 }
 
-if (lowerMsg.includes("fashion store")) {
-  state.business = "Fashion Store";
+// Dynamic business detection - checks against ALL industries/keywords
+// from knowledge/industries.js, not just a single hardcoded phrase.
+if (!state.business) {
+
+  for (const industry of INDUSTRIES) {
+
+    const allNames = [industry.displayName, ...(industry.keywords || [])];
+
+    const matched = allNames.some(name =>
+      lowerMsg.includes(name.toLowerCase())
+    );
+
+    if (matched) {
+      state.business = industry.displayName;
+      state.industryId = industry.id;
+      break;
+    }
+
+  }
+
 }
 
-if (lowerMsg.includes("mumbai")) {
-  state.city = "Mumbai";
+// City detection - common Indian cities + "City = X" pattern
+if (!state.city) {
+
+  const commonCities = [
+    "mumbai", "delhi", "bangalore", "bengaluru", "pune", "kolkata",
+    "chennai", "hyderabad", "ahmedabad", "jaipur", "lucknow", "patna",
+    "surat", "nagpur", "indore", "bhopal", "kanpur", "noida", "gurgaon",
+    "gurugram", "chandigarh", "vadodara", "nashik", "ranchi", "guwahati"
+  ];
+
+  const foundCity = commonCities.find(city => lowerMsg.includes(city));
+
+  if (foundCity) {
+    state.city = foundCity.charAt(0).toUpperCase() + foundCity.slice(1);
+  } else {
+    const cityMatch = userMessage.match(/city\s*[:=]\s*([a-zA-Z\s]+)/i);
+    if (cityMatch && cityMatch[1]) {
+      state.city = cityMatch[1].trim();
+    }
+  }
+
 }
 
 if (
@@ -732,6 +795,11 @@ console.log("BEFORE UPDATE =", state.stage);
 updateStage(state, userMessage);
 
 console.log("AFTER UPDATE =", state.stage);
+
+// Save facts NOW, before calling Gemini - so even if the AI call
+// fails/times out below, we never lose what we already extracted.
+await persistState(userNumber, state);
+await persistConversation(userNumber, conversationHistory);
 
 
 // ==========================================================
@@ -951,4 +1019,3 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-  
