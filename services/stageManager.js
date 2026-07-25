@@ -98,8 +98,6 @@ export function updateStage(state, userMessage) {
 
   if (
     state.stage === "DISCOVERY" &&
-    state.business &&
-    state.city &&
     state.problem &&
     state.customerBehaviour &&
     state.competitor
@@ -261,5 +259,5 @@ export function updateStage(state, userMessage) {
 
   return state.stage;
 
-          }
-    
+}
+  
