@@ -1,262 +1,353 @@
 /**
  * ==========================================================
- * stageManager.js
+ * knowledgeManager.js
  * ==========================================================
- * Raj AI Conversation Stage Manager
+ * Raj AI Knowledge Manager
+ * Central Knowledge Access Layer
  * ==========================================================
  */
 
-const ACCEPT_WORDS = [
-  "ha",
-  "haan",
-  "han",
-  "hanji",
-  "yes",
-  "ok",
-  "okay",
-  "batao",
-  "sunao",
-  "continue",
-  "show",
-  "dikhao",
-  "demo",
-  "bhejo",
-  "send",
-  "link",
-  "sample",
-  "portfolio",
-  "website"
-];
+import INDUSTRIES from "../knowledge/industries.js";
+import BUSINESS_PROBLEMS from "../knowledge/businessProblems.js";
+import SUCCESS_STORIES from "../knowledge/successStories.js";
+import WEBSITE_BENEFITS from "../knowledge/websiteBenefits.js";
+import PRICING_KNOWLEDGE from "../knowledge/pricingKnowledge.js";
+import OBJECTIONS from "../knowledge/objections.js";
 
-const PRICE_WORDS = [
-  "price",
-  "kitna",
-  "kitne",
-  "cost",
-  "charge",
-  "rate"
-];
+class KnowledgeManager {
 
-const PAYMENT_WORDS = [
-  "upi",
-  "qr",
-  "pay",
-  "payment",
-  "paid",
-  "advance",
-  "transfer",
-  "sent",
-  "done",
-  "screenshot",
-  "successful"
-];
+    constructor() {
 
-const CATEGORY_WORDS = [
-  "template",
-  "3d",
-  "premium",
-  "animated"
-];
+        this.industries = INDUSTRIES;
+        this.businessProblems = BUSINESS_PROBLEMS;
+        this.successStories = SUCCESS_STORIES;
+        this.websiteBenefits = WEBSITE_BENEFITS;
+        this.pricing = PRICING_KNOWLEDGE;
+        this.objections = OBJECTIONS;
 
-// ==========================================================
-// REJECT_WORDS - IMPORTANT
-// These must be CLEAR, EXPLICIT decline phrases only.
-// A bare "nahi" or "no" is NOT included here on purpose,
-// because "nahi" appears constantly in normal Hinglish
-// answers (e.g. "customer nahi aata", "pata nahi") and is
-// NOT the same as rejecting the website offer.
-// ==========================================================
+    }
 
-const REJECT_WORDS = [
-  "nahi chahiye",
-  "nahi banwana",
-  "website nahi",
-  "interest nahi",
-  "jarurat nahi",
-  "zarurat nahi",
-  "need nahi",
-  "abhi nahi banwana",
-  "mana kar diya",
-  "rehne dijiye"
-];
+    // ===========================================
+    // Industry Detection
+    // ===========================================
 
-function hasKeyword(message, keywords) {
+    getIndustry(categoryName = "") {
 
-  return keywords.some(word =>
-    message.includes(word)
-  );
+        const keyword = categoryName.toLowerCase().trim();
+
+        for (const industry of this.industries) {
+
+            if (industry.displayName.toLowerCase() === keyword) {
+                return industry;
+            }
+
+            const matched = industry.keywords.find(item =>
+                item.toLowerCase() === keyword
+            );
+
+            if (matched) {
+                return industry;
+            }
+
+        }
+
+        return null;
+
+    }
+
+    // ===========================================
+    // Get Industry By ID
+    // ===========================================
+
+    getIndustryById(industryId) {
+
+        return this.industries.find(
+            industry => industry.id === industryId
+        ) || null;
+
+    }
+
+    // ===========================================
+    // Business Problems
+    // ===========================================
+
+    getBusinessProblems(industryId) {
+
+        return this.businessProblems[industryId] || {};
+
+    }
+
+    // ===========================================
+    // Success Stories
+    // ===========================================
+
+    getSuccessStories(industryId) {
+
+        return this.successStories[industryId] || [];
+
+    }
+
+    // ===========================================
+    // Website Benefits
+    // ===========================================
+
+    getWebsiteBenefits(industryId) {
+
+        return {
+
+            common: this.websiteBenefits.common || [],
+
+            category:
+                this.websiteBenefits[industryId] || []
+
+        };
+
+    }
+
+    // ===========================================
+    // Pricing
+    // ===========================================
+
+    getPricing(packageName) {
+
+        return this.pricing[packageName] || null;
+
+    }
+
+    // ===========================================
+    // All Pricing
+    // ===========================================
+
+    getAllPricing() {
+
+        return this.pricing;
+
+    }
+
+    // ===========================================
+    // Objection
+    // ===========================================
+
+    getObjection(objectionName) {
+
+        return this.objections[objectionName] || null;
+
+    }
+
+    // ===========================================
+    // All Objections
+    // ===========================================
+
+    getAllObjections() {
+
+        return this.objections;
+
+    }
+
+    // ===========================================
+    // Complete Business Knowledge
+    // ===========================================
+
+    getCompleteBusinessKnowledge(industryId) {
+
+        return {
+
+            industry: this.getIndustryById(industryId),
+
+            problems: this.getBusinessProblems(industryId),
+
+            stories: this.getSuccessStories(industryId),
+
+            benefits: this.getWebsiteBenefits(industryId)
+
+        };
+
+    }
+
+    // ===========================================
+    // Check Industry Exists
+    // ===========================================
+
+    hasIndustry(industryId) {
+
+        return this.industries.some(
+            industry => industry.id === industryId
+        );
+
+    }
+
+    // ===========================================
+    // Search Industry
+    // ===========================================
+
+    searchIndustry(keyword = "") {
+
+        keyword = keyword.toLowerCase().trim();
+
+        return this.industries.filter(industry => {
+
+            if (
+                industry.displayName.toLowerCase().includes(keyword)
+            ) {
+                return true;
+            }
+
+            return industry.keywords.some(item =>
+                item.toLowerCase().includes(keyword)
+            );
+
+        });
+
+    }
+
+    // ===========================================
+    // Health Check
+    // ===========================================
+
+    healthCheck() {
+
+        return {
+
+            industries: this.industries.length,
+
+            businessProblems: Object.keys(this.businessProblems).length,
+
+            successStories: Object.keys(this.successStories).length,
+
+            websiteBenefits: Object.keys(this.websiteBenefits).length,
+
+            pricingPackages: Object.keys(this.pricing).length,
+
+            objections: Object.keys(this.objections).length,
+
+            status: "OK"
+
+        };
+
+    }
+
+    // ===========================================
+    // Validate Knowledge Base
+    // ===========================================
+
+    validateKnowledgeBase() {
+
+        const errors = [];
+
+        if (!this.industries.length)
+            errors.push("Industries data missing.");
+
+        if (!Object.keys(this.businessProblems).length)
+            errors.push("Business Problems missing.");
+
+        if (!Object.keys(this.successStories).length)
+            errors.push("Success Stories missing.");
+
+        if (!Object.keys(this.websiteBenefits).length)
+            errors.push("Website Benefits missing.");
+
+        if (!Object.keys(this.pricing).length)
+            errors.push("Pricing Knowledge missing.");
+
+        if (!Object.keys(this.objections).length)
+            errors.push("Objections missing.");
+
+        return {
+
+            valid: errors.length === 0,
+
+            errors
+
+        };
+
+    }
+
+    // ===========================================
+    // Safe Getter
+    // ===========================================
+
+    safeGet(callback, defaultValue = null) {
+
+        try {
+
+            return callback();
+
+        } catch (error) {
+
+            console.error("KnowledgeManager:", error.message);
+
+            return defaultValue;
+
+        }
+
+    }
+
+    // ===========================================
+    // Reset Knowledge
+    // ===========================================
+
+    reset() {
+
+        this.industries = INDUSTRIES;
+        this.businessProblems = BUSINESS_PROBLEMS;
+        this.successStories = SUCCESS_STORIES;
+        this.websiteBenefits = WEBSITE_BENEFITS;
+        this.pricing = PRICING_KNOWLEDGE;
+        this.objections = OBJECTIONS;
+
+        return true;
+
+    }
 
 }
 
-export function updateStage(state, userMessage) {
+const knowledgeManager = new KnowledgeManager();
 
-  const message = userMessage.toLowerCase().trim();
+// ===========================================
+// getKnowledge - used by aiService.js
+// Returns a simple bundle: problems, benefits, story
+// for the customer's current industry/state
+// ===========================================
 
-  // ==========================================
-  // DISCOVERY → STORY
-  // ==========================================
+export function getKnowledge(state = {}) {
 
-  if (
-    state.stage === "DISCOVERY" &&
-    state.problem &&
-    state.customerBehaviour &&
-    state.competitor
-  ) {
+    let industryId = state.industryId;
 
-    state.stage = "STORY";
-    state.storyShown = false;
-    return;
+    // If industryId wasn't explicitly set, try to detect it from the
+    // business text we already have (e.g. "Fashion Store", "Gym").
+    // This is what makes STORY stage actually use our real knowledge
+    // base instead of always falling back to "no story available".
+    if (!industryId && state.business) {
 
-  }
+        const matchedIndustry = knowledgeManager.getIndustry(state.business);
 
-  // ==========================================
-  // STORY → DEMO
-  // ==========================================
+        if (matchedIndustry) {
+            industryId = matchedIndustry.id;
+        }
 
-  if (
-    state.stage === "STORY" &&
-    state.storyShown &&
-    hasKeyword(message, ACCEPT_WORDS)
-  ) {
+    }
 
-    state.stage = "DEMO";
-    state.demoShown = false;
-    return;
+    const problemsObj = knowledgeManager.getBusinessProblems(industryId);
 
-  }
+    const problems = [
+        ...(problemsObj.customerProblems || []),
+        ...(problemsObj.salesProblems || [])
+    ];
 
-  // ==========================================
-  // DEMO → CATEGORY
-  // ==========================================
+    const benefitsObj = knowledgeManager.getWebsiteBenefits(industryId);
 
-  if (
-    state.stage === "DEMO" &&
-    (
-      message.includes("achha") ||
-      message.includes("accha") ||
-      message.includes("good") ||
-      message.includes("nice") ||
-      message.includes("mast") ||
-      message.includes("pasand")
-    )
-  ) {
+    const benefits = [
+        ...(benefitsObj.common || []),
+        ...(benefitsObj.category || [])
+    ];
 
-    state.stage = "CATEGORY";
-    return;
+    const stories = knowledgeManager.getSuccessStories(industryId);
+
+    const story = (stories && stories.length) ? stories[0] : null;
+
+    return { problems, benefits, story };
 
 }
 
-  // ==========================================
-  // CATEGORY → DEAL
-  // ==========================================
-
-  if (
-    state.stage === "CATEGORY" &&
-    hasKeyword(message, CATEGORY_WORDS)
-  ) {
-
-    state.selectedCategory = message;
-
-    state.stage = "DEAL";
-
-    return;
-
-  }
-
-  // ==========================================
-  // DEAL → NEGOTIATION
-  // ==========================================
-
-  if (
-    state.stage === "DEAL" &&
-    (
-      hasKeyword(message, PRICE_WORDS) ||
-      hasKeyword(message, PAYMENT_WORDS)
-    )
-  ) {
-
-    state.stage = "NEGOTIATION";
-
-    return;
-
-  }
-
-  // ==========================================
-  // NEGOTIATION → PAYMENT
-  // ==========================================
-
-  if (
-    state.stage === "NEGOTIATION" &&
-    (
-      message.includes("final") ||
-      message.includes("deal") ||
-      message.includes("ready") ||
-      message.includes("banaiye") ||
-      message.includes("kar dijiye") ||
-      hasKeyword(message, PAYMENT_WORDS)
-    )
-  ) {
-
-    state.stage = "PAYMENT";
-
-    return;
-
-  }
-
-  // ==========================================
-  // PAYMENT → FOLLOWUP
-  // ==========================================
-
-  if (
-    state.stage === "PAYMENT" &&
-    (
-      message.includes("paid") ||
-      message.includes("done") ||
-      message.includes("payment") ||
-      message.includes("transfer") ||
-      message.includes("screenshot") ||
-      message.includes("success") ||
-      message.includes("successful")
-    )
-  ) {
-
-    state.paymentReceived = true;
-
-    state.stage = "FOLLOWUP";
-
-    return;
-
-  }
-
-  // ==========================================
-  // Rejection Handling
-  //
-  // Only checked AFTER an actual offer/demo/category/price has
-  // been presented (DEMO, CATEGORY, DEAL, NEGOTIATION, PAYMENT
-  // stages). Never checked during DISCOVERY or STORY, because
-  // customers say "nahi" constantly there just answering
-  // normal questions - that is NOT a rejection of the website.
-  // ==========================================
-
-  const offerStages = ["DEMO", "CATEGORY", "DEAL", "NEGOTIATION", "PAYMENT"];
-
-  if (
-    offerStages.includes(state.stage) &&
-    hasKeyword(message, REJECT_WORDS)
-  ) {
-
-    state.rejected = true;
-
-    state.stage = "FOLLOWUP";
-
-    return;
-
-  }
-
-  // ==========================================
-  // Return Current Stage
-  // ==========================================
-
-  return state.stage;
-
-}
+export default knowledgeManager;
+          
