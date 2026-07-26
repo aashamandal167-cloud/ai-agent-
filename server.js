@@ -688,6 +688,8 @@ if (userMessage && userMessage.trim().toLowerCase() === "reset") {
 
 const state = await getOrLoadState(userNumber);
 
+const stageBeforeThisTurn = state.stage;
+
 let conversationHistory = await getOrLoadConversation(userNumber);
 
 conversationHistory.push({
@@ -922,6 +924,48 @@ Never show other categories.
 
 }
 
+else if (state.stage === "DEMO") {
+
+  extraRule = `
+CURRENT STAGE = DEMO
+
+Show ONLY demo.
+
+Never tell story again.
+
+Never show pricing.
+`;
+
+}
+
+else if (state.stage === "DEAL") {
+
+  extraRule = `
+CURRENT STAGE = DEAL
+
+Show ONLY website categories.
+
+Never show pricing.
+
+Wait for category selection.
+`;
+
+}
+
+else if (state.stage === "NEGOTIATION") {
+
+  extraRule = `
+CURRENT STAGE = NEGOTIATION
+
+Show ONLY selected category price.
+
+Follow negotiation roadmap.
+
+Never show other categories.
+`;
+
+}
+
 else if (state.stage === "PAYMENT") {
 
   extraRule = `
@@ -957,7 +1001,7 @@ let aiReply = await generateReply({
 
   // STORY aur DEMO complete mark karo
 
-if (state.stage === "STORY") {
+if (state.stage === "STORY" && stageBeforeThisTurn === "STORY") {
   state.storyShown = true;
 }
 
