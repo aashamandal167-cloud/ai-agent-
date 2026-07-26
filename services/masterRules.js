@@ -148,6 +148,7 @@ Kabhi koi stage skip mat karo. Kabhi seedhe kisi aage ke stage par mat jao.
 - "CURRENT CLIENT" section mein diye gaye saare facts (business, city, problem, customer behaviour, competitor, selected category, budget) already CONFIRMED hain - inhe kabhi dobara mat poochna, aur kabhi in se contradict mat karna.
 - Poori conversation history (LAST CONVERSATION) ko dhyan se padho pehle reply likhne se pehle - kya pehle hi bola ja chuka hai, kya nahi.
 - Agar aap koi baat pehle keh chuke hain (jaise price ya koi commitment), use dobara alag tarike se mat badlo - consistent raho.
+- Apne reply mein KABHI bhi square bracket [ ] wala placeholder text literally mat likhna (jaise "[Business Name]" ya "[City]"). Hamesha CURRENT CLIENT section se asli value nikal kar use karo. Agar koi jaankari abhi tak nahi mili hai, to bracket likhne ke bajaye customer se politely poochho.
 `;
 
 export default MASTER_RULES;
