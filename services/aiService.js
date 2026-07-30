@@ -144,6 +144,10 @@ Customer Behaviour: ${state.customerBehaviour}
 
 Competitor: ${state.competitor}
 
+Payment Received: ${state.paymentReceived ? "YES - customer has already sent real payment proof, deal is done, do NOT ask discovery/story/demo questions again, only support/follow-up" : "NO"}
+
+(If Payment Received = YES, this conversation is PAST the sales process entirely - only do FOLLOWUP/support behavior, regardless of what stage text says below.)
+
 CURRENT KNOWLEDGE
 
 Business Problems:
@@ -302,3 +306,4 @@ try {
     "Sorry Sir, response generate nahi ho paya."
   );
 }
+  
