@@ -650,17 +650,58 @@ async function persistConversation(userNumber, history) {
 
 }
 
-app.post("/whatsapp-webhook", async (req, res) => {
-
-  try {
+    app.post("/whatsapp-webhook", async (req, res) => {
 
 console.log("🔥 WEBHOOK HIT 🔥");
 
 const userMessage = req.body.Body;
 const userNumber = req.body.From;
+const twilioFromNumber = req.body.To;
+
+// ==========================================================
+// IMMEDIATELY acknowledge Twilio with an empty response.
+// This means Twilio never times out waiting for us and never
+// retries/re-sends the same message - which was causing two
+// requests to process the same conversation at once and stomp
+// on each other's saved state ("forgetting" everything).
+//
+// The actual reply is sent separately below via the Twilio
+// REST API (twilioClient.messages.create), independent of how
+// long Gemini takes.
+// ==========================================================
+
+res.type("text/xml");
+res.send("<Response></Response>");
+
+async function sendWhatsAppReply(text) {
+  try {
+    await twilioClient.messages.create({
+      body: text,
+      from: twilioFromNumber,
+      to: userNumber
+    });
+  } catch (sendErr) {
+    console.error("TWILIO SEND ERROR:", sendErr.message);
+  }
+}
+
+  try {
+
+// ==========================================================
+// REAL PAYMENT PROOF CHECK
+// Twilio tells us if the incoming WhatsApp message actually
+// has an attached image/media via NumMedia + MediaUrl0.
+// We NEVER trust the customer's text alone (e.g. "payment ho gaya")
+// as proof of payment - only real attached media counts.
+// ==========================================================
+
+const numMedia = parseInt(req.body.NumMedia || "0", 10);
+const hasAttachedMedia = numMedia > 0;
+const mediaUrl = req.body.MediaUrl0 || null;
 
 console.log("USER:", userMessage);
 console.log("BODY:", req.body);
+console.log("HAS MEDIA:", hasAttachedMedia, mediaUrl);
 
 // ==========================================================
 // RESET COMMAND (for testing / customer restart)
@@ -675,14 +716,9 @@ if (userMessage && userMessage.trim().toLowerCase() === "reset") {
   await persistState(userNumber, clientState[userNumber]);
   await persistConversation(userNumber, []);
 
-  const resetTwiml = `
-<Response>
-<Message>Sir 😊, conversation reset ho gayi hai. Hello bolke phir se shuru kariye! 🙏</Message>
-</Response>
-`;
+  await sendWhatsAppReply("Sir 😊, conversation reset ho gayi hai. Hello bolke phir se shuru kariye! 🙏");
 
-  res.type("text/xml");
-  return res.send(resetTwiml);
+  return;
 
 }
 
@@ -794,7 +830,7 @@ if (state.competitor) state.factsCount++;
 
 console.log("BEFORE UPDATE =", state.stage);
 
-updateStage(state, userMessage);
+updateStage(state, userMessage, hasAttachedMedia);
 
 console.log("AFTER UPDATE =", state.stage);
 
@@ -924,48 +960,6 @@ Never show other categories.
 
 }
 
-else if (state.stage === "DEMO") {
-
-  extraRule = `
-CURRENT STAGE = DEMO
-
-Show ONLY demo.
-
-Never tell story again.
-
-Never show pricing.
-`;
-
-}
-
-else if (state.stage === "DEAL") {
-
-  extraRule = `
-CURRENT STAGE = DEAL
-
-Show ONLY website categories.
-
-Never show pricing.
-
-Wait for category selection.
-`;
-
-}
-
-else if (state.stage === "NEGOTIATION") {
-
-  extraRule = `
-CURRENT STAGE = NEGOTIATION
-
-Show ONLY selected category price.
-
-Follow negotiation roadmap.
-
-Never show other categories.
-`;
-
-}
-
 else if (state.stage === "PAYMENT") {
 
   extraRule = `
@@ -974,6 +968,13 @@ CURRENT STAGE = PAYMENT
 Ask only for advance payment.
 
 Never negotiate.
+
+PAYMENT PROOF STATUS: ${hasAttachedMedia ? "Customer HAS attached a real image/screenshot with this message." : "Customer has NOT attached any real image/screenshot with this message (even if their text claims payment is done)."}
+
+CRITICAL RULE - PAYMENT VERIFICATION:
+- NEVER say "mujhe screenshot mil gaya hai" ya "payment confirm ho gaya" ya "project shuru ho raha hai" agar customer ne sirf TEXT mein "payment ho gaya" / "done" likha hai lekin koi real image attach nahi ki. Sirf text ek proof NAHI hai.
+- Agar PAYMENT PROOF STATUS "NOT attached" hai: politely bolo "Sir, kripya payment ka screenshot bhi bhej dijiye taaki main confirm kar sakoon" - project start ya confirm mat karo.
+- Agar PAYMENT PROOF STATUS "HAS attached" hai: bolo ki screenshot mil gaya hai aur team verify karke jald hi confirm karegi - lekin abhi bhi "final confirmed, project shuru" jaisa 100% guarantee mat do, kyunki asli verification insaan (Raj khud) karega.
 `;
 
 }
@@ -1010,7 +1011,7 @@ if (state.stage === "DEMO") {
 }
 
 // DEMO STAGE - actual demo link bhejo (ek hi baar)
-if (state.stage === "DEMO" && !state.demoLinkSent) {
+if (state.stage === "DEMO" && stageBeforeThisTurn === "DEMO" && !state.demoLinkSent) {
 
   const appUrl = process.env.APP_URL || "https://ai-agent-h5dd.onrender.com";
 
@@ -1030,13 +1031,7 @@ content: aiReply
 await persistState(userNumber, state);
 await persistConversation(userNumber, conversationHistory);
 
-const twiml = `
-
-<Response>  
-<Message>${aiReply}</Message>  
-</Response>  
-`;  res.type("text/xml");  
-res.send(twiml);
+await sendWhatsAppReply(aiReply);
 
 } catch (err) {
     
@@ -1047,12 +1042,7 @@ res.send(twiml);
     console.error(err.stack);
   }
 
-  res.type("text/xml");
-  res.send(`
-<Response>
-<Message>Error: ${err.message}</Message>
-</Response>
-`);
+  await sendWhatsAppReply(`Sir 😊, thoda technical dikkat aa rahi hai abhi. Kripya 1-2 minute baad phir se message kijiye. 🙏`);
 
   }
 
@@ -1063,3 +1053,4 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+        
