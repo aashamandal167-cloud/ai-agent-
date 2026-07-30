@@ -88,7 +88,7 @@ function hasKeyword(message, keywords) {
 
 }
 
-export function updateStage(state, userMessage) {
+export function updateStage(state, userMessage, hasAttachedMedia = false) {
 
   const message = userMessage.toLowerCase().trim();
 
@@ -205,28 +205,31 @@ export function updateStage(state, userMessage) {
 
   // ==========================================
   // PAYMENT → FOLLOWUP
+  //
+  // IMPORTANT: We only mark payment as received when the customer
+  // actually attaches real media (a screenshot image) with their
+  // WhatsApp message. A customer just TYPING "payment ho gaya" or
+  // "done" is NOT proof - that alone must never confirm payment.
+  // This matters for real money/legal reasons.
   // ==========================================
 
   if (
     state.stage === "PAYMENT" &&
-    (
-      message.includes("paid") ||
-      message.includes("done") ||
-      message.includes("payment") ||
-      message.includes("transfer") ||
-      message.includes("screenshot") ||
-      message.includes("success") ||
-      message.includes("successful")
-    )
+    hasAttachedMedia
   ) {
 
     state.paymentReceived = true;
+    state.paymentNeedsManualVerification = true;
 
     state.stage = "FOLLOWUP";
 
     return;
 
   }
+
+  // If customer CLAIMS payment via text only (no media attached),
+  // stay in PAYMENT stage and let the brain/extraRule ask for the
+  // actual screenshot - do NOT advance the stage here.
 
   // ==========================================
   // Rejection Handling
@@ -260,4 +263,3 @@ export function updateStage(state, userMessage) {
   return state.stage;
 
 }
-  
