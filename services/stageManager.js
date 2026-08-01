@@ -98,9 +98,7 @@ export function updateStage(state, userMessage, hasAttachedMedia = false) {
 
   if (
     state.stage === "DISCOVERY" &&
-    state.problem &&
-    state.customerBehaviour &&
-    state.competitor
+    state.problem
   ) {
 
     state.stage = "STORY";
@@ -262,4 +260,4 @@ export function updateStage(state, userMessage, hasAttachedMedia = false) {
 
   return state.stage;
 
-}
+  }
