@@ -650,7 +650,7 @@ async function persistConversation(userNumber, history) {
 
 }
 
-    app.post("/whatsapp-webhook", async (req, res) => {
+        app.post("/whatsapp-webhook", async (req, res) => {
 
 console.log("🔥 WEBHOOK HIT 🔥");
 
@@ -820,6 +820,26 @@ if (
   state.competitor = "No Website";
 }
 
+// Robust fallback: Discovery now asks ONE consolidated question about
+// the business's biggest customer/sales problem. If we're still in
+// DISCOVERY, business is already known (possibly just set above in
+// this same message), problem is still empty, and this message is a
+// real/substantive reply (not just a greeting or the reset command) -
+// capture it directly as the problem, instead of relying only on the
+// narrow keyword matches above.
+const trivialMessages = ["hello", "hi", "hey", "reset", "namaste", "hii", "helo"];
+
+if (
+  state.stage === "DISCOVERY" &&
+  state.business &&
+  !state.problem &&
+  userMessage &&
+  userMessage.trim().length > 3 &&
+  !trivialMessages.includes(lowerMsg)
+) {
+  state.problem = userMessage.trim();
+}
+
 state.factsCount = 0;
 
 if (state.business) state.factsCount++;
@@ -849,22 +869,12 @@ let extraRule = "";
 
 if (state.stage === "DISCOVERY") {
 
-  const missingItems = [];
+  if (!state.problem) {
 
-  if (!state.problem) missingItems.push({ key: "problem", question: "Sir, aapko sabse badi problem kya lagti hai business mein?" });
-  if (!state.customerBehaviour) missingItems.push({ key: "customerBehaviour", question: "Kya customers pehle aapke paas aate the?" });
-  if (!state.competitor) missingItems.push({ key: "competitor", question: "Kya competitors ke paas website hai?" });
-
-  if (missingItems.length > 0) {
-
-    const nextQuestion = missingItems[0].question;
     const alreadyKnownParts = [];
 
     if (state.business) alreadyKnownParts.push(`Business = ${state.business}`);
     if (state.city) alreadyKnownParts.push(`City = ${state.city}`);
-    if (state.problem) alreadyKnownParts.push(`Problem = ${state.problem}`);
-    if (state.customerBehaviour) alreadyKnownParts.push(`Customer Behaviour = ${state.customerBehaviour}`);
-    if (state.competitor) alreadyKnownParts.push(`Competitor = ${state.competitor}`);
 
     extraRule = `
 CURRENT STAGE = DISCOVERY
@@ -872,15 +882,14 @@ CURRENT STAGE = DISCOVERY
 ALREADY KNOWN (DO NOT ask about these again, DO NOT ask to "confirm" these again):
 ${alreadyKnownParts.length ? alreadyKnownParts.join(", ") : "Nothing yet"}
 
-STILL MISSING: ${missingItems.map(m => m.key).join(", ")}
-
-YOUR NEXT QUESTION MUST BE (in your own natural Hinglish words, but asking exactly this): "${nextQuestion}"
+YOUR NEXT QUESTION MUST BE (in your own natural Hinglish words, ONE consolidated question, but asking exactly this): "Sir, kya aap thoda sa bata sakte hain ki aapke business mein abhi sabse badi customer ya sales problem kya chal rahi hai?"
 
 Rules:
 - Do NOT re-ask for business name or city if they are already listed above as known.
-- If the customer's last message already answered the next question, acknowledge it briefly and move on - do not repeat the same question.
-- If customer asked something off-topic (like your name), answer in one short line, then still ask the next question above.
-- Ask ONLY ONE question - the one specified above.
+- Do NOT ask separate questions about customer behaviour or competitors - this ONE question covers everything needed for Discovery.
+- If the customer's last message already answered this question, acknowledge it briefly and move on - do not repeat the same question.
+- If customer asked something off-topic (like your name), answer in one short line, then still ask this question above (if not answered yet).
+- Ask ONLY this ONE question.
 
 Never tell story.
 Never show demo.
@@ -893,7 +902,7 @@ Never show pricing.
     extraRule = `
 CURRENT STAGE = DISCOVERY
 
-Saari discovery jaankari mil chuki hai (problem, customer behaviour, competitor).
+Discovery jaankari mil chuki hai (business ki sabse badi customer/sales problem).
 
 Ab customer ko politely batao ki aapke paas unke jaisi problem waale ek business ki chhoti si success story hai, aur unse permission maango woh sunane ki.
 `;
@@ -1053,4 +1062,4 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-        
+              
