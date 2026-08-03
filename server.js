@@ -566,11 +566,16 @@ async function getOrLoadState(userNumber) {
         .eq("phone", userNumber)
         .maybeSingle();
 
-      if (!error && data && data.state) {
+      if (error) {
+        console.log("STATE LOAD SUPABASE ERROR:", JSON.stringify(error));
+      } else if (data && data.state) {
         state = data.state;
+        console.log("STATE LOADED FROM SUPABASE OK, stage =", state.stage);
+      } else {
+        console.log("STATE LOAD: no existing row found for", userNumber);
       }
     } catch (e) {
-      console.log("STATE LOAD ERROR:", e.message);
+      console.log("STATE LOAD EXCEPTION:", e.message);
     }
   }
 
@@ -585,15 +590,19 @@ async function persistState(userNumber, state) {
 
   if (supabase) {
     try {
-      await supabase
+      const { error } = await supabase
         .from("client_state")
         .upsert({
           phone: userNumber,
           state,
           updated_at: new Date().toISOString()
         });
+
+      if (error) {
+        console.log("STATE SAVE SUPABASE ERROR:", JSON.stringify(error));
+      }
     } catch (e) {
-      console.log("STATE SAVE ERROR:", e.message);
+      console.log("STATE SAVE EXCEPTION:", e.message);
     }
   }
 
@@ -615,11 +624,16 @@ async function getOrLoadConversation(userNumber) {
         .eq("phone", userNumber)
         .maybeSingle();
 
-      if (!error && data && data.messages) {
+      if (error) {
+        console.log("CONVO LOAD SUPABASE ERROR:", JSON.stringify(error));
+      } else if (data && data.messages) {
         history = data.messages;
+        console.log("CONVO LOADED FROM SUPABASE OK, messages count =", history.length);
+      } else {
+        console.log("CONVO LOAD: no existing row found for", userNumber);
       }
     } catch (e) {
-      console.log("CONVO LOAD ERROR:", e.message);
+      console.log("CONVO LOAD EXCEPTION:", e.message);
     }
   }
 
@@ -636,15 +650,19 @@ async function persistConversation(userNumber, history) {
 
   if (supabase) {
     try {
-      await supabase
+      const { error } = await supabase
         .from("client_conversations")
         .upsert({
           phone: userNumber,
           messages: trimmed,
           updated_at: new Date().toISOString()
         });
+
+      if (error) {
+        console.log("CONVO SAVE SUPABASE ERROR:", JSON.stringify(error));
+      }
     } catch (e) {
-      console.log("CONVO SAVE ERROR:", e.message);
+      console.log("CONVO SAVE EXCEPTION:", e.message);
     }
   }
 
@@ -1062,4 +1080,4 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-              
+    
