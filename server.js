@@ -7,6 +7,7 @@ import { getBrain } from "./services/brainManager.js";
 import { generateReply } from "./services/aiService.js";
 import { updateStage } from "./services/stageManager.js";
 import INDUSTRIES from "./knowledge/industries.js";
+import { generateDemoWebsite } from "./services/demoGenerator.js";
 
 const conversations = {};
 const clientState = {};
@@ -38,6 +39,34 @@ app.use(express.static("."));
 
 app.get("/", (req, res) => {
   res.sendFile(process.cwd() + "/index.html");
+});
+
+// Serves a client's AI-generated custom demo website by id.
+app.get("/demo/:id", async (req, res) => {
+
+  if (!supabase) {
+    return res.status(503).send("Demo storage not configured.");
+  }
+
+  try {
+
+    const { data, error } = await supabase
+      .from("generated_demos")
+      .select("html")
+      .eq("id", req.params.id)
+      .maybeSingle();
+
+    if (error || !data) {
+      return res.status(404).send("Demo not found. Link may have expired.");
+    }
+
+    res.set("Content-Type", "text/html");
+    res.send(data.html);
+
+  } catch (err) {
+    res.status(500).send("Error loading demo: " + err.message);
+  }
+
 });
 
 app.get("/test-sms", async (req, res) => {
@@ -1042,7 +1071,52 @@ if (state.stage === "DEMO" && stageBeforeThisTurn === "DEMO" && !state.demoLinkS
 
   const appUrl = process.env.APP_URL || "https://ai-agent-h5dd.onrender.com";
 
-  aiReply = `${aiReply}\n\n👉 ${appUrl}/demo.html`;
+  // Static fallback demos (used only if live generation fails/errors,
+  // so the customer never gets stuck without any demo link).
+  const DEMO_FILE_BY_INDUSTRY = {
+    fashion_store: "demo.html",
+    restaurant: "demo-restaurant.html",
+    salon: "demo-salon.html",
+    gym: "demo-gym.html",
+    kirana_store: "demo-kirana.html"
+  };
+
+  let demoUrl = null;
+
+  try {
+
+    const generatedHtml = await generateDemoWebsite(state);
+
+    const demoId =
+      Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+    if (supabase) {
+
+      const { error } = await supabase
+        .from("generated_demos")
+        .upsert({ id: demoId, html: generatedHtml });
+
+      if (error) {
+        console.log("DEMO SAVE SUPABASE ERROR:", JSON.stringify(error));
+        throw new Error("Could not save generated demo");
+      }
+
+      demoUrl = `${appUrl}/demo/${demoId}`;
+
+    } else {
+      throw new Error("Supabase not configured for demo storage");
+    }
+
+  } catch (genErr) {
+
+    console.log("DEMO GENERATION FAILED, using static fallback:", genErr.message);
+
+    const fallbackFile = DEMO_FILE_BY_INDUSTRY[state.industryId] || "demo.html";
+    demoUrl = `${appUrl}/${fallbackFile}`;
+
+  }
+
+  aiReply = `${aiReply}\n\n👉 ${demoUrl}`;
 
   state.demoLinkSent = true;
 
