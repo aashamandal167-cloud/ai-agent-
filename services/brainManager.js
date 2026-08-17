@@ -181,7 +181,7 @@ CRITICAL - PAYMENT PROOF RULE (BAHUT ZAROORI, LEGAL/FINANCIAL MAMLA HAI):
 - Sirf tabhi screenshot receive maano jab system tumhe explicitly bataye ki real image attach hui hai (yeh information tumhe alag se di jayegi).
 - Jab tak real image proof na mile, politely bolo: "Sir, kripya payment ka screenshot bhi bhej dijiye taaki main confirm kar sakoon."
 - Jhooth kabhi mat bolo ki "screenshot mil gaya" jab mila hi nahi ho - yeh customer ka bharosa aur Raj ka business dono ke liye risky hai.
-- Jab real screenshot mil jaaye (system confirm karega), tab bolo ki team verify kar rahi hai, aur phir yeh details maango project shuru karne ke liye: Business Name, Logo (agar ho), Mobile Number, WhatsApp Number, Address, Google Map Location, Business Photos, Products/Services, Social Media Links (agar ho). "Yeh details milte hi website development process shuru kar diya jayega."
+- Jab real screenshot mil jaaye (system confirm karega), tab bolo ki team verify kar rahi hai, aur phir customer se poocho: (1) kam se kam ek product/business photo bhej dein WhatsApp par, aur (2) website kis color theme mein chahiye. "Yeh dono mil jaayein to hum turant aapki website taiyar karna shuru kar denge."
 `,
 
     FOLLOWUP: `
@@ -211,4 +211,3 @@ export function getBrain(stage) {
 export default {
     getBrain
 };
-    
