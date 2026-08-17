@@ -8,9 +8,25 @@ import { generateReply } from "./services/aiService.js";
 import { updateStage } from "./services/stageManager.js";
 import INDUSTRIES from "./knowledge/industries.js";
 import { generateDemoWebsite } from "./services/demoGenerator.js";
+import { generateFinalWebsite } from "./services/websiteGenerator.js";
 
 const conversations = {};
 const clientState = {};
+
+// Per-phone-number processing queue - ensures messages from the SAME
+// number are always processed one at a time, in order, even if a
+// second message arrives while the first is still being handled
+// (e.g. waiting on a slow Gemini call). This prevents two overlapping
+// requests from both reading/writing the same state and both sending
+// replies for what looks like one message.
+const userQueues = {};
+
+function runSequential(userNumber, task) {
+  const previous = userQueues[userNumber] || Promise.resolve();
+  const current = previous.then(task, task);
+  userQueues[userNumber] = current.catch(() => {});
+  return current;
+}
 
 const app = express();
 const twilioClient = twilio(
@@ -65,6 +81,34 @@ app.get("/demo/:id", async (req, res) => {
 
   } catch (err) {
     res.status(500).send("Error loading demo: " + err.message);
+  }
+
+});
+
+// Serves a client's REAL final generated website by id.
+app.get("/site/:id", async (req, res) => {
+
+  if (!supabase) {
+    return res.status(503).send("Website storage not configured.");
+  }
+
+  try {
+
+    const { data, error } = await supabase
+      .from("client_websites")
+      .select("html")
+      .eq("id", req.params.id)
+      .maybeSingle();
+
+    if (error || !data) {
+      return res.status(404).send("Website not found.");
+    }
+
+    res.set("Content-Type", "text/html");
+    res.send(data.html);
+
+  } catch (err) {
+    res.status(500).send("Error loading website: " + err.message);
   }
 
 });
@@ -573,7 +617,17 @@ function defaultClientState() {
     competitor: "",
 
     industryId: "",
-    demoLinkSent: false
+    demoLinkSent: false,
+
+    // Post-payment: real website generation workflow
+    productPhotos: [],
+    colorPreference: "",
+    requirementsLocked: false,
+    finalWebsiteUrl: "",
+    finalWebsiteGenerated: false,
+    finalWebsiteLinkSent: false,
+    remainingPaymentRequested: false,
+    remainingPaymentReceived: false
   };
 }
 
@@ -697,7 +751,7 @@ async function persistConversation(userNumber, history) {
 
 }
 
-        app.post("/whatsapp-webhook", async (req, res) => {
+            app.post("/whatsapp-webhook", async (req, res) => {
 
 console.log("🔥 WEBHOOK HIT 🔥");
 
@@ -731,6 +785,8 @@ async function sendWhatsAppReply(text) {
     console.error("TWILIO SEND ERROR:", sendErr.message);
   }
 }
+
+await runSequential(userNumber, async () => {
 
   try {
 
@@ -901,6 +957,135 @@ updateStage(state, userMessage, hasAttachedMedia);
 
 console.log("AFTER UPDATE =", state.stage);
 
+// ==========================================================
+// POST-PAYMENT: PHOTO + COLOR COLLECTION -> LOCK -> GENERATE
+// REAL WEBSITE -> ASK FOR REMAINING PAYMENT
+// ==========================================================
+
+if (state.stage === "FOLLOWUP" && state.paymentReceived) {
+
+  // Once requirements are locked, any further image is treated as
+  // remaining-payment proof, NOT another product photo.
+  if (hasAttachedMedia && state.requirementsLocked && state.finalWebsiteGenerated) {
+
+    if (!state.remainingPaymentReceived) {
+      state.remainingPaymentReceived = true;
+      console.log("REMAINING PAYMENT MARKED RECEIVED for", userNumber);
+    }
+
+  } else if (hasAttachedMedia && !state.requirementsLocked && mediaUrl) {
+
+    // Collect a product/business photo: download from Twilio (needs
+    // Basic Auth) and re-host it publicly in Supabase Storage.
+    try {
+
+      const twilioAuth = Buffer.from(
+        `${process.env.TWILIO_ACCOUNT_SID}:${process.env.TWILIO_AUTH_TOKEN}`
+      ).toString("base64");
+
+      const imgResponse = await fetch(mediaUrl, {
+        headers: { Authorization: `Basic ${twilioAuth}` }
+      });
+
+      const imgBuffer = Buffer.from(await imgResponse.arrayBuffer());
+
+      const contentType = imgResponse.headers.get("content-type") || "image/jpeg";
+      const ext = contentType.includes("png") ? "png" : "jpg";
+      const fileName = `${userNumber.replace(/[^a-zA-Z0-9]/g, "")}_${Date.now()}.${ext}`;
+
+      if (supabase) {
+
+        const { error: uploadError } = await supabase.storage
+          .from("client-photos")
+          .upload(fileName, imgBuffer, { contentType });
+
+        if (uploadError) {
+          console.log("PHOTO UPLOAD ERROR:", JSON.stringify(uploadError));
+        } else {
+
+          const { data: publicUrlData } = supabase.storage
+            .from("client-photos")
+            .getPublicUrl(fileName);
+
+          if (publicUrlData && publicUrlData.publicUrl) {
+            state.productPhotos.push(publicUrlData.publicUrl);
+            console.log("PHOTO SAVED:", publicUrlData.publicUrl);
+          }
+
+        }
+
+      }
+
+    } catch (photoErr) {
+      console.log("PHOTO PROCESSING EXCEPTION:", photoErr.message);
+    }
+
+  }
+
+  // Color preference capture (simple keyword + fallback to raw text)
+  if (!state.colorPreference) {
+
+    const colorWords = [
+      "blue", "red", "gold", "golden", "pink", "black", "white", "green",
+      "purple", "orange", "yellow", "nila", "lal", "kala", "safed", "hara",
+      "peela", "gulabi"
+    ];
+
+    const matchedColor = colorWords.find(c => lowerMsg.includes(c));
+
+    if (matchedColor) {
+      state.colorPreference = matchedColor;
+    } else if (
+      lowerMsg.includes("color") ||
+      lowerMsg.includes("colour") ||
+      lowerMsg.includes("rang")
+    ) {
+      state.colorPreference = userMessage.trim();
+    }
+
+  }
+
+  // Lock requirements and generate the real website once we have
+  // at least 1 photo and a color preference.
+  if (
+    !state.requirementsLocked &&
+    state.productPhotos.length >= 1 &&
+    state.colorPreference
+  ) {
+
+    state.requirementsLocked = true;
+
+    try {
+
+      const finalHtml = await generateFinalWebsite(state);
+
+      const siteId =
+        Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+      if (supabase) {
+
+        const { error: siteError } = await supabase
+          .from("client_websites")
+          .upsert({ id: siteId, phone: userNumber, html: finalHtml });
+
+        if (siteError) {
+          console.log("FINAL SITE SAVE ERROR:", JSON.stringify(siteError));
+        } else {
+          const appUrlForSite = process.env.APP_URL || "https://ai-agent-h5dd.onrender.com";
+          state.finalWebsiteUrl = `${appUrlForSite}/site/${siteId}`;
+          state.finalWebsiteGenerated = true;
+        }
+
+      }
+
+    } catch (genErr) {
+      console.log("FINAL WEBSITE GENERATION FAILED:", genErr.message);
+    }
+
+  }
+
+}
+
 // Save facts NOW, before calling Gemini - so even if the AI call
 // fails/times out below, we never lose what we already extracted.
 await persistState(userNumber, state);
@@ -1037,13 +1222,61 @@ CRITICAL RULE - PAYMENT VERIFICATION:
 
 else if (state.stage === "FOLLOWUP") {
 
-  extraRule = `
+  if (state.paymentReceived && !state.requirementsLocked) {
+
+    const stillNeed = [];
+    if (state.productPhotos.length === 0) stillNeed.push("kam se kam ek product/business photo");
+    if (!state.colorPreference) stillNeed.push("website ka color preference");
+
+    extraRule = `
+CURRENT STAGE = FOLLOWUP (advance payment mil chuka hai)
+
+Ab customer se yeh maango (agar abhi tak nahi mila): ${stillNeed.join(" aur ")}.
+
+Photo bhejne ke liye politely bolo ki WhatsApp par image attach karke bhej dein. Color ke liye poocho "Sir, website kis color theme mein chahiye?"
+
+Jab tak dono na mil jaayein, baar baar politely yehi maango, ek baar mein ek cheez.
+
+Never confirm/declare that the website is ready yet - system will tell you when it's actually generated.
+`;
+
+  } else if (state.paymentReceived && state.requirementsLocked && state.finalWebsiteGenerated && !state.finalWebsiteLinkSent) {
+
+    extraRule = `
+CURRENT STAGE = FOLLOWUP (website ban chuki hai)
+
+Customer ko batao ki unki website ban gayi hai aur khushi se share karo ki link neeche aa raha hai (system automatically link attach karega - aap khud koi link mat likhna).
+
+Uske baad politely baaki 50 percent payment maango.
+`;
+
+  } else if (state.paymentReceived && state.requirementsLocked && state.finalWebsiteGenerated && !state.remainingPaymentReceived) {
+
+    extraRule = `
+CURRENT STAGE = FOLLOWUP (website deliver ho chuki hai, baaki payment baaki hai)
+
+Politely baaki 50 percent payment maango agar abhi tak nahi mila.
+
+Agar customer text mein "payment kar diya" bole lekin koi real image attach na ho, to yehi bolo ki screenshot bhi bhej dein confirm karne ke liye - kabhi khud se confirm mat karo bina real image ke (system batayega jab real image milegi).
+`;
+
+  } else if (state.remainingPaymentReceived) {
+
+    extraRule = `
+CURRENT STAGE = FOLLOWUP (poora payment mil chuka hai)
+
+Customer ka dhanyavaad karo, unhe assure karo ki website live hai aur agar future mein koi changes chahiye ho to aap available hain.
+`;
+
+  } else {
+
+    extraRule = `
 CURRENT STAGE = FOLLOWUP
 
-Support customer.
-
-Give updates only.
+Support customer politely. Agar deal nahi hui thi, warm note par close karo. Force mat karo.
 `;
+
+  }
 
 }
 
@@ -1067,7 +1300,9 @@ if (state.stage === "DEMO") {
 }
 
 // DEMO STAGE - actual demo link bhejo (ek hi baar)
-if (state.stage === "DEMO" && stageBeforeThisTurn === "DEMO" && !state.demoLinkSent) {
+const isFallbackReply = aiReply.includes("thoda technical dikkat aa rahi hai");
+
+if (state.stage === "DEMO" && stageBeforeThisTurn === "DEMO" && !state.demoLinkSent && !isFallbackReply) {
 
   const appUrl = process.env.APP_URL || "https://ai-agent-h5dd.onrender.com";
 
@@ -1122,6 +1357,20 @@ if (state.stage === "DEMO" && stageBeforeThisTurn === "DEMO" && !state.demoLinkS
 
 }
 
+// Send the final real website link once it's ready (one time only)
+if (
+  state.finalWebsiteGenerated &&
+  state.finalWebsiteUrl &&
+  !state.finalWebsiteLinkSent &&
+  !isFallbackReply
+) {
+
+  aiReply = `${aiReply}\n\n🌐 ${state.finalWebsiteUrl}`;
+
+  state.finalWebsiteLinkSent = true;
+
+}
+
 // USKE BAAD HISTORY SAVE
 
 conversationHistory.push({
@@ -1149,9 +1398,11 @@ await sendWhatsAppReply(aiReply);
 
 });
 
+});
+
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-    
+        
