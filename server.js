@@ -9,6 +9,7 @@ import { updateStage } from "./services/stageManager.js";
 import INDUSTRIES from "./knowledge/industries.js";
 import { generateDemoWebsite } from "./services/demoGenerator.js";
 import { generateFinalWebsite } from "./services/websiteGenerator.js";
+import { extractPaymentInfo } from "./services/paymentVerifier.js";
 
 const conversations = {};
 const clientState = {};
@@ -494,6 +495,7 @@ app.get("/test-supabase", async (req, res) => {
     message: "Supabase Connected 🚀"
   });
 
+        
 });
 
 app.get("/test-history-save", async (req, res) => {
@@ -627,7 +629,8 @@ function defaultClientState() {
     finalWebsiteGenerated: false,
     finalWebsiteLinkSent: false,
     remainingPaymentRequested: false,
-    remainingPaymentReceived: false
+    remainingPaymentReceived: false,
+    qrCodeSent: false
   };
 }
 
@@ -751,7 +754,7 @@ async function persistConversation(userNumber, history) {
 
 }
 
-            app.post("/whatsapp-webhook", async (req, res) => {
+app.post("/whatsapp-webhook", async (req, res) => {
 
 console.log("🔥 WEBHOOK HIT 🔥");
 
@@ -774,13 +777,17 @@ const twilioFromNumber = req.body.To;
 res.type("text/xml");
 res.send("<Response></Response>");
 
-async function sendWhatsAppReply(text) {
+async function sendWhatsAppReply(text, mediaUrl) {
   try {
-    await twilioClient.messages.create({
+    const payload = {
       body: text,
       from: twilioFromNumber,
       to: userNumber
-    });
+    };
+    if (mediaUrl) {
+      payload.mediaUrl = [mediaUrl];
+    }
+    await twilioClient.messages.create(payload);
   } catch (sendErr) {
     console.error("TWILIO SEND ERROR:", sendErr.message);
   }
@@ -953,6 +960,39 @@ if (state.competitor) state.factsCount++;
 
 console.log("BEFORE UPDATE =", state.stage);
 
+// If customer submits a real payment screenshot while we're at PAYMENT
+// stage, try to read the amount/recipient off it via Gemini Vision -
+// this does NOT block confirmation (we have no gateway to be 100%
+// sure), but logs it clearly so Rahul can manually cross-check
+// against his own UPI/bank app before starting real work.
+if (state.stage === "PAYMENT" && hasAttachedMedia && mediaUrl) {
+
+  try {
+
+    const twilioAuth = Buffer.from(
+      `${process.env.TWILIO_ACCOUNT_SID}:${process.env.TWILIO_AUTH_TOKEN}`
+    ).toString("base64");
+
+    const payImgResponse = await fetch(mediaUrl, {
+      headers: { Authorization: `Basic ${twilioAuth}` }
+    });
+
+    const payImgBuffer = Buffer.from(await payImgResponse.arrayBuffer());
+    const payMimeType = payImgResponse.headers.get("content-type") || "image/jpeg";
+
+    const extracted = await extractPaymentInfo(payImgBuffer, payMimeType);
+
+    console.log("=== PAYMENT SCREENSHOT CHECK (verify manually!) ===");
+    console.log("From customer:", userNumber);
+    console.log(extracted || "Could not extract details");
+    console.log("====================================================");
+
+  } catch (payCheckErr) {
+    console.log("PAYMENT SCREENSHOT CHECK FAILED:", payCheckErr.message);
+  }
+
+  }
+        
 updateStage(state, userMessage, hasAttachedMedia);
 
 console.log("AFTER UPDATE =", state.stage);
@@ -973,52 +1013,79 @@ if (state.stage === "FOLLOWUP" && state.paymentReceived) {
       console.log("REMAINING PAYMENT MARKED RECEIVED for", userNumber);
     }
 
-  } else if (hasAttachedMedia && !state.requirementsLocked && mediaUrl) {
+  } else if (hasAttachedMedia && !state.requirementsLocked) {
 
-    // Collect a product/business photo: download from Twilio (needs
-    // Basic Auth) and re-host it publicly in Supabase Storage.
-    try {
+    console.log(`PHOTO STEP: processing ${numMedia} attached media item(s) for`, userNumber);
 
-      const twilioAuth = Buffer.from(
-        `${process.env.TWILIO_ACCOUNT_SID}:${process.env.TWILIO_AUTH_TOKEN}`
-      ).toString("base64");
+    // Twilio sends multiple images as MediaUrl0, MediaUrl1, MediaUrl2...
+    // Loop through ALL of them, not just the first, since customers
+    // commonly send several photos at once.
+    for (let i = 0; i < numMedia; i++) {
 
-      const imgResponse = await fetch(mediaUrl, {
-        headers: { Authorization: `Basic ${twilioAuth}` }
-      });
+      const thisMediaUrl = req.body[`MediaUrl${i}`];
 
-      const imgBuffer = Buffer.from(await imgResponse.arrayBuffer());
+      if (!thisMediaUrl) {
+        console.log(`PHOTO STEP: no MediaUrl${i} found, skipping`);
+        continue;
+      }
 
-      const contentType = imgResponse.headers.get("content-type") || "image/jpeg";
-      const ext = contentType.includes("png") ? "png" : "jpg";
-      const fileName = `${userNumber.replace(/[^a-zA-Z0-9]/g, "")}_${Date.now()}.${ext}`;
+      try {
 
-      if (supabase) {
+        console.log(`PHOTO STEP: downloading media ${i} from Twilio:`, thisMediaUrl);
+
+        const twilioAuth = Buffer.from(
+          `${process.env.TWILIO_ACCOUNT_SID}:${process.env.TWILIO_AUTH_TOKEN}`
+        ).toString("base64");
+
+        const imgResponse = await fetch(thisMediaUrl, {
+          headers: { Authorization: `Basic ${twilioAuth}` }
+        });
+
+        if (!imgResponse.ok) {
+          console.log(`PHOTO STEP: Twilio download failed, status ${imgResponse.status} for media ${i}`);
+          continue;
+        }
+
+        const imgBuffer = Buffer.from(await imgResponse.arrayBuffer());
+
+        console.log(`PHOTO STEP: downloaded media ${i}, size = ${imgBuffer.length} bytes`);
+
+        const contentType = imgResponse.headers.get("content-type") || "image/jpeg";
+        const ext = contentType.includes("png") ? "png" : "jpg";
+        const fileName = `${userNumber.replace(/[^a-zA-Z0-9]/g, "")}_${Date.now()}_${i}.${ext}`;
+
+        if (!supabase) {
+          console.log("PHOTO STEP: supabase not configured, cannot store photo");
+          continue;
+        }
 
         const { error: uploadError } = await supabase.storage
           .from("client-photos")
           .upload(fileName, imgBuffer, { contentType });
 
         if (uploadError) {
-          console.log("PHOTO UPLOAD ERROR:", JSON.stringify(uploadError));
-        } else {
-
-          const { data: publicUrlData } = supabase.storage
-            .from("client-photos")
-            .getPublicUrl(fileName);
-
-          if (publicUrlData && publicUrlData.publicUrl) {
-            state.productPhotos.push(publicUrlData.publicUrl);
-            console.log("PHOTO SAVED:", publicUrlData.publicUrl);
-          }
-
+          console.log(`PHOTO UPLOAD ERROR for media ${i}:`, JSON.stringify(uploadError));
+          continue;
         }
 
+        const { data: publicUrlData } = supabase.storage
+          .from("client-photos")
+          .getPublicUrl(fileName);
+
+        if (publicUrlData && publicUrlData.publicUrl) {
+          state.productPhotos.push(publicUrlData.publicUrl);
+          console.log(`PHOTO SAVED (media ${i}):`, publicUrlData.publicUrl);
+        } else {
+          console.log(`PHOTO STEP: upload succeeded for media ${i} but no public URL returned`);
+        }
+
+      } catch (photoErr) {
+        console.log(`PHOTO PROCESSING EXCEPTION for media ${i}:`, photoErr.message);
       }
 
-    } catch (photoErr) {
-      console.log("PHOTO PROCESSING EXCEPTION:", photoErr.message);
     }
+
+    console.log("PHOTO STEP: total photos stored so far =", state.productPhotos.length);
 
   }
 
@@ -1203,12 +1270,18 @@ Never show other categories.
 
 else if (state.stage === "PAYMENT") {
 
+  const realUpiId = process.env.RAJ_UPI_ID || "";
+
   extraRule = `
 CURRENT STAGE = PAYMENT
 
 Ask only for advance payment.
 
 Never negotiate.
+
+REAL UPI ID (use this EXACT value if customer asks for payment details - NEVER invent your own UPI ID): ${realUpiId || "(not configured yet - tell customer payment details are being prepared)"}
+
+If customer asks how to pay: tell them the UPI ID above, and mention a QR code is also being sent below (system attaches it automatically - you don't need to describe it in detail).
 
 PAYMENT PROOF STATUS: ${hasAttachedMedia ? "Customer HAS attached a real image/screenshot with this message." : "Customer has NOT attached any real image/screenshot with this message (even if their text claims payment is done)."}
 
@@ -1231,11 +1304,13 @@ else if (state.stage === "FOLLOWUP") {
     extraRule = `
 CURRENT STAGE = FOLLOWUP (advance payment mil chuka hai)
 
-Ab customer se yeh maango (agar abhi tak nahi mila): ${stillNeed.join(" aur ")}.
+Ab customer se SIRF yeh maango (agar abhi tak nahi mila): ${stillNeed.join(" aur ")}.
 
 Photo bhejne ke liye politely bolo ki WhatsApp par image attach karke bhej dein. Color ke liye poocho "Sir, website kis color theme mein chahiye?"
 
 Jab tak dono na mil jaayein, baar baar politely yehi maango, ek baar mein ek cheez.
+
+STRICT RULE: Address, business ka poora naam, logo, mobile number, WhatsApp number, Google Map location, social media links - IN MEIN SE KUCH BHI MAT POOCHHO. Sirf photo aur color - bas yeh 2 cheezein chahiye, aur kuch nahi. Agar customer khud koi aur detail de de (jaise address), to politely thank karo lekin usko age nahi badhao, sirf photo/color pe focus karo.
 
 Never confirm/declare that the website is ready yet - system will tell you when it's actually generated.
 `;
@@ -1381,7 +1456,15 @@ content: aiReply
 await persistState(userNumber, state);
 await persistConversation(userNumber, conversationHistory);
 
-await sendWhatsAppReply(aiReply);
+if (state.stage === "PAYMENT" && !state.qrCodeSent && !isFallbackReply) {
+
+  const appUrlForQr = process.env.APP_URL || "https://ai-agent-h5dd.onrender.com";
+  await sendWhatsAppReply(aiReply, `${appUrlForQr}/qr-code.png`);
+  state.qrCodeSent = true;
+
+} else {
+  await sendWhatsAppReply(aiReply);
+}
 
 } catch (err) {
     
@@ -1405,4 +1488,4 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-        
+            
