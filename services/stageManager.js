@@ -82,9 +82,14 @@ const REJECT_WORDS = [
 
 function hasKeyword(message, keywords) {
 
-  return keywords.some(word =>
-    message.includes(word)
-  );
+  return keywords.some(word => {
+
+    // Word-boundary match - "ha" should match the standalone word "ha"
+    // but NOT match inside "aachha", "chahiye", "yahan" etc.
+    const pattern = new RegExp(`(^|[^a-zA-Z])${word}([^a-zA-Z]|$)`, "i");
+    return pattern.test(message);
+
+  });
 
 }
 
@@ -260,4 +265,5 @@ export function updateStage(state, userMessage, hasAttachedMedia = false) {
 
   return state.stage;
 
-  }
+}
+  
