@@ -495,7 +495,6 @@ app.get("/test-supabase", async (req, res) => {
     message: "Supabase Connected 🚀"
   });
 
-        
 });
 
 app.get("/test-history-save", async (req, res) => {
@@ -503,7 +502,8 @@ app.get("/test-history-save", async (req, res) => {
 
     const { data, error } = await supabase
       .from("my_chat_history")
-      .insert([
+
+          .insert([
 {
 message: req.body.message,
 reply: aiReply,
@@ -991,8 +991,8 @@ if (state.stage === "PAYMENT" && hasAttachedMedia && mediaUrl) {
     console.log("PAYMENT SCREENSHOT CHECK FAILED:", payCheckErr.message);
   }
 
-  }
-        
+}
+
 updateStage(state, userMessage, hasAttachedMedia);
 
 console.log("AFTER UPDATE =", state.stage);
@@ -1008,6 +1008,7 @@ if (state.stage === "FOLLOWUP" && state.paymentReceived) {
   // remaining-payment proof, NOT another product photo.
   if (hasAttachedMedia && state.requirementsLocked && state.finalWebsiteGenerated) {
 
+  
     if (!state.remainingPaymentReceived) {
       state.remainingPaymentReceived = true;
       console.log("REMAINING PAYMENT MARKED RECEIVED for", userNumber);
@@ -1279,7 +1280,13 @@ Ask only for advance payment.
 
 Never negotiate.
 
-REAL UPI ID (use this EXACT value if customer asks for payment details - NEVER invent your own UPI ID): ${realUpiId || "(not configured yet - tell customer payment details are being prepared)"}
+REAL UPI ID (yeh EXACT value use karo jab bhi customer payment details maange - kisi bhi wording mein): ${realUpiId || "(not configured yet - tell customer payment details are being prepared)"}
+
+CRITICAL RULE - PAYMENT DETAILS:
+- Customer chahe "UPI ID", "PhonePe number", "Google Pay number", "Paytm number", "account number", "mobile number for payment" - kuch bhi bole, payment ke liye tumhare paas SIRF ek hi cheez hai: upar di gayi REAL UPI ID, aur ek QR code (jo system automatically bhejega).
+- Kabhi bhi koi phone number, account number, ya kisi bhi tarah ka digit-based identifier khud se mat banao/invent mat karo - chahe customer kisi bhi specific app (PhonePe/GPay/Paytm) ka naam le.
+- Agar customer kisi specific app ka number maange, politely bolo: "Sir, yeh UPI ID kisi bhi app (PhonePe, GPay, Paytm) se kaam karti hai - [REAL UPI ID] par bhej dijiye, ya QR code scan kar lijiye."
+- Kabhi bhi square bracket [ ] wala placeholder text (jaise "[PhonePe Number]") apne reply mein literally mat likhna.
 
 If customer asks how to pay: tell them the UPI ID above, and mention a QR code is also being sent below (system attaches it automatically - you don't need to describe it in detail).
 
@@ -1377,7 +1384,16 @@ if (state.stage === "DEMO") {
 // DEMO STAGE - actual demo link bhejo (ek hi baar)
 const isFallbackReply = aiReply.includes("thoda technical dikkat aa rahi hai");
 
+console.log("DEMO LINK CHECK:", {
+  stage: state.stage,
+  stageBeforeThisTurn,
+  demoLinkSent: state.demoLinkSent,
+  isFallbackReply
+});
+
 if (state.stage === "DEMO" && stageBeforeThisTurn === "DEMO" && !state.demoLinkSent && !isFallbackReply) {
+
+  console.log("DEMO LINK: entering generation block for", userNumber);
 
   const appUrl = process.env.APP_URL || "https://ai-agent-h5dd.onrender.com";
 
@@ -1395,7 +1411,11 @@ if (state.stage === "DEMO" && stageBeforeThisTurn === "DEMO" && !state.demoLinkS
 
   try {
 
+    console.log("DEMO LINK: calling generateDemoWebsite...");
+
     const generatedHtml = await generateDemoWebsite(state);
+
+    console.log("DEMO LINK: generateDemoWebsite returned, length =", generatedHtml?.length);
 
     const demoId =
       Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -1412,6 +1432,7 @@ if (state.stage === "DEMO" && stageBeforeThisTurn === "DEMO" && !state.demoLinkS
       }
 
       demoUrl = `${appUrl}/demo/${demoId}`;
+      console.log("DEMO LINK: generated successfully:", demoUrl);
 
     } else {
       throw new Error("Supabase not configured for demo storage");
@@ -1423,12 +1444,15 @@ if (state.stage === "DEMO" && stageBeforeThisTurn === "DEMO" && !state.demoLinkS
 
     const fallbackFile = DEMO_FILE_BY_INDUSTRY[state.industryId] || "demo.html";
     demoUrl = `${appUrl}/${fallbackFile}`;
+    console.log("DEMO LINK: using fallback:", demoUrl);
 
   }
 
   aiReply = `${aiReply}\n\n👉 ${demoUrl}`;
 
   state.demoLinkSent = true;
+
+  console.log("DEMO LINK: appended to aiReply, final length =", aiReply.length);
 
 }
 
@@ -1488,4 +1512,4 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-            
+      
