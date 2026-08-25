@@ -502,8 +502,7 @@ app.get("/test-history-save", async (req, res) => {
 
     const { data, error } = await supabase
       .from("my_chat_history")
-
-          .insert([
+      .insert([
 {
 message: req.body.message,
 reply: aiReply,
@@ -619,6 +618,7 @@ function defaultClientState() {
     competitor: "",
 
     industryId: "",
+    discoveryMessageCount: 0,
     demoLinkSent: false,
 
     // Post-payment: real website generation workflow
@@ -931,17 +931,35 @@ if (
 }
 
 // Robust fallback: Discovery now asks ONE consolidated question about
-// the business's biggest customer/sales problem. If we're still in
-// DISCOVERY, business is already known (possibly just set above in
-// this same message), problem is still empty, and this message is a
-// real/substantive reply (not just a greeting or the reset command) -
-// capture it directly as the problem, instead of relying only on the
-// narrow keyword matches above.
-const trivialMessages = ["hello", "hi", "hey", "reset", "namaste", "hii", "helo"];
+// the business's biggest customer/sales problem. Previously this was
+// gated on "state.business" being detected first - but business
+// detection is keyword-based and fails for typos/unlisted business
+// types (e.g. "hear cuting"), which meant state.problem NEVER got
+// captured, which meant the DISCOVERY->STORY transition NEVER fired,
+// even though the conversation looked like it was progressing fine.
+//
+// Fixed: use a simple turn counter instead. The FIRST DISCOVERY-stage
+// message is reserved for business/city info (matches our opening
+// question), and starting from the SECOND message we capture
+// whatever the customer says as the problem - regardless of whether
+// business/city were successfully auto-detected.
+const trivialMessages = [
+  "hello", "hi", "hey", "reset", "namaste", "hii", "helo",
+  "ha", "haan", "han", "hanji", "yes", "ok", "okay", "h"
+];
 
 if (
   state.stage === "DISCOVERY" &&
-  state.business &&
+  userMessage &&
+  userMessage.trim().length > 3 &&
+  !trivialMessages.includes(lowerMsg)
+) {
+  state.discoveryMessageCount = (state.discoveryMessageCount || 0) + 1;
+}
+
+if (
+  state.stage === "DISCOVERY" &&
+  state.discoveryMessageCount >= 2 &&
   !state.problem &&
   userMessage &&
   userMessage.trim().length > 3 &&
@@ -1001,14 +1019,13 @@ console.log("AFTER UPDATE =", state.stage);
 // POST-PAYMENT: PHOTO + COLOR COLLECTION -> LOCK -> GENERATE
 // REAL WEBSITE -> ASK FOR REMAINING PAYMENT
 // ==========================================================
-
+  
 if (state.stage === "FOLLOWUP" && state.paymentReceived) {
 
   // Once requirements are locked, any further image is treated as
   // remaining-payment proof, NOT another product photo.
   if (hasAttachedMedia && state.requirementsLocked && state.finalWebsiteGenerated) {
 
-  
     if (!state.remainingPaymentReceived) {
       state.remainingPaymentReceived = true;
       console.log("REMAINING PAYMENT MARKED RECEIVED for", userNumber);
@@ -1512,4 +1529,4 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-      
+          
