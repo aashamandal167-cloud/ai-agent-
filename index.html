@@ -1,153 +1,148 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Raj Web Studio — Professional Websites for Local Businesses</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --ink:#1a2035; --paper:#f6f4ef; --line:#dfdacd;
-    --accent:#c0793a; --accent-deep:#9a5c26; --muted:#6b6a63;
-  }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'Inter',sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;}
-  img{max-width:100%;}
-  .wrap{max-width:1080px;margin:0 auto;padding:0 6%;}
-
-  nav{display:flex;justify-content:space-between;align-items:center;padding:26px 6%;}
-  .logo{font-family:'Fraunces',serif;font-weight:600;font-size:21px;}
-  nav a.cta{background:var(--ink);color:#fff;padding:11px 22px;border-radius:3px;text-decoration:none;font-size:14px;font-weight:500;}
-
-  .hero{padding:40px 6% 70px;}
-  .hero-inner{max-width:640px;}
-  .hero h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(34px,5.5vw,52px);line-height:1.12;margin-bottom:22px;}
-  .hero p{font-size:17px;color:var(--muted);max-width:520px;margin-bottom:30px;line-height:1.65;}
-  .hero-btns{display:flex;gap:14px;flex-wrap:wrap;}
-  .btn-primary{background:var(--accent);color:#fff;padding:13px 26px;border-radius:3px;text-decoration:none;font-weight:600;font-size:15px;}
-  .btn-outline{border:1.5px solid var(--ink);color:var(--ink);padding:13px 26px;border-radius:3px;text-decoration:none;font-weight:600;font-size:15px;}
-
-  section{padding:64px 6%;border-top:1px solid var(--line);}
-  .section-label{font-size:13px;color:var(--accent-deep);font-weight:600;margin-bottom:12px;}
-  .section-title{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(24px,3.5vw,32px);margin-bottom:36px;max-width:560px;}
-
-  .services{display:grid;grid-template-columns:1fr;gap:24px;}
-  @media(min-width:820px){ .services{grid-template-columns:repeat(3,1fr);} }
-  .service-card{border:1px solid var(--line);border-radius:6px;padding:28px;background:#fff;}
-  .service-card h3{font-family:'Fraunces',serif;font-weight:600;font-size:19px;margin-bottom:10px;}
-  .service-card p{font-size:14px;color:var(--muted);line-height:1.65;margin-bottom:16px;}
-  .service-card .price{font-size:15px;font-weight:700;color:var(--accent-deep);}
-
-  .process{counter-reset:step;}
-  .process-list{display:flex;flex-direction:column;gap:0;max-width:640px;}
-  .process-item{display:flex;gap:20px;padding:20px 0;border-bottom:1px solid var(--line);}
-  .process-item:last-child{border-bottom:none;}
-  .process-num{font-family:'Fraunces',serif;font-size:22px;color:var(--accent-deep);min-width:34px;}
-  .process-item h4{font-size:16px;font-weight:600;margin-bottom:5px;}
-  .process-item p{font-size:14px;color:var(--muted);}
-
-  .payment-note{background:#fff;border:1px solid var(--line);border-radius:6px;padding:26px 28px;max-width:640px;}
-  .payment-note h4{font-family:'Fraunces',serif;font-weight:600;font-size:17px;margin-bottom:10px;}
-  .payment-note p{font-size:14px;color:var(--muted);line-height:1.7;}
-
-  .contact{background:var(--ink);color:#f0ede4;border-top:none;}
-  .contact .section-title{color:#fff;}
-  .contact p{color:#c7c4ba;max-width:480px;margin-bottom:26px;font-size:15px;line-height:1.65;}
-  .whatsapp-btn{background:#25D366;color:#fff;padding:14px 28px;border-radius:3px;text-decoration:none;font-weight:600;font-size:15px;display:inline-block;}
-
-  footer{padding:28px 6%;text-align:center;font-size:13px;color:var(--muted);}
-</style>
-</head>
-<body>
-
-<nav>
-  <div class="logo">Raj Web Studio</div>
-  <a href="#contact" class="cta">Sampark Karein</a>
-</nav>
-
-<div class="hero">
-  <div class="hero-inner">
-    <h1>Aapke business ke liye, ek professional website.</h1>
-    <p>Hum local businesses — fashion stores, salons, restaurants, gyms, aur kirana stores — ke liye custom websites design aur develop karte hain. Poori discussion aur design process WhatsApp par hota hai, seedha aapke saath.</p>
-    <div class="hero-btns">
-      <a href="#services" class="btn-primary">Packages Dekhiye</a>
-      <a href="#contact" class="btn-outline">WhatsApp Karein</a>
-    </div>
-  </div>
-</div>
-
-<section id="services">
-  <div class="section-label">Website Packages</div>
-  <div class="section-title">Aapki zarurat aur budget ke hisaab se, teen options.</div>
-  <div class="services">
-    <div class="service-card">
-      <h3>Template Website</h3>
-      <p>Professional design, fast loading, mobile-friendly. Chhote businesses ke liye budget-friendly online presence.</p>
-      <div class="price">₹10,000 se shuru</div>
-    </div>
-    <div class="service-card">
-      <h3>3D Premium Website</h3>
-      <p>Modern premium design aur 3D effects ke saath, better user experience aur strong business branding.</p>
-      <div class="price">₹25,000 se shuru</div>
-    </div>
-    <div class="service-card">
-      <h3>Animated Premium Website</h3>
-      <p>High-end animations, fully customized design — un businesses ke liye jo apni online identity ko sabse alag banana chahte hain.</p>
-      <div class="price">₹45,000 se shuru</div>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="section-label">Kaise Kaam Karta Hai</div>
-  <div class="section-title">Order se delivery tak, poori process seedhi aur transparent.</div>
-  <div class="process">
-    <div class="process-list">
-      <div class="process-item">
-        <div class="process-num">1</div>
-        <div><h4>Discussion</h4><p>Aap WhatsApp par apne business aur zarurat ke baare mein baat karte hain.</p></div>
-      </div>
-      <div class="process-item">
-        <div class="process-num">2</div>
-        <div><h4>Demo aur Package Selection</h4><p>Aapko ek demo dikhaya jaata hai aur aap apne budget ke hisaab se package choose karte hain.</p></div>
-      </div>
-      <div class="process-item">
-        <div class="process-num">3</div>
-        <div><h4>Advance Payment</h4><p>Order confirm hone par 50% advance payment li jaati hai, project shuru karne ke liye.</p></div>
-      </div>
-      <div class="process-item">
-        <div class="process-num">4</div>
-        <div><h4>Design aur Development</h4><p>Aapke photos aur details ke saath aapki website design ki jaati hai.</p></div>
-      </div>
-      <div class="process-item">
-        <div class="process-num">5</div>
-        <div><h4>Delivery aur Final Payment</h4><p>Website ready hone par aapko dikhayi jaati hai, aur baaki 50% payment li jaati hai.</p></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="section-label">Payment</div>
-  <div class="section-title">Simple, do-hisson mein payment.</div>
-  <div class="payment-note">
-    <h4>Advance + Final Payment Model</h4>
-    <p>Har website order ke liye 50% advance payment li jaati hai project shuru karne se pehle, aur baaki 50% website complete hone aur deliver hone ke baad li jaati hai. Payment UPI, QR code, ya bank transfer ke through accept ki jaati hai.</p>
-  </div>
-</section>
-
-<section class="contact" id="contact">
-  <div class="section-label" style="color:#d9a86a;">Sampark Karein</div>
-  <div class="section-title">Apni website ke baare mein baat karne ke liye WhatsApp par message kariye.</div>
-  <p>Hum aapke business, zarurat aur budget ke hisaab se best package suggest karenge.</p>
-  <a href="#" class="whatsapp-btn">💬 WhatsApp par Message Kariye</a>
-</section>
-
-<footer>
-  © 2026 Raj Web Studio. Website design &amp; development services.
-</footer>
-
-</body>
-  </html>
-          
+‎<!DOCTYPE html>
+‎<html lang="en">
+‎
+‎<head>
+‎  <meta charset="UTF-8" />
+‎  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+‎  <title>AI Agency OS</title>
+‎  <link rel="stylesheet" href="style.css"/>
+‎</head>
+‎
+‎<body>
+‎
+‎  <!-- SIDEBAR -->
+‎
+‎  <div class="sidebar" id="sidebar">
+‎
+‎    <div class="sidebar-top">
+‎
+‎      <div class="logo">
+‎        LeadFlow
+‎      </div>
+‎
+‎      <button class="close-btn" onclick="closeSidebar()">
+‎        ✕
+‎      </button>
+‎
+‎    </div>
+‎
+‎    <ul class="menu">
+‎
+‎<li>📊 Dashboard</li>
+‎<li>🔍 Lead Finder</li>
+‎<li>➕ Add Lead</li>
+‎<li>📋 Leads</li>
+‎<li>👥 Clients</li>
+‎<li>🛒 Orders</li>
+‎<li>📦 Services</li>
+‎<li>🚀 Campaigns</li>
+‎<li>📩 Outreach</li>
+‎<li>🧾 Invoices</li>
+‎<li>🤖 AI Agent</li>
+‎<li>💳 Payments</li>
+‎<li>✨ AI Tools</li>
+‎<li>📈 Analytics</li>
+‎
+‎<li>📜 My Chat History</li>
+‎<li>👥 Client Chat History</li>
+‎
+‎<li>⚙️ Settings</li>
+‎
+‎    </ul>
+‎
+‎    <div class="owner-box">
+‎
+‎      <div class="owner-circle">
+‎        RC
+‎      </div>
+‎
+‎      <div>
+‎        <h3>Rahul Chandrvashi</h3>
+‎        <p>Admin</p>
+‎      </div>
+‎
+‎    </div>
+‎
+‎  </div>
+‎
+‎  <!-- MAIN -->
+‎
+‎  <div class="main">
+‎
+‎    <!-- TOP BAR -->
+‎
+‎    <div class="top-bar">
+‎
+‎      <button class="menu-btn" onclick="openSidebar()">
+‎        ☰
+‎      </button>
+‎
+‎      <div style="display:flex;align-items:center;gap:10px;">
+‎
+‎<button onclick="goBackHome()" class="back-btn">
+‎</button>
+‎   ⬅️
+‎<div class="top-title">
+‎Mira AI
+‎</div>
+‎
+‎      </div>
+‎
+‎      <div class="top-icon">
+‎        ⚙️
+‎      </div>
+‎
+‎    </div>
+‎
+‎    <!-- CHAT AREA -->
+‎
+‎    <div class="chat-area">
+‎
+‎      <div class="bot-message">
+‎        Hello Rahul 👋 <br><br>
+‎        All AI workers are running successfully 🚀
+‎      </div>
+‎
+‎    </div>
+‎
+‎    <!-- INPUT AREA -->
+‎
+‎    <div class="input-area">
+‎
+‎      <!-- FILE BUTTON -->
+‎
+‎      <label class="plus-btn" for="fileUpload">
+‎        +
+‎      </label>
+‎
+‎      <!-- FILE INPUT -->
+‎
+‎      <input
+‎        type="file"
+‎        id="fileUpload"
+‎        hidden
+‎      >
+‎
+‎      <!-- TEXTAREA -->
+‎
+‎      <textarea
+‎        placeholder="Give command to your AI workers..."
+‎      ></textarea>
+‎
+‎      <!-- SEND BUTTON -->
+‎
+‎      <button class="send-btn">
+‎        ⬆️
+‎      </button>
+‎
+‎    </div>
+‎
+‎  </div>
+‎
+‎  <!-- SCRIPT -->
+‎
+‎<script src="script.js"></script>
+‎
+‎</body>
+‎</html>
+‎
