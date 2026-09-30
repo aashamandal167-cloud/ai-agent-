@@ -54,6 +54,85 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static("."));
 
+// The business owner's own WhatsApp number - payment screenshots get
+// forwarded here for manual approval before anything is confirmed.
+const OWNER_NUMBER = process.env.OWNER_WHATSAPP_NUMBER || "whatsapp:+918735054297";
+
+// Generic helper to send a WhatsApp message to ANY number (not tied to
+// the current request's customer) - used for owner notifications and
+// for proactively confirming to a customer once the owner approves.
+async function sendWhatsAppMessageTo(toNumber, fromNumber, text, mediaUrl) {
+  try {
+    const payload = { body: text, from: fromNumber, to: toNumber };
+    if (mediaUrl) payload.mediaUrl = [mediaUrl];
+    await twilioClient.messages.create(payload);
+  } catch (e) {
+    console.log("SEND TO", toNumber, "ERROR:", e.message);
+  }
+}
+
+// Uploads a downloaded image buffer to Supabase Storage and returns a
+// public URL - used to re-host payment screenshots so they can be
+// forwarded to the owner's WhatsApp (Twilio media URLs need auth and
+// can't be reused directly in a new outbound message).
+async function rehostImage(buffer, contentType, labelPrefix) {
+  if (!supabase) return null;
+  try {
+    const ext = (contentType || "").includes("png") ? "png" : "jpg";
+    const fileName = `${labelPrefix}_${Date.now()}.${ext}`;
+    const { error } = await supabase.storage
+      .from("client-photos")
+      .upload(fileName, buffer, { contentType: contentType || "image/jpeg" });
+    if (error) {
+      console.log("REHOST IMAGE ERROR:", JSON.stringify(error));
+      return null;
+    }
+    const { data } = supabase.storage.from("client-photos").getPublicUrl(fileName);
+    return data?.publicUrl || null;
+  } catch (e) {
+    console.log("REHOST IMAGE EXCEPTION:", e.message);
+    return null;
+  }
+}
+
+// Searches in-memory + Supabase for a customer with a pending payment
+// approval whose phone number ends in the given 4-digit code.
+async function findPendingApprovalByCode(code) {
+
+  // Check in-memory cache first (fast path, covers active conversations)
+  for (const phone of Object.keys(clientState)) {
+    const s = clientState[phone];
+    if (
+      phone.endsWith(code) &&
+      (s.paymentPendingApproval || s.remainingPaymentPendingApproval)
+    ) {
+      return { phone, state: s };
+    }
+  }
+
+  // Fall back to Supabase in case the server restarted / it's not cached
+  if (supabase) {
+    try {
+      const { data, error } = await supabase.from("client_state").select("phone,state");
+      if (!error && data) {
+        for (const row of data) {
+          if (
+            row.phone.endsWith(code) &&
+            row.state &&
+            (row.state.paymentPendingApproval || row.state.remainingPaymentPendingApproval)
+          ) {
+            return { phone: row.phone, state: row.state };
+          }
+        }
+      }
+    } catch (e) {
+      console.log("FIND PENDING APPROVAL EXCEPTION:", e.message);
+    }
+  }
+
+  return null;
+}
+
 app.get("/", (req, res) => {
   res.sendFile(process.cwd() + "/index.html");
 });
@@ -630,7 +709,10 @@ function defaultClientState() {
     finalWebsiteLinkSent: false,
     remainingPaymentRequested: false,
     remainingPaymentReceived: false,
-    qrCodeSent: false
+    qrCodeSent: false,
+    paymentPendingApproval: false,
+    ownerApprovedPayment: false,
+    remainingPaymentPendingApproval: false
   };
 }
 
@@ -832,6 +914,68 @@ if (userMessage && userMessage.trim().toLowerCase() === "reset") {
 
 }
 
+// ==========================================================
+// OWNER APPROVAL COMMANDS
+// If this message is from the business owner's OWN WhatsApp number,
+// treat it as an approval command instead of normal customer flow.
+// Owner replies like "confirm 4297" (last 4 digits of the customer's
+// number) to approve a pending payment screenshot.
+// ==========================================================
+
+if (userNumber === OWNER_NUMBER) {
+
+  const codeMatch = userMessage.match(/\d{4}/);
+
+  const isApprovalWord =
+    /confirm|approve|haan|yes|ok\b/i.test(userMessage);
+
+  if (codeMatch && isApprovalWord) {
+
+    const code = codeMatch[0];
+    const found = await findPendingApprovalByCode(code);
+
+    if (!found) {
+      await sendWhatsAppReply(`Koi pending payment approval nahi mila jo ${code} se match kare.`);
+      return;
+    }
+
+    const { phone, state: custState } = found;
+
+    let kind = null;
+
+    if (custState.paymentPendingApproval) {
+      custState.ownerApprovedPayment = true;
+      custState.paymentPendingApproval = false;
+      updateStage(custState, "owner approved", false);
+      kind = "advance";
+    } else if (custState.remainingPaymentPendingApproval) {
+      custState.remainingPaymentReceived = true;
+      custState.remainingPaymentPendingApproval = false;
+      kind = "remaining";
+    }
+
+    await persistState(phone, custState);
+
+    const notifyText =
+      kind === "advance"
+        ? "Sir 😊, aapka advance payment confirm ho gaya hai! Ab hum aapki website par kaam shuru kar sakte hain.\n\nKya aap apne business/products ki kam se kam ek photo WhatsApp par bhej sakte hain?"
+        : "Sir 😊, aapka payment confirm ho gaya hai! Aapki website ab officially complete hai. Bahut bahut dhanyavaad humpar bharosa karne ke liye! 🙏";
+
+    await sendWhatsAppMessageTo(phone, twilioFromNumber, notifyText);
+
+    await sendWhatsAppReply(`✅ ${phone} ka ${kind === "advance" ? "advance" : "remaining"} payment confirm kar diya gaya, aur unhe inform kar diya gaya hai.`);
+
+    return;
+
+  }
+
+  // Owner sent something else (not a recognized approval command) -
+  // just acknowledge briefly, don't run them through the sales flow.
+  await sendWhatsAppReply("Sir, agar kisi customer ka payment confirm karna hai, to reply karein: confirm <last 4 digits of their number>");
+  return;
+
+}
+
 const state = await getOrLoadState(userNumber);
 
 const stageBeforeThisTurn = state.stage;
@@ -979,11 +1123,11 @@ if (state.competitor) state.factsCount++;
 console.log("BEFORE UPDATE =", state.stage);
 
 // If customer submits a real payment screenshot while we're at PAYMENT
-// stage, try to read the amount/recipient off it via Gemini Vision -
-// this does NOT block confirmation (we have no gateway to be 100%
-// sure), but logs it clearly so Rahul can manually cross-check
-// against his own UPI/bank app before starting real work.
-if (state.stage === "PAYMENT" && hasAttachedMedia && mediaUrl) {
+// stage, read the amount/recipient via Gemini Vision, re-host the
+// image, and forward BOTH to the owner's own WhatsApp for manual
+// approval. Nothing gets auto-confirmed just because an image was
+// attached - only the owner's explicit approval does that.
+if (state.stage === "PAYMENT" && hasAttachedMedia && mediaUrl && !state.paymentPendingApproval) {
 
   try {
 
@@ -1000,10 +1144,25 @@ if (state.stage === "PAYMENT" && hasAttachedMedia && mediaUrl) {
 
     const extracted = await extractPaymentInfo(payImgBuffer, payMimeType);
 
-    console.log("=== PAYMENT SCREENSHOT CHECK (verify manually!) ===");
+    console.log("=== PAYMENT SCREENSHOT (forwarding to owner) ===");
     console.log("From customer:", userNumber);
     console.log(extracted || "Could not extract details");
-    console.log("====================================================");
+    console.log("=================================================");
+
+    const publicImgUrl = await rehostImage(payImgBuffer, payMimeType, "payment");
+
+    const last4 = userNumber.replace(/\D/g, "").slice(-4);
+
+    const ownerText =
+      `💰 Naya payment screenshot!\n\n` +
+      `Business: ${state.business || "Unknown"}\n` +
+      `Number ends in: ${last4}\n\n` +
+      `AI ne padha:\n${extracted || "Nahi padh paya"}\n\n` +
+      `Reply karein: confirm ${last4}`;
+
+    await sendWhatsAppMessageTo(OWNER_NUMBER, twilioFromNumber, ownerText, publicImgUrl);
+
+    state.paymentPendingApproval = true;
 
   } catch (payCheckErr) {
     console.log("PAYMENT SCREENSHOT CHECK FAILED:", payCheckErr.message);
@@ -1015,20 +1174,54 @@ updateStage(state, userMessage, hasAttachedMedia);
 
 console.log("AFTER UPDATE =", state.stage);
 
-// ==========================================================
+    // ==========================================================
 // POST-PAYMENT: PHOTO + COLOR COLLECTION -> LOCK -> GENERATE
 // REAL WEBSITE -> ASK FOR REMAINING PAYMENT
 // ==========================================================
-  
+
 if (state.stage === "FOLLOWUP" && state.paymentReceived) {
 
   // Once requirements are locked, any further image is treated as
-  // remaining-payment proof, NOT another product photo.
+  // remaining-payment proof, NOT another product photo. It is
+  // forwarded to the owner for approval - never auto-confirmed.
   if (hasAttachedMedia && state.requirementsLocked && state.finalWebsiteGenerated) {
 
-    if (!state.remainingPaymentReceived) {
-      state.remainingPaymentReceived = true;
-      console.log("REMAINING PAYMENT MARKED RECEIVED for", userNumber);
+    if (!state.remainingPaymentReceived && !state.remainingPaymentPendingApproval && mediaUrl) {
+
+      try {
+
+        const twilioAuth = Buffer.from(
+          `${process.env.TWILIO_ACCOUNT_SID}:${process.env.TWILIO_AUTH_TOKEN}`
+        ).toString("base64");
+
+        const remImgResponse = await fetch(mediaUrl, {
+          headers: { Authorization: `Basic ${twilioAuth}` }
+        });
+
+        const remImgBuffer = Buffer.from(await remImgResponse.arrayBuffer());
+        const remMimeType = remImgResponse.headers.get("content-type") || "image/jpeg";
+
+        const remExtracted = await extractPaymentInfo(remImgBuffer, remMimeType);
+
+        const remPublicUrl = await rehostImage(remImgBuffer, remMimeType, "remaining_payment");
+
+        const remLast4 = userNumber.replace(/\D/g, "").slice(-4);
+
+        const remOwnerText =
+          `💰 REMAINING payment screenshot!\n\n` +
+          `Business: ${state.business || "Unknown"}\n` +
+          `Number ends in: ${remLast4}\n\n` +
+          `AI ne padha:\n${remExtracted || "Nahi padh paya"}\n\n` +
+          `Reply karein: confirm ${remLast4}`;
+
+        await sendWhatsAppMessageTo(OWNER_NUMBER, twilioFromNumber, remOwnerText, remPublicUrl);
+
+        state.remainingPaymentPendingApproval = true;
+
+      } catch (remErr) {
+        console.log("REMAINING PAYMENT FORWARD FAILED:", remErr.message);
+      }
+
     }
 
   } else if (hasAttachedMedia && !state.requirementsLocked) {
@@ -1107,7 +1300,7 @@ if (state.stage === "FOLLOWUP" && state.paymentReceived) {
 
   }
 
-  // Color preference capture (simple keyword + fallback to raw text)
+  // Color preference capture
   if (!state.colorPreference) {
 
     const colorWords = [
@@ -1116,31 +1309,69 @@ if (state.stage === "FOLLOWUP" && state.paymentReceived) {
       "peela", "gulabi"
     ];
 
+    const affirmativeWords = ["ha", "haan", "han", "hanji", "yes", "ok", "okay", "h", "thik", "theek"];
+
     const matchedColor = colorWords.find(c => lowerMsg.includes(c));
 
     if (matchedColor) {
+
       state.colorPreference = matchedColor;
+
     } else if (
       lowerMsg.includes("color") ||
       lowerMsg.includes("colour") ||
       lowerMsg.includes("rang")
     ) {
+
       state.colorPreference = userMessage.trim();
+
+    } else if (
+      state.productPhotos.length >= 1 &&
+      affirmativeWords.includes(lowerMsg)
+    ) {
+
+      // We already have a photo, meaning we're clearly past that step
+      // and likely in the color-question phase. A bare "ha/haan" here
+      // almost always means "jaisa demo mein tha, waisa hi rakh do" -
+      // capture that intent so the generation isn't blocked forever.
+      state.colorPreference = "waisa hi jaisa demo website mein dikhaya gaya tha";
+
+    } else if (
+      state.productPhotos.length >= 1 &&
+      userMessage &&
+      userMessage.trim().length > 3 &&
+      !hasAttachedMedia
+    ) {
+
+      // Any other substantive text reply once we have a photo - treat
+      // it as their color preference description rather than leaving
+      // this permanently blocked.
+      state.colorPreference = userMessage.trim();
+
     }
 
   }
 
-  // Lock requirements and generate the real website once we have
-  // at least 1 photo and a color preference.
+  // Lock requirements once we have at least 1 photo and a color
+  // preference (this just marks "we have enough info to try").
   if (
     !state.requirementsLocked &&
     state.productPhotos.length >= 1 &&
     state.colorPreference
   ) {
-
     state.requirementsLocked = true;
+    console.log("REQUIREMENTS LOCKED for", userNumber);
+  }
+
+  // Attempt generation whenever locked but not yet successfully
+  // generated - this makes it retry-safe: if a previous attempt
+  // failed (e.g. Gemini quota), the NEXT message in this conversation
+  // will simply try again, instead of being stuck forever.
+  if (state.requirementsLocked && !state.finalWebsiteGenerated) {
 
     try {
+
+      console.log("FINAL WEBSITE: attempting generation for", userNumber);
 
       const finalHtml = await generateFinalWebsite(state);
 
@@ -1159,12 +1390,13 @@ if (state.stage === "FOLLOWUP" && state.paymentReceived) {
           const appUrlForSite = process.env.APP_URL || "https://ai-agent-h5dd.onrender.com";
           state.finalWebsiteUrl = `${appUrlForSite}/site/${siteId}`;
           state.finalWebsiteGenerated = true;
+          console.log("FINAL WEBSITE: generated successfully:", state.finalWebsiteUrl);
         }
 
       }
 
     } catch (genErr) {
-      console.log("FINAL WEBSITE GENERATION FAILED:", genErr.message);
+      console.log("FINAL WEBSITE GENERATION FAILED (will retry next message):", genErr.message);
     }
 
   }
@@ -1529,4 +1761,4 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-          
+    
