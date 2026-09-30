@@ -209,20 +209,20 @@ export function updateStage(state, userMessage, hasAttachedMedia = false) {
   // ==========================================
   // PAYMENT → FOLLOWUP
   //
-  // IMPORTANT: We only mark payment as received when the customer
-  // actually attaches real media (a screenshot image) with their
-  // WhatsApp message. A customer just TYPING "payment ho gaya" or
-  // "done" is NOT proof - that alone must never confirm payment.
-  // This matters for real money/legal reasons.
+  // IMPORTANT: We do NOT auto-confirm payment just because an image
+  // was attached (a customer could attach ANY random screenshot).
+  // The real confirmation now happens when the OWNER (Rahul) personally
+  // reviews the screenshot (forwarded to his own WhatsApp) and replies
+  // to approve it. That approval sets state.ownerApprovedPayment = true
+  // from server.js, and THIS is what actually advances the stage.
   // ==========================================
 
   if (
     state.stage === "PAYMENT" &&
-    hasAttachedMedia
+    state.ownerApprovedPayment
   ) {
 
     state.paymentReceived = true;
-    state.paymentNeedsManualVerification = true;
 
     state.stage = "FOLLOWUP";
 
