@@ -845,21 +845,45 @@ const userNumber = req.body.From;
 const twilioFromNumber = req.body.To;
 
 // ==========================================================
-// IMMEDIATELY acknowledge Twilio with an empty response.
-// This means Twilio never times out waiting for us and never
-// retries/re-sends the same message - which was causing two
-// requests to process the same conversation at once and stomp
-// on each other's saved state ("forgetting" everything).
-//
-// The actual reply is sent separately below via the Twilio
-// REST API (twilioClient.messages.create), independent of how
-// long Gemini takes.
+// FIX (ContentSid Required): pehla reply seedha webhook ke jawab
+// (TwiML) mein jaata hai - isme REST API / ContentSid ki zaroorat
+// nahi. Agar 13 sec tak koi reply taiyaar nahi hua (Gemini slow),
+// to khali jawab bhej dete hain taaki Twilio timeout/retry na kare,
+// aur baad ka reply REST API (twilioClient.messages.create) se jaata hai.
 // ==========================================================
 
-res.type("text/xml");
-res.send("<Response></Response>");
+let webhookAnswered = false;
+
+function answerWebhook(twimlString) {
+  if (webhookAnswered) return false;
+  webhookAnswered = true;
+  clearTimeout(ackTimer);
+  res.type("text/xml");
+  res.send(twimlString);
+  return true;
+}
+
+const ackTimer = setTimeout(() => {
+  if (!webhookAnswered) {
+    console.log("WEBHOOK: slow reply, empty ack bheja; reply REST se jayega");
+    answerWebhook("<Response></Response>");
+  }
+}, 13000);
 
 async function sendWhatsAppReply(text, mediaUrl) {
+
+  // 1) Pehla reply: TwiML
+  if (!webhookAnswered) {
+    const twiml = new twilio.twiml.MessagingResponse();
+    const msg = twiml.message(text);
+    if (mediaUrl) {
+      msg.media(mediaUrl);
+    }
+    answerWebhook(twiml.toString());
+    return;
+  }
+
+  // 2) Baad ke replies: REST API
   try {
     const payload = {
       body: text,
@@ -922,7 +946,8 @@ if (userMessage && userMessage.trim().toLowerCase() === "reset") {
 // number) to approve a pending payment screenshot.
 // ==========================================================
 
-if (userNumber === OWNER_NUMBER) {
+// OWNER_TEST_MODE=true (Render env) par owner number se bhi customer jaisa test ho sakta hai
+if (userNumber === OWNER_NUMBER && process.env.OWNER_TEST_MODE !== "true") {
 
   const codeMatch = userMessage.match(/\d{4}/);
 
@@ -993,7 +1018,7 @@ conversationHistory.push({
 // Gemini only phrases replies; it never invents facts on its own.
 // ==========================================================
 
-const lowerMsg = userMessage.toLowerCase().trim();
+  const lowerMsg = userMessage.toLowerCase().trim();
 
 if (lowerMsg.includes("online shopping")) {
   state.problem = "online shopping";
@@ -1393,7 +1418,7 @@ if (state.stage === "FOLLOWUP" && state.paymentReceived) {
           console.log("FINAL WEBSITE: generated successfully:", state.finalWebsiteUrl);
         }
 
-      }
+          }
 
     } catch (genErr) {
       console.log("FINAL WEBSITE GENERATION FAILED (will retry next message):", genErr.message);
@@ -1754,6 +1779,9 @@ if (state.stage === "PAYMENT" && !state.qrCodeSent && !isFallbackReply) {
 
 });
 
+// Agar kisi wajah se koi reply nahi gaya, to bhi Twilio ko jawab de do.
+answerWebhook("<Response></Response>");
+
 });
 
 const PORT = process.env.PORT || 10000;
@@ -1761,4 +1789,5 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
     
