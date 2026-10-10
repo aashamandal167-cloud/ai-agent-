@@ -539,7 +539,7 @@ res.json({
   }
 });
 
-app.get("/test-twilio", (req, res) => {
+  app.get("/test-twilio", (req, res) => {
   res.json({
     sidExists: !!process.env.TWILIO_ACCOUNT_SID,
     tokenExists: !!process.env.TWILIO_AUTH_TOKEN,
@@ -836,6 +836,46 @@ async function persistConversation(userNumber, history) {
 
 }
 
+// ==========================================================
+// Gemini kabhi kabhi 503 (overloaded) ya 429 (rate limit) deta hai.
+// Isliye fallback ("technical dikkat") aane par chhote gap ke saath
+// 2 baar aur try karte hain - par sirf tab jab Twilio ke 13 sec ke
+// andar time bacha ho.
+// ==========================================================
+const AI_FALLBACK_MARKER = "thoda technical dikkat aa rahi hai";
+
+function sleepMs(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function generateReplyWithRetry(args, startedAt) {
+  const delays = [1500, 3000];
+  let lastReply = null;
+  let lastErr = null;
+
+  for (let attempt = 0; attempt <= delays.length; attempt++) {
+    try {
+      const r = await generateReply(args);
+      if (typeof r === "string" && !r.includes(AI_FALLBACK_MARKER)) {
+        return r;
+      }
+      lastReply = r;
+      console.log(`AI RETRY: fallback reply aaya (attempt ${attempt + 1})`);
+    } catch (e) {
+      lastErr = e;
+      console.log(`AI RETRY: Gemini error (attempt ${attempt + 1}):`, e.message);
+    }
+
+    if (attempt < delays.length) {
+      if (Date.now() - startedAt > 7000) break;
+      await sleepMs(delays[attempt]);
+    }
+  }
+
+  if (typeof lastReply === "string") return lastReply;
+  throw lastErr || new Error("generateReply failed");
+}
+
 app.post("/whatsapp-webhook", async (req, res) => {
 
 console.log("🔥 WEBHOOK HIT 🔥");
@@ -843,6 +883,7 @@ console.log("🔥 WEBHOOK HIT 🔥");
 const userMessage = req.body.Body;
 const userNumber = req.body.From;
 const twilioFromNumber = req.body.To;
+const webhookStartedAt = Date.now();
 
 // ==========================================================
 // FIX (ContentSid Required): pehla reply seedha webhook ke jawab
@@ -1007,6 +1048,11 @@ const stageBeforeThisTurn = state.stage;
 
 let conversationHistory = await getOrLoadConversation(userNumber);
 
+      // Agar Gemini fail ho jaye to is turn ko undo karne ke liye snapshot
+// (taaki error wale replies history/state mein na bhar jayein).
+const stateSnapshot = JSON.parse(JSON.stringify(state));
+const historyLenBefore = conversationHistory.length;
+
 conversationHistory.push({
   role: "user",
   content: userMessage
@@ -1018,7 +1064,7 @@ conversationHistory.push({
 // Gemini only phrases replies; it never invents facts on its own.
 // ==========================================================
 
-  const lowerMsg = userMessage.toLowerCase().trim();
+const lowerMsg = userMessage.toLowerCase().trim();
 
 if (lowerMsg.includes("online shopping")) {
   state.problem = "online shopping";
@@ -1418,13 +1464,13 @@ if (state.stage === "FOLLOWUP" && state.paymentReceived) {
           console.log("FINAL WEBSITE: generated successfully:", state.finalWebsiteUrl);
         }
 
-          }
+      }
 
     } catch (genErr) {
       console.log("FINAL WEBSITE GENERATION FAILED (will retry next message):", genErr.message);
     }
 
-  }
+    }
 
 }
 
@@ -1639,11 +1685,11 @@ Support customer politely. Agar deal nahi hui thi, warm note par close karo. For
 const recentHistory =
   conversationHistory.slice(-16);
 
-let aiReply = await generateReply({
+let aiReply = await generateReplyWithRetry({
   state,
   recentHistory,
   extraRule
-});
+}, webhookStartedAt);
 
   // STORY aur DEMO complete mark karo
 
@@ -1657,6 +1703,17 @@ if (state.stage === "DEMO") {
 
 // DEMO STAGE - actual demo link bhejo (ek hi baar)
 const isFallbackReply = aiReply.includes("thoda technical dikkat aa rahi hai");
+
+// Gemini fail hua: is turn ko undo karo (state + history), error reply
+// save mat karo. Customer wahi message dobara bhejega to clean chalega.
+if (isFallbackReply && !hasAttachedMedia) {
+  console.log("AI FALLBACK: state/history rollback kiya, reply save nahi kiya");
+  for (const k of Object.keys(state)) delete state[k];
+  Object.assign(state, stateSnapshot);
+  conversationHistory.length = historyLenBefore;
+  await sendWhatsAppReply(aiReply);
+  return;
+}
 
 console.log("DEMO LINK CHECK:", {
   stage: state.stage,
