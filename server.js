@@ -539,7 +539,7 @@ res.json({
   }
 });
 
-  app.get("/test-twilio", (req, res) => {
+    app.get("/test-twilio", (req, res) => {
   res.json({
     sidExists: !!process.env.TWILIO_ACCOUNT_SID,
     tokenExists: !!process.env.TWILIO_AUTH_TOKEN,
@@ -1048,7 +1048,7 @@ const stageBeforeThisTurn = state.stage;
 
 let conversationHistory = await getOrLoadConversation(userNumber);
 
-      // Agar Gemini fail ho jaye to is turn ko undo karne ke liye snapshot
+    // Agar Gemini fail ho jaye to is turn ko undo karne ke liye snapshot
 // (taaki error wale replies history/state mein na bhar jayein).
 const stateSnapshot = JSON.parse(JSON.stringify(state));
 const historyLenBefore = conversationHistory.length;
@@ -1715,6 +1715,20 @@ if (isFallbackReply && !hasAttachedMedia) {
   return;
 }
 
+// SAFETY: Gemini kabhi kabhi "[Bank Name]" jaise nakli placeholder wale bank
+// details bana deta hai. Hamare paas bank details nahi hain, sirf UPI ID + QR.
+// Aisa reply customer ko kabhi nahi jaana chahiye - uski jagah asli UPI details.
+if (/\[[^\]]{2,40}\]/.test(aiReply) && /bank|account|ifsc|upi|phonepe|paytm|gpay|google pay/i.test(aiReply)) {
+
+  const realUpi = process.env.RAJ_UPI_ID || "";
+
+  console.log("PLACEHOLDER REPLY BLOCKED -> asli UPI details bheji");
+
+  aiReply = realUpi
+    ? `Sir 😊, payment ke liye hamare paas UPI hai.\n\nUPI ID: ${realUpi}\n\nQR code bhi bhej raha hoon. Aap kisi bhi UPI app (GPay, PhonePe, Paytm) se payment kar sakte hain.\n\nPayment ke baad please screenshot bhej dijiye, Sir.`
+    : "Sir 😊, payment details abhi taiyaar ho rahi hain. Thodi der mein bhej deta hoon.";
+}
+
 console.log("DEMO LINK CHECK:", {
   stage: state.stage,
   stageBeforeThisTurn,
@@ -1847,4 +1861,4 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-    
+      
