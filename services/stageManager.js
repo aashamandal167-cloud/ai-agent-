@@ -80,6 +80,85 @@ const REJECT_WORDS = [
   "rehne dijiye"
 ];
 
+// Customer ke spelling mistakes bhi chalne chahiye (templet, temlate, etc.)
+const PRICE_WORDS_EXTRA = [
+  "dam",
+  "daam",
+  "kimat",
+  "keemat",
+  "rupya",
+  "rupaye",
+  "rupees",
+  "paisa",
+  "paise",
+  "discount",
+  "budget",
+  "kam karo",
+  "kuchh kam",
+  "kuch kam"
+];
+
+// NEGOTIATION mein customer ki "haan, theek hai" jaisi sahmati
+const AGREE_WORDS = [
+  "ha",
+  "haan",
+  "han",
+  "hanji",
+  "yes",
+  "ok",
+  "okay",
+  "chalo",
+  "chalega",
+  "thik hai",
+  "theek hai",
+  "thik he",
+  "manzoor",
+  "manjur",
+  "kar do",
+  "kardo",
+  "bana do",
+  "banao",
+  "bana dijiye",
+  "start karo",
+  "shuru karo",
+  "dane",
+  "done"
+];
+
+// Agar customer ab bhi bhaav-taav kar raha hai to "sahmati" mat maano
+const STILL_BARGAINING_WORDS = [
+  "kam",
+  "discount",
+  "lekin",
+  "but",
+  "zyada",
+  "mehnga",
+  "mehenga",
+  "mahnga",
+  "nahi",
+  "no"
+];
+
+function detectCategory(message) {
+
+  // Customer sirf "1", "2" ya "3" bheje
+  const numberOnly = message.replace(/[^0-9]/g, "");
+  if (/^\s*[123]\s*[.)]?\s*$/.test(message)) {
+    if (numberOnly === "1") return "template website";
+    if (numberOnly === "2") return "premium 3d website";
+    if (numberOnly === "3") return "animated premium website";
+  }
+
+  if (message.includes("animat")) return "animated premium website";
+  if (/(^|[^a-z0-9])3\s*d([^a-z0-9]|$)/i.test(message)) return "premium 3d website";
+  if (message.includes("templ") || message.includes("temlate") || message.includes("tamplate") || message.includes("tempate")) {
+    return "template website";
+  }
+  if (message.includes("premium")) return "premium";
+
+  return null;
+}
+
 function hasKeyword(message, keywords) {
 
   return keywords.some(word => {
@@ -155,10 +234,10 @@ export function updateStage(state, userMessage, hasAttachedMedia = false) {
 
   if (
     state.stage === "CATEGORY" &&
-    hasKeyword(message, CATEGORY_WORDS)
+    detectCategory(message)
   ) {
 
-    state.selectedCategory = message;
+    state.selectedCategory = detectCategory(message);
 
     state.stage = "DEAL";
 
@@ -174,6 +253,7 @@ export function updateStage(state, userMessage, hasAttachedMedia = false) {
     state.stage === "DEAL" &&
     (
       hasKeyword(message, PRICE_WORDS) ||
+      hasKeyword(message, PRICE_WORDS_EXTRA) ||
       hasKeyword(message, PAYMENT_WORDS)
     )
   ) {
@@ -196,7 +276,11 @@ export function updateStage(state, userMessage, hasAttachedMedia = false) {
       message.includes("ready") ||
       message.includes("banaiye") ||
       message.includes("kar dijiye") ||
-      hasKeyword(message, PAYMENT_WORDS)
+      hasKeyword(message, PAYMENT_WORDS) ||
+      (
+        hasKeyword(message, AGREE_WORDS) &&
+        !hasKeyword(message, STILL_BARGAINING_WORDS)
+      )
     )
   ) {
 
@@ -266,4 +350,5 @@ export function updateStage(state, userMessage, hasAttachedMedia = false) {
   return state.stage;
 
 }
+
   
