@@ -2,6 +2,8 @@ import express from "express";
 import fetch from "node-fetch";
 import { createClient } from "@supabase/supabase-js";
 import twilio from "twilio";
+import fs from "fs";
+import path from "path";
 import ai from "./config/gemini.js";
 import { getBrain } from "./services/brainManager.js";
 import { generateReply } from "./services/aiService.js";
@@ -53,6 +55,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static("."));
+
+// QR image: repo ke root mein ho ya services/ folder mein - dono jagah se chalega.
+app.get("/qr-code.png", (req, res) => {
+  const candidates = [
+    path.resolve("qr-code.png"),
+    path.resolve("services", "qr-code.png")
+  ];
+  const found = candidates.find((p) => fs.existsSync(p));
+  if (found) {
+    return res.sendFile(found);
+  }
+  res.status(404).send("qr-code.png nahi mili (root ya services folder mein daaliye)");
+});
 
 // The business owner's own WhatsApp number - payment screenshots get
 // forwarded here for manual approval before anything is confirmed.
@@ -539,7 +554,7 @@ res.json({
   }
 });
 
-    app.get("/test-twilio", (req, res) => {
+  app.get("/test-twilio", (req, res) => {
   res.json({
     sidExists: !!process.env.TWILIO_ACCOUNT_SID,
     tokenExists: !!process.env.TWILIO_AUTH_TOKEN,
@@ -837,6 +852,50 @@ async function persistConversation(userNumber, history) {
 }
 
 // ==========================================================
+// PAYMENT DETAILS - code se fixed message (Gemini par depend nahi).
+// UPI ID + bank details + QR code, hamesha asli values ke saath.
+// Render Environment variables:
+//   RAJ_UPI_ID, RAJ_BANK_NAME, RAJ_ACCOUNT_HOLDER,
+//   RAJ_ACCOUNT_NUMBER, RAJ_IFSC
+// ==========================================================
+function buildPaymentDetailsMessage(history) {
+
+  const upi = process.env.RAJ_UPI_ID || "rr9566735-1@okaxis";
+  const bankName = process.env.RAJ_BANK_NAME || "";
+  const holder = process.env.RAJ_ACCOUNT_HOLDER || "";
+  const accNo = process.env.RAJ_ACCOUNT_NUMBER || "";
+  const ifsc = process.env.RAJ_IFSC || "";
+
+  // Pichle reply se advance amount nikalne ki koshish (jaise "advance ₹4,250")
+  let advanceLine = "";
+  try {
+    for (let i = history.length - 1; i >= 0; i--) {
+      const m = history[i];
+      if (m.role !== "user") {
+        const hit = String(m.content).match(/advance[^₹\d]{0,40}₹\s?([\d,]+)/i);
+        if (hit) {
+          advanceLine = `\nAdvance amount: ₹${hit[1]}\n`;
+          break;
+        }
+      }
+    }
+  } catch (e) {}
+
+  let text = `Sir 😊, payment ki details ye hain:\n${advanceLine}\n💳 UPI ID: ${upi}\n(GPay, PhonePe, Paytm - kisi bhi UPI app se ho jayega)\n`;
+
+  if (accNo && ifsc) {
+    text += `\n🏦 Bank Transfer:\n`;
+    if (bankName) text += `Bank: ${bankName}\n`;
+    if (holder) text += `Account Holder: ${holder}\n`;
+    text += `Account Number: ${accNo}\nIFSC: ${ifsc}\n`;
+  }
+
+  text += `\nQR code bhi saath mein bhej raha hoon, scan karke pay kar sakte hain.\n\nPayment ke baad please screenshot bhej dijiye, Sir. 🙏`;
+
+  return text;
+}
+
+// ==========================================================
 // Gemini kabhi kabhi 503 (overloaded) ya 429 (rate limit) deta hai.
 // Isliye fallback ("technical dikkat") aane par chhote gap ke saath
 // 2 baar aur try karte hain - par sirf tab jab Twilio ke 13 sec ke
@@ -1009,7 +1068,7 @@ if (userNumber === OWNER_NUMBER && process.env.OWNER_TEST_MODE !== "true") {
 
     let kind = null;
 
-    if (custState.paymentPendingApproval) {
+        if (custState.paymentPendingApproval) {
       custState.ownerApprovedPayment = true;
       custState.paymentPendingApproval = false;
       updateStage(custState, "owner approved", false);
@@ -1048,7 +1107,7 @@ const stageBeforeThisTurn = state.stage;
 
 let conversationHistory = await getOrLoadConversation(userNumber);
 
-    // Agar Gemini fail ho jaye to is turn ko undo karne ke liye snapshot
+// Agar Gemini fail ho jaye to is turn ko undo karne ke liye snapshot
 // (taaki error wale replies history/state mein na bhar jayein).
 const stateSnapshot = JSON.parse(JSON.stringify(state));
 const historyLenBefore = conversationHistory.length;
@@ -1455,7 +1514,7 @@ if (state.stage === "FOLLOWUP" && state.paymentReceived) {
           .from("client_websites")
           .upsert({ id: siteId, phone: userNumber, html: finalHtml });
 
-        if (siteError) {
+              if (siteError) {
           console.log("FINAL SITE SAVE ERROR:", JSON.stringify(siteError));
         } else {
           const appUrlForSite = process.env.APP_URL || "https://ai-agent-h5dd.onrender.com";
@@ -1470,7 +1529,7 @@ if (state.stage === "FOLLOWUP" && state.paymentReceived) {
       console.log("FINAL WEBSITE GENERATION FAILED (will retry next message):", genErr.message);
     }
 
-    }
+  }
 
 }
 
@@ -1685,6 +1744,40 @@ Support customer politely. Agar deal nahi hui thi, warm note par close karo. For
 const recentHistory =
   conversationHistory.slice(-16);
 
+// ==========================================================
+// PAYMENT STAGE: details/QR maangne par seedha code se bhejo (Gemini nahi)
+// ==========================================================
+if (state.stage === "PAYMENT" && !hasAttachedMedia) {
+
+  const asksPaymentInfo = /upi|qr|bank|account|ifsc|scan|payment|pay\b|kispe|kispar|kis par|kahan|kaha|details|detail|number|bhejo|bhej do|send/i.test(lowerMsg);
+
+  const justAgrees = /^(ha|haan|han|hanji|ok|okay|yes|chalo|thik hai|theek hai|bhejo|ji|ji ha)\b/i.test(lowerMsg);
+
+  const claimsPaid = /ho gaya|ho gya|kar diya|kar di\b|kar dia|done|paid|bhej diya|bhej dia|sent|successful/i.test(lowerMsg);
+
+  if (!claimsPaid && (asksPaymentInfo || (justAgrees && !state.paymentDetailsSent))) {
+
+    console.log("PAYMENT DETAILS: code se bheji ja rahi hain (UPI + bank + QR)");
+
+    const payText = buildPaymentDetailsMessage(conversationHistory);
+    const qrBase = process.env.APP_URL || "https://ai-agent-h5dd.onrender.com";
+
+    conversationHistory.push({
+      role: "assistant",
+      content: payText
+    });
+
+    state.paymentDetailsSent = true;
+    state.qrCodeSent = true;
+
+    await persistState(userNumber, state);
+    await persistConversation(userNumber, conversationHistory);
+
+    await sendWhatsAppReply(payText, `${qrBase}/qr-code.png`);
+    return;
+  }
+}
+
 let aiReply = await generateReplyWithRetry({
   state,
   recentHistory,
@@ -1715,18 +1808,24 @@ if (isFallbackReply && !hasAttachedMedia) {
   return;
 }
 
-// SAFETY: Gemini kabhi kabhi "[Bank Name]" jaise nakli placeholder wale bank
-// details bana deta hai. Hamare paas bank details nahi hain, sirf UPI ID + QR.
-// Aisa reply customer ko kabhi nahi jaana chahiye - uski jagah asli UPI details.
-if (/\[[^\]]{2,40}\]/.test(aiReply) && /bank|account|ifsc|upi|phonepe|paytm|gpay|google pay/i.test(aiReply)) {
+// SAFETY: Gemini kabhi kabhi "[Your UPI ID Here]" / "[QR Code Image Link Here]" /
+// "[Bank Name]" jaise nakli placeholder likh deta hai. Aisa reply customer ko
+// kabhi nahi jaana chahiye - uski jagah asli payment details + QR.
+const placeholderMatch = aiReply.match(/\[[^\]]{2,100}\](?!\()/g) || [];
+const hasFakePlaceholder = placeholderMatch.some(p => /here|link|upi|qr|bank|account|ifsc|number|name|id/i.test(p));
 
-  const realUpi = process.env.RAJ_UPI_ID || "";
+if (hasFakePlaceholder) {
 
-  console.log("PLACEHOLDER REPLY BLOCKED -> asli UPI details bheji");
+  console.log("PLACEHOLDER REPLY BLOCKED -> asli payment details bheji");
 
-  aiReply = realUpi
-    ? `Sir 😊, payment ke liye hamare paas UPI hai.\n\nUPI ID: ${realUpi}\n\nQR code bhi bhej raha hoon. Aap kisi bhi UPI app (GPay, PhonePe, Paytm) se payment kar sakte hain.\n\nPayment ke baad please screenshot bhej dijiye, Sir.`
-    : "Sir 😊, payment details abhi taiyaar ho rahi hain. Thodi der mein bhej deta hoon.";
+  aiReply = buildPaymentDetailsMessage(conversationHistory);
+  state.paymentDetailsSent = true;
+  state.qrCodeSent = true;
+  conversationHistory.push({ role: "assistant", content: aiReply });
+  await persistState(userNumber, state);
+  await persistConversation(userNumber, conversationHistory);
+  await sendWhatsAppReply(aiReply, `${process.env.APP_URL || "https://ai-agent-h5dd.onrender.com"}/qr-code.png`);
+  return;
 }
 
 console.log("DEMO LINK CHECK:", {
@@ -1861,4 +1960,4 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-      
+                   
