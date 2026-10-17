@@ -69,6 +69,27 @@ app.get("/qr-code.png", (req, res) => {
   res.status(404).send("qr-code.png nahi mili (root ya services folder mein daaliye)");
 });
 
+// Demo sample files: demo-samples folder root mein ho, services/ ke andar ho,
+// ya files seedha root/services mein padi hon - sab jagah se chalega.
+app.get("/demo-samples/:file", (req, res) => {
+  const name = req.params.file;
+  if (!/^[a-z0-9-]+\.(jpg|html)$/.test(name)) {
+    return res.status(404).send("Not found");
+  }
+  const candidates = [
+    path.resolve("demo-samples", name),
+    path.resolve("services", "demo-samples", name),
+    path.resolve("services", name),
+    path.resolve(name)
+  ];
+  const found = candidates.find((p) => fs.existsSync(p));
+  if (found) {
+    return res.sendFile(found);
+  }
+  console.log("DEMO SAMPLE NOT FOUND:", name, candidates);
+  res.status(404).send("Demo sample file nahi mili: " + name);
+});
+
 // The business owner's own WhatsApp number - payment screenshots get
 // forwarded here for manual approval before anything is confirmed.
 const OWNER_NUMBER = process.env.OWNER_WHATSAPP_NUMBER || "whatsapp:+918735054297";
@@ -1092,7 +1113,7 @@ if (userMessage && userMessage.trim().toLowerCase() === "reset") {
 
   return;
 
-}
+          }
 
 // ==========================================================
 // OWNER APPROVAL COMMANDS
@@ -1570,7 +1591,7 @@ if (state.stage === "FOLLOWUP" && state.paymentReceived) {
           .from("client_websites")
           .upsert({ id: siteId, phone: userNumber, html: finalHtml });
 
-        if (siteError) {
+                                      if (siteError) {
           console.log("FINAL SITE SAVE ERROR:", JSON.stringify(siteError));
         } else {
           const appUrlForSite = process.env.APP_URL || "https://ai-agent-h5dd.onrender.com";
@@ -1579,7 +1600,7 @@ if (state.stage === "FOLLOWUP" && state.paymentReceived) {
           console.log("FINAL WEBSITE: generated successfully:", state.finalWebsiteUrl);
         }
 
-        }
+      }
 
     } catch (genErr) {
       console.log("FINAL WEBSITE GENERATION FAILED (will retry next message):", genErr.message);
@@ -2042,4 +2063,4 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-      
+  
