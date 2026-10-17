@@ -554,7 +554,7 @@ res.json({
   }
 });
 
-  app.get("/test-twilio", (req, res) => {
+app.get("/test-twilio", (req, res) => {
   res.json({
     sidExists: !!process.env.TWILIO_ACCOUNT_SID,
     tokenExists: !!process.env.TWILIO_AUTH_TOKEN,
@@ -852,6 +852,62 @@ async function persistConversation(userNumber, history) {
 }
 
 // ==========================================================
+// DEMO SAMPLES - live generate karne ki jagah ready design images dikhao.
+// Files: demo-samples/view.html + demo-samples/<naam>.jpg (GitHub repo mein).
+// Live generation wapas chahiye to Render env mein DEMO_MODE=live daalo.
+// ==========================================================
+// Customer ki baaton se business type pehchano (10 sample designs ke hisaab se)
+function detectDemoCategory(history, businessText) {
+
+  const text = (
+    (history || [])
+      .filter((m) => m.role === "user")
+      .map((m) => String(m.content))
+      .join(" ") +
+    " " +
+    String(businessText || "")
+  ).toLowerCase();
+
+  const has = (words) => words.some((w) => text.includes(w));
+
+  // Pehle specific wale, phir general
+  if (has(["beauty", "parlour", "parlor", "ladies", "bridal", "makeup", "make up", "facial"])) return "beauty-parlour";
+  if (has(["salon", "barber", "haircut", "hair cut", "hair cutting", "men's salon", "mens salon"])) return "salon";
+  if (has(["gym", "fitness", "workout", "trainer"])) return "gym";
+  if (has(["bakery", "cake", "mithai", "sweet shop", "sweets", "halwai"])) return "bakery";
+  if (has(["clinic", "dentist", "dental", "doctor", "hospital", "medical"])) return "clinic";
+  if (has(["coaching", "tuition", "institute", "academy", "classes", "school", "teacher"])) return "coaching";
+  if (has(["mobile", "phone", "electronic", "electronics", "laptop", "repair"])) return "mobile-shop";
+  if (has(["kirana", "grocery", "general store", "supermarket", "super market", "ration", "provision"])) return "kirana";
+  if (has(["restaurant", "cafe", "coffee", "dhaba", "hotel", "food", "biryani", "pizza"])) return "restaurant";
+  if (has(["fashion", "cloth", "kapde", "kapda", "garment", "boutique", "saree", "shoes", "jewellery", "jewelry"])) return "fashion";
+
+  return null;
+}
+
+function pickSampleDemoUrl(category, industryId, appUrl) {
+
+  const VALID = ["gym", "salon", "beauty-parlour", "restaurant", "fashion", "kirana", "bakery", "mobile-shop", "clinic", "coaching"];
+
+  // Purani industry ids -> sample design (agar message se category na mile)
+  const BY_INDUSTRY_ID = {
+    gym: "gym",
+    salon: "salon",
+    restaurant: "restaurant",
+    fashion_store: "fashion",
+    kirana_store: "kirana"
+  };
+
+  const key = VALID.includes(category) ? category : BY_INDUSTRY_ID[industryId];
+
+  if (key) {
+    return `${appUrl}/demo-samples/view.html?d=${key}`;
+  }
+
+  return `${appUrl}/demo.html`;
+}
+
+// ==========================================================
 // PAYMENT DETAILS - code se fixed message (Gemini par depend nahi).
 // UPI ID + bank details + QR code, hamesha asli values ke saath.
 // Render Environment variables:
@@ -1068,7 +1124,7 @@ if (userNumber === OWNER_NUMBER && process.env.OWNER_TEST_MODE !== "true") {
 
     let kind = null;
 
-        if (custState.paymentPendingApproval) {
+    if (custState.paymentPendingApproval) {
       custState.ownerApprovedPayment = true;
       custState.paymentPendingApproval = false;
       updateStage(custState, "owner approved", false);
@@ -1514,7 +1570,7 @@ if (state.stage === "FOLLOWUP" && state.paymentReceived) {
           .from("client_websites")
           .upsert({ id: siteId, phone: userNumber, html: finalHtml });
 
-              if (siteError) {
+        if (siteError) {
           console.log("FINAL SITE SAVE ERROR:", JSON.stringify(siteError));
         } else {
           const appUrlForSite = process.env.APP_URL || "https://ai-agent-h5dd.onrender.com";
@@ -1523,7 +1579,7 @@ if (state.stage === "FOLLOWUP" && state.paymentReceived) {
           console.log("FINAL WEBSITE: generated successfully:", state.finalWebsiteUrl);
         }
 
-      }
+        }
 
     } catch (genErr) {
       console.log("FINAL WEBSITE GENERATION FAILED (will retry next message):", genErr.message);
@@ -1816,16 +1872,32 @@ const hasFakePlaceholder = placeholderMatch.some(p => /here|link|upi|qr|bank|acc
 
 if (hasFakePlaceholder) {
 
-  console.log("PLACEHOLDER REPLY BLOCKED -> asli payment details bheji");
+  if (state.stage === "PAYMENT") {
 
-  aiReply = buildPaymentDetailsMessage(conversationHistory);
-  state.paymentDetailsSent = true;
-  state.qrCodeSent = true;
-  conversationHistory.push({ role: "assistant", content: aiReply });
-  await persistState(userNumber, state);
-  await persistConversation(userNumber, conversationHistory);
-  await sendWhatsAppReply(aiReply, `${process.env.APP_URL || "https://ai-agent-h5dd.onrender.com"}/qr-code.png`);
-  return;
+    // Sirf PAYMENT stage mein: asli payment details + QR bhejo
+    console.log("PLACEHOLDER REPLY BLOCKED (PAYMENT) -> asli payment details bheji");
+
+    aiReply = buildPaymentDetailsMessage(conversationHistory);
+    state.paymentDetailsSent = true;
+    state.qrCodeSent = true;
+    conversationHistory.push({ role: "assistant", content: aiReply });
+    await persistState(userNumber, state);
+    await persistConversation(userNumber, conversationHistory);
+    await sendWhatsAppReply(aiReply, `${process.env.APP_URL || "https://ai-agent-h5dd.onrender.com"}/qr-code.png`);
+    return;
+
+  } else {
+
+    // Baaki stages mein: bas nakli [placeholder] hata do, flow wahi rehne do
+    // (demo link wagairah aage ka code khud lagayega).
+    console.log("PLACEHOLDER removed (stage:", state.stage, ")");
+
+    aiReply = aiReply
+      .replace(/\[[^\]]{2,100}\](?!\()/g, "")
+      .replace(/[ \t]+\n/g, "\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+  }
 }
 
 console.log("DEMO LINK CHECK:", {
@@ -1851,7 +1923,15 @@ if (state.stage === "DEMO" && stageBeforeThisTurn === "DEMO" && !state.demoLinkS
     kirana_store: "demo-kirana.html"
   };
 
-  let demoUrl = null;
+  let demoUrl = pickSampleDemoUrl(
+    detectDemoCategory(conversationHistory, state.business),
+    state.industryId,
+    appUrl
+  );
+
+  console.log("DEMO LINK: sample demo:", demoUrl);
+
+  if (process.env.DEMO_MODE === "live") {
 
   try {
 
@@ -1889,6 +1969,8 @@ if (state.stage === "DEMO" && stageBeforeThisTurn === "DEMO" && !state.demoLinkS
     const fallbackFile = DEMO_FILE_BY_INDUSTRY[state.industryId] || "demo.html";
     demoUrl = `${appUrl}/${fallbackFile}`;
     console.log("DEMO LINK: using fallback:", demoUrl);
+
+  }
 
   }
 
@@ -1960,4 +2042,4 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-                   
+      
