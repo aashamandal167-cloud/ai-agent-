@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sample Website Design</title>
+<style>
+  :root {
+    --bg: #f4f1ec;
+    --text: #1d1d1f;
+    --muted: #5f5f66;
+    --card: #ffffff;
+    --accent: #c07a3a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121214;
+      --text: #f2f2f4;
+      --muted: #a3a3ab;
+      --card: #1c1c20;
+      --accent: #e0a060;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .bar {
+    padding: 14px 16px;
+    text-align: center;
+    font-weight: 600;
+    background: var(--card);
+    border-bottom: 1px solid rgba(128,128,128,.25);
+  }
+  .bar span { color: var(--accent); }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 14px 12px 28px; }
+  .note { font-size: 14px; line-height: 1.5; color: var(--muted); text-align: center; margin: 4px 4px 14px; }
+  .shot {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 18px rgba(0,0,0,.25);
+    background: var(--card);
+  }
+  .cta { text-align: center; margin-top: 18px; font-size: 15px; line-height: 1.5; }
+  .cta b { color: var(--accent); }
+  .missing { text-align: center; padding: 60px 16px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="bar">Sample <span>Website Design</span></div>
+<div class="wrap" id="app"></div>
+<script>
+  var allowed = ["gym", "salon", "beauty-parlour", "restaurant", "fashion", "kirana", "bakery", "mobile-shop", "clinic", "coaching"];
+  var params = new URLSearchParams(window.location.search);
+  var key = params.get("d");
+  var app = document.getElementById("app");
+
+  if (allowed.indexOf(key) === -1) {
+    app.innerHTML = '<div class="missing">Sample design nahi mila.</div>';
+  } else {
+    app.innerHTML =
+      '<p class="note">Ye ek sample design hai. Aapki website aapke business ke naam, colors, photos aur products ke hisaab se customize hogi.</p>' +
+      '<img class="shot" alt="Sample website design" src="' + key + '.jpg">' +
+      '<p class="cta">Design pasand aaya? <b>WhatsApp par Raj ko reply kijiye.</b></p>';
+  }
+</script>
+</body>
+</html>
