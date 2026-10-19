@@ -55,6 +55,15 @@ app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 
+// Demo gallery page: HTML seedha server.js mein hai, taaki GitHub par purani
+// view.html padi ho to bhi hamesha naya wala hi khule. (static se PEHLE rakha hai)
+const DEMO_VIEW_HTML = "<!DOCTYPE html>\n<html lang=\"hi\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Sample Website Design</title>\n<style>\n  :root {\n    --bg: #f4f1ec;\n    --text: #1d1d1f;\n    --muted: #5f5f66;\n    --card: #ffffff;\n    --accent: #c07a3a;\n  }\n  @media (prefers-color-scheme: dark) {\n    :root {\n      --bg: #121214;\n      --text: #f2f2f4;\n      --muted: #a3a3ab;\n      --card: #1c1c20;\n      --accent: #e0a060;\n    }\n  }\n  * { box-sizing: border-box; }\n  body {\n    margin: 0;\n    background: var(--bg);\n    color: var(--text);\n    font-family: system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif;\n  }\n  .bar {\n    padding: 14px 16px;\n    text-align: center;\n    font-weight: 600;\n    background: var(--card);\n    border-bottom: 1px solid rgba(128,128,128,.25);\n  }\n  .bar span { color: var(--accent); }\n  .wrap { max-width: 820px; margin: 0 auto; padding: 14px 12px 28px; }\n  .note { font-size: 14px; line-height: 1.5; color: var(--muted); text-align: center; margin: 4px 4px 14px; }\n  .shot {\n    display: block;\n    width: 100%;\n    height: auto;\n    border-radius: 10px;\n    box-shadow: 0 4px 18px rgba(0,0,0,.25);\n    background: var(--card);\n  }\n  .cta { text-align: center; margin-top: 18px; font-size: 15px; line-height: 1.5; }\n  .cta b { color: var(--accent); }\n  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }\n  .card { display: block; text-decoration: none; color: var(--text); background: var(--card); border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.18); }\n  .card img { display: block; width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: top; }\n  .card span { display: block; padding: 8px 10px; font-size: 14px; font-weight: 600; text-align: center; }\n  .back { display: inline-block; margin-bottom: 10px; color: var(--accent); text-decoration: none; font-size: 14px; }\n  .missing { text-align: center; padding: 60px 16px; color: var(--muted); }\n</style>\n</head>\n<body>\n<div class=\"bar\">Sample <span>Website Design</span></div>\n<div class=\"wrap\" id=\"app\"></div>\n<script>\n  var labels = {\n    \"gym\": \"Gym / Fitness\",\n    \"salon\": \"Men's Salon\",\n    \"beauty-parlour\": \"Beauty Parlour\",\n    \"restaurant\": \"Restaurant / Cafe\",\n    \"fashion\": \"Fashion Store\",\n    \"kirana\": \"Kirana / Grocery\",\n    \"bakery\": \"Bakery / Sweets\",\n    \"mobile-shop\": \"Mobile / Electronics\",\n    \"clinic\": \"Clinic / Dental\",\n    \"coaching\": \"Coaching / Tuition\"\n  };\n  var allowed = Object.keys(labels);\n  var params = new URLSearchParams(window.location.search);\n  var key = params.get(\"d\");\n  var app = document.getElementById(\"app\");\n\n  if (key === \"all\" || key === null) {\n    var html = '<p class=\"note\">Apne business jaisa sample design chuniye. Aapki website aapke business ke naam, colors, photos aur products ke hisaab se customize hogi.</p><div class=\"grid\">';\n    allowed.forEach(function (k) {\n      html += '<a class=\"card\" href=\"?d=' + k + '\"><img alt=\"' + labels[k] + '\" src=\"' + k + '.jpg\"><span>' + labels[k] + '</span></a>';\n    });\n    html += '</div>';\n    app.innerHTML = html;\n  } else if (allowed.indexOf(key) === -1) {\n    app.innerHTML = '<div class=\"missing\">Sample design nahi mila.</div>';\n  } else {\n    app.innerHTML =\n      '<a class=\"back\" href=\"?d=all\">&larr; Aur designs dekhiye</a>' +\n      '<p class=\"note\">Ye ek sample design hai. Aapki website aapke business ke naam, colors, photos aur products ke hisaab se customize hogi.</p>' +\n      '<img class=\"shot\" alt=\"Sample website design\" src=\"' + key + '.jpg\">' +\n      '<p class=\"cta\">Design pasand aaya? <b>WhatsApp par Raj ko reply kijiye.</b></p>';\n  }\n</script>\n</body>\n</html>\n";
+
+app.get("/demo-samples/view.html", (req, res) => {
+  res.set("Cache-Control", "no-cache");
+  res.type("html").send(DEMO_VIEW_HTML);
+});
+
 app.use(express.static("."));
 
 // QR image: repo ke root mein ho ya services/ folder mein - dono jagah se chalega.
@@ -1152,7 +1161,7 @@ if (userMessage && userMessage.trim().toLowerCase() === "reset") {
 // number) to approve a pending payment screenshot.
 // ==========================================================
 
-      // OWNER_TEST_MODE=true (Render env) par owner number se bhi customer jaisa test ho sakta hai
+          // OWNER_TEST_MODE=true (Render env) par owner number se bhi customer jaisa test ho sakta hai
 if (userNumber === OWNER_NUMBER && process.env.OWNER_TEST_MODE !== "true") {
 
   const codeMatch = userMessage.match(/\d{4}/);
@@ -1650,7 +1659,7 @@ await persistConversation(userNumber, conversationHistory);
 // in this stage, and what's still missing in Discovery)
 // ==========================================================
 
-        let extraRule = "";
+  let extraRule = "";
 
 if (state.stage === "DISCOVERY") {
 
@@ -2125,4 +2134,4 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-    
+  
