@@ -12,6 +12,7 @@ import INDUSTRIES from "./knowledge/industries.js";
 import { generateDemoWebsite } from "./services/demoGenerator.js";
 import { generateFinalWebsite } from "./services/websiteGenerator.js";
 import { extractPaymentInfo } from "./services/paymentVerifier.js";
+import { generateReplyFallback, backupLLMConfigured } from "./services/aiFallback.js";
 
 const conversations = {};
 const clientState = {};
@@ -925,7 +926,8 @@ function pickSampleDemoUrl(category, industryId, appUrl) {
     return `${appUrl}/demo-samples/view.html?d=${key}`;
   }
 
-  return `${appUrl}/demo.html`;
+  // Business type pata nahi: saare sample designs ki gallery dikhao
+  return `${appUrl}/demo-samples/view.html?d=all`;
 }
 
 // ==========================================================
@@ -985,7 +987,23 @@ function sleepMs(ms) {
 }
 
 async function generateReplyWithRetry(args, startedAt) {
-  const delays = [1500, 3000];
+
+  const hasBackup = backupLLMConfigured();
+  const deadline = startedAt + 11500;
+
+  // Backup AI pehle chalana ho (jaise Gemini quota khatam ho) -> PREFER_BACKUP_LLM=true
+  if (hasBackup && process.env.PREFER_BACKUP_LLM === "true") {
+    try {
+      const r = await generateReplyFallback(args, deadline);
+      if (r) return r;
+    } catch (e) {
+      console.log("BACKUP LLM (pehle) fail:", e.message);
+    }
+  }
+
+  // Backup hai to Gemini ko sirf ek baar try karo (retry mein waqt kharab nahi);
+  // backup nahi hai to pehle jaisa 2 baar retry.
+  const delays = hasBackup ? [] : [1500, 3000];
   let lastReply = null;
   let lastErr = null;
 
@@ -1005,6 +1023,17 @@ async function generateReplyWithRetry(args, startedAt) {
     if (attempt < delays.length) {
       if (Date.now() - startedAt > 7000) break;
       await sleepMs(delays[attempt]);
+    }
+  }
+
+  // Gemini fail: backup AI se jawab banao
+  if (hasBackup) {
+    try {
+      console.log("BACKUP LLM: Gemini fail hua, backup AI se jawab bana rahe hain");
+      const r = await generateReplyFallback(args, deadline);
+      if (r) return r;
+    } catch (e) {
+      console.log("BACKUP LLM fail:", e.message);
     }
   }
 
@@ -1113,7 +1142,7 @@ if (userMessage && userMessage.trim().toLowerCase() === "reset") {
 
   return;
 
-          }
+}
 
 // ==========================================================
 // OWNER APPROVAL COMMANDS
@@ -1123,7 +1152,7 @@ if (userMessage && userMessage.trim().toLowerCase() === "reset") {
 // number) to approve a pending payment screenshot.
 // ==========================================================
 
-// OWNER_TEST_MODE=true (Render env) par owner number se bhi customer jaisa test ho sakta hai
+      // OWNER_TEST_MODE=true (Render env) par owner number se bhi customer jaisa test ho sakta hai
 if (userNumber === OWNER_NUMBER && process.env.OWNER_TEST_MODE !== "true") {
 
   const codeMatch = userMessage.match(/\d{4}/);
@@ -1591,7 +1620,7 @@ if (state.stage === "FOLLOWUP" && state.paymentReceived) {
           .from("client_websites")
           .upsert({ id: siteId, phone: userNumber, html: finalHtml });
 
-                                      if (siteError) {
+        if (siteError) {
           console.log("FINAL SITE SAVE ERROR:", JSON.stringify(siteError));
         } else {
           const appUrlForSite = process.env.APP_URL || "https://ai-agent-h5dd.onrender.com";
@@ -1621,7 +1650,7 @@ await persistConversation(userNumber, conversationHistory);
 // in this stage, and what's still missing in Discovery)
 // ==========================================================
 
-let extraRule = "";
+        let extraRule = "";
 
 if (state.stage === "DISCOVERY") {
 
@@ -1824,13 +1853,36 @@ const recentHistory =
 // ==========================================================
 // PAYMENT STAGE: details/QR maangne par seedha code se bhejo (Gemini nahi)
 // ==========================================================
+const claimsPaid = /ho gaya|ho gya|kar diya|kar di\b|kar dia|done|paid|bhej diya|bhej dia|sent|successful/i.test(lowerMsg);
+
+// Deal ho chuki (NEGOTIATION) aur customer seedha UPI/QR/bank maange ya "kispe karu" bole:
+// stage ka intezaar mat karo, seedha PAYMENT par le aao.
+const strongPayIntent = /upi|qr|bank|account|ifsc|scan|kispe karu|kispar karu|kis par karu|kahan karu|kaha karu|kaise karu|kaise pay|payment karna|payment karunga|payment kar\b/i.test(lowerMsg);
+
+if (state.stage === "NEGOTIATION" && !hasAttachedMedia && strongPayIntent && !claimsPaid) {
+  console.log("STAGE: NEGOTIATION -> PAYMENT (customer ne payment details maangi)");
+  state.stage = "PAYMENT";
+}
+
 if (state.stage === "PAYMENT" && !hasAttachedMedia) {
+
+  // "Payment ho gaya" - Gemini ke bina seedha screenshot maango
+  if (claimsPaid) {
+
+    const paidText = state.paymentPendingApproval
+      ? "Sir 😊, aapka payment screenshot mil gaya hai. Verify ho raha hai, thodi der mein confirm karke aapko bata denge. 🙏"
+      : "Sir 😊, thank you! Payment confirm karne ke liye please payment ka screenshot yahan bhej dijiye. Screenshot milte hi hum verify karke aapki website par kaam shuru kar denge. 🙏";
+
+    conversationHistory.push({ role: "assistant", content: paidText });
+    await persistState(userNumber, state);
+    await persistConversation(userNumber, conversationHistory);
+    await sendWhatsAppReply(paidText);
+    return;
+  }
 
   const asksPaymentInfo = /upi|qr|bank|account|ifsc|scan|payment|pay\b|kispe|kispar|kis par|kahan|kaha|details|detail|number|bhejo|bhej do|send/i.test(lowerMsg);
 
   const justAgrees = /^(ha|haan|han|hanji|ok|okay|yes|chalo|thik hai|theek hai|bhejo|ji|ji ha)\b/i.test(lowerMsg);
-
-  const claimsPaid = /ho gaya|ho gya|kar diya|kar di\b|kar dia|done|paid|bhej diya|bhej dia|sent|successful/i.test(lowerMsg);
 
   if (!claimsPaid && (asksPaymentInfo || (justAgrees && !state.paymentDetailsSent))) {
 
@@ -1883,6 +1935,16 @@ if (isFallbackReply && !hasAttachedMedia) {
   conversationHistory.length = historyLenBefore;
   await sendWhatsAppReply(aiReply);
   return;
+}
+
+// SAFETY 1: Gemini kabhi kabhi apni banayi hui UPI ID likh deta hai (jaise
+// "rajchandravanshi@ybl"). Koi bhi UPI handle jo hamari asli ID nahi hai, asli se badal do.
+{
+  const realUpiCheck = process.env.RAJ_UPI_ID || "rr9566735-1@okaxis";
+  aiReply = aiReply.replace(
+    /[A-Za-z0-9._-]{2,}@[A-Za-z]{2,}\b(?!\.[A-Za-z])/g,
+    (m) => (m.toLowerCase() === realUpiCheck.toLowerCase() ? m : realUpiCheck)
+  );
 }
 
 // SAFETY: Gemini kabhi kabhi "[Your UPI ID Here]" / "[QR Code Image Link Here]" /
@@ -2063,4 +2125,4 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-  
+    
