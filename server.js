@@ -10,7 +10,7 @@ import { generateReply } from "./services/aiService.js";
 import { updateStage } from "./services/stageManager.js";
 import INDUSTRIES from "./knowledge/industries.js";
 import { generateDemoWebsite } from "./services/demoGenerator.js";
-import { generateFinalWebsite } from "./services/websiteGenerator.js";
+import { generateFinalWebsite, generateAIWebsite } from "./services/websiteGenerator.js";
 import { extractPaymentInfo } from "./services/paymentVerifier.js";
 import { generateReplyFallback, backupLLMConfigured } from "./services/aiFallback.js";
 
@@ -107,14 +107,43 @@ const OWNER_NUMBER = process.env.OWNER_WHATSAPP_NUMBER || "whatsapp:+91873505429
 // Generic helper to send a WhatsApp message to ANY number (not tied to
 // the current request's customer) - used for owner notifications and
 // for proactively confirming to a customer once the owner approves.
+// Return: true = message chala gaya, false = fail (caller backup plan use kar sakta hai)
 async function sendWhatsAppMessageTo(toNumber, fromNumber, text, mediaUrl) {
   try {
     const payload = { body: text, from: fromNumber, to: toNumber };
     if (mediaUrl) payload.mediaUrl = [mediaUrl];
     await twilioClient.messages.create(payload);
+    return true;
   } catch (e) {
     console.log("SEND TO", toNumber, "ERROR:", e.message);
+    return false;
   }
+}
+
+// Owner ke liye: sabhi pending payment approvals ki list (memory + Supabase)
+async function listPendingApprovals() {
+  const found = {};
+  for (const phone of Object.keys(clientState)) {
+    const st = clientState[phone];
+    if (st && (st.paymentPendingApproval || st.remainingPaymentPendingApproval)) {
+      found[phone] = st;
+    }
+  }
+  if (supabase) {
+    try {
+      const { data, error } = await supabase.from("client_state").select("phone,state");
+      if (!error && data) {
+        for (const row of data) {
+          if (!found[row.phone] && row.state && (row.state.paymentPendingApproval || row.state.remainingPaymentPendingApproval)) {
+            found[row.phone] = row.state;
+          }
+        }
+      }
+    } catch (e) {
+      console.log("LIST PENDING EXCEPTION:", e.message);
+    }
+  }
+  return Object.entries(found).map(([phone, st]) => ({ phone, state: st }));
 }
 
 // Uploads a downloaded image buffer to Supabase Storage and returns a
@@ -549,7 +578,7 @@ const recentHistory = [
   }
 ];
 
-const aiReply = await generateReply({
+        const aiReply = await generateReply({
   state,
   recentHistory,
   extraRule: ""
@@ -946,7 +975,9 @@ function pickSampleDemoUrl(category, industryId, appUrl) {
 //   RAJ_UPI_ID, RAJ_BANK_NAME, RAJ_ACCOUNT_HOLDER,
 //   RAJ_ACCOUNT_NUMBER, RAJ_IFSC
 // ==========================================================
-function buildPaymentDetailsMessage(history) {
+function buildPaymentDetailsMessage(history, mode) {
+
+  const isRemaining = mode === "remaining";
 
   const upi = process.env.RAJ_UPI_ID || "rr9566735-1@okaxis";
   const bankName = process.env.RAJ_BANK_NAME || "";
@@ -962,14 +993,14 @@ function buildPaymentDetailsMessage(history) {
       if (m.role !== "user") {
         const hit = String(m.content).match(/advance[^₹\d]{0,40}₹\s?([\d,]+)/i);
         if (hit) {
-          advanceLine = `\nAdvance amount: ₹${hit[1]}\n`;
+          advanceLine = `\n${isRemaining ? "Baaki payment (50%)" : "Advance amount"}: ₹${hit[1]}\n`;
           break;
         }
       }
     }
   } catch (e) {}
 
-  let text = `Sir 😊, payment ki details ye hain:\n${advanceLine}\n💳 UPI ID: ${upi}\n(GPay, PhonePe, Paytm - kisi bhi UPI app se ho jayega)\n`;
+  let text = `Sir 😊, ${isRemaining ? "baaki 50% payment" : "payment"} ki details ye hain:\n${advanceLine}\n💳 UPI ID: ${upi}\n(GPay, PhonePe, Paytm - kisi bhi UPI app se ho jayega)\n`;
 
   if (accNo && ifsc) {
     text += `\n🏦 Bank Transfer:\n`;
@@ -1068,6 +1099,7 @@ const webhookStartedAt = Date.now();
 // ==========================================================
 
 let webhookAnswered = false;
+let noticePrefix = "";
 
 function answerWebhook(twimlString) {
   if (webhookAnswered) return false;
@@ -1086,6 +1118,13 @@ const ackTimer = setTimeout(() => {
 }, 13000);
 
 async function sendWhatsAppReply(text, mediaUrl) {
+
+  // Owner ne jo confirm kiya tha par REST se customer tak nahi pahunch paya,
+  // wo notice customer ke agle reply ke saath chala jata hai.
+  if (noticePrefix) {
+    text = noticePrefix + "\n\n" + text;
+    noticePrefix = "";
+  }
 
   // 1) Pehla reply: TwiML
   if (!webhookAnswered) {
@@ -1118,7 +1157,7 @@ await runSequential(userNumber, async () => {
 
   try {
 
-// ==========================================================
+      // ==========================================================
 // REAL PAYMENT PROOF CHECK
 // Twilio tells us if the incoming WhatsApp message actually
 // has an attached image/media via NumMedia + MediaUrl0.
@@ -1161,7 +1200,7 @@ if (userMessage && userMessage.trim().toLowerCase() === "reset") {
 // number) to approve a pending payment screenshot.
 // ==========================================================
 
-          // OWNER_TEST_MODE=true (Render env) par owner number se bhi customer jaisa test ho sakta hai
+// OWNER_TEST_MODE=true (Render env) par owner number se bhi customer jaisa test ho sakta hai
 if (userNumber === OWNER_NUMBER && process.env.OWNER_TEST_MODE !== "true") {
 
   const codeMatch = userMessage.match(/\d{4}/);
@@ -1194,16 +1233,25 @@ if (userNumber === OWNER_NUMBER && process.env.OWNER_TEST_MODE !== "true") {
       kind = "remaining";
     }
 
-    await persistState(phone, custState);
-
     const notifyText =
       kind === "advance"
         ? "Sir 😊, aapka advance payment confirm ho gaya hai! Ab hum aapki website par kaam shuru kar sakte hain.\n\nKya aap apne business/products ki kam se kam ek photo WhatsApp par bhej sakte hain?"
         : "Sir 😊, aapka payment confirm ho gaya hai! Aapki website ab officially complete hai. Bahut bahut dhanyavaad humpar bharosa karne ke liye! 🙏";
 
-    await sendWhatsAppMessageTo(phone, twilioFromNumber, notifyText);
+    const notified = await sendWhatsAppMessageTo(phone, twilioFromNumber, notifyText);
 
-    await sendWhatsAppReply(`✅ ${phone} ka ${kind === "advance" ? "advance" : "remaining"} payment confirm kar diya gaya, aur unhe inform kar diya gaya hai.`);
+    // REST se message na ja paye to customer ke agle message par bhej denge
+    if (!notified) {
+      custState.pendingNotice = notifyText;
+    }
+
+    await persistState(phone, custState);
+
+    await sendWhatsAppReply(
+      notified
+        ? `✅ ${phone} ka ${kind === "advance" ? "advance" : "remaining"} payment confirm kar diya gaya, aur unhe inform kar diya gaya hai.`
+        : `✅ ${phone} ka ${kind === "advance" ? "advance" : "remaining"} payment confirm ho gaya. Par Twilio se customer ko message nahi ja paya - unke agle message par apne aap bhej diya jayega. Aap chahein to unhe khud bhi bata dein.`
+    );
 
     return;
 
@@ -1211,7 +1259,20 @@ if (userNumber === OWNER_NUMBER && process.env.OWNER_TEST_MODE !== "true") {
 
   // Owner sent something else (not a recognized approval command) -
   // just acknowledge briefly, don't run them through the sales flow.
-  await sendWhatsAppReply("Sir, agar kisi customer ka payment confirm karna hai, to reply karein: confirm <last 4 digits of their number>");
+  const pendingList = await listPendingApprovals();
+
+  if (!pendingList.length) {
+    await sendWhatsAppReply("Sir, abhi koi payment approval pending nahi hai.\n\nPayment confirm karne ke liye reply karein: confirm <customer ke number ke last 4 digits>");
+    return;
+  }
+
+  const lines = pendingList.map(({ phone, state: st }) => {
+    const l4 = phone.replace(/\D/g, "").slice(-4);
+    const kindLabel = st.remainingPaymentPendingApproval ? "REMAINING" : "ADVANCE";
+    return `💰 ${kindLabel} payment\nBusiness: ${st.business || "Unknown"}\nNumber ends in: ${l4}\nAI ne padha:\n${st.lastPaymentRead || "(nahi mila)"}\n\nReply karein: confirm ${l4}`;
+  });
+
+  await sendWhatsAppReply(lines.join("\n\n----------\n\n"), pendingList[0].state.lastPaymentImageUrl || undefined);
   return;
 
 }
@@ -1226,6 +1287,11 @@ let conversationHistory = await getOrLoadConversation(userNumber);
 // (taaki error wale replies history/state mein na bhar jayein).
 const stateSnapshot = JSON.parse(JSON.stringify(state));
 const historyLenBefore = conversationHistory.length;
+
+if (state.pendingNotice) {
+  noticePrefix = state.pendingNotice;
+  state.pendingNotice = "";
+}
 
 conversationHistory.push({
   role: "user",
@@ -1405,7 +1471,11 @@ if (state.stage === "PAYMENT" && hasAttachedMedia && mediaUrl && !state.paymentP
       `AI ne padha:\n${extracted || "Nahi padh paya"}\n\n` +
       `Reply karein: confirm ${last4}`;
 
-    await sendWhatsAppMessageTo(OWNER_NUMBER, twilioFromNumber, ownerText, publicImgUrl);
+    const ownerAlerted = await sendWhatsAppMessageTo(OWNER_NUMBER, twilioFromNumber, ownerText, publicImgUrl);
+
+    state.lastPaymentRead = extracted || "";
+    state.lastPaymentImageUrl = publicImgUrl || "";
+    state.ownerAlertDelivered = ownerAlerted;
 
     state.paymentPendingApproval = true;
 
@@ -1459,7 +1529,11 @@ if (state.stage === "FOLLOWUP" && state.paymentReceived) {
           `AI ne padha:\n${remExtracted || "Nahi padh paya"}\n\n` +
           `Reply karein: confirm ${remLast4}`;
 
-        await sendWhatsAppMessageTo(OWNER_NUMBER, twilioFromNumber, remOwnerText, remPublicUrl);
+        const remAlerted = await sendWhatsAppMessageTo(OWNER_NUMBER, twilioFromNumber, remOwnerText, remPublicUrl);
+
+        state.lastPaymentRead = remExtracted || "";
+        state.lastPaymentImageUrl = remPublicUrl || "";
+        state.ownerAlertDelivered = remAlerted;
 
         state.remainingPaymentPendingApproval = true;
 
@@ -1618,6 +1692,8 @@ if (state.stage === "FOLLOWUP" && state.paymentReceived) {
 
       console.log("FINAL WEBSITE: attempting generation for", userNumber);
 
+      state.contactNumber = userNumber.replace(/\D/g, "");
+
       const finalHtml = await generateFinalWebsite(state);
 
       const siteId =
@@ -1636,19 +1712,21 @@ if (state.stage === "FOLLOWUP" && state.paymentReceived) {
           state.finalWebsiteUrl = `${appUrlForSite}/site/${siteId}`;
           state.finalWebsiteGenerated = true;
           console.log("FINAL WEBSITE: generated successfully:", state.finalWebsiteUrl);
-        }
 
-      }
-
-    } catch (genErr) {
-      console.log("FINAL WEBSITE GENERATION FAILED (will retry next message):", genErr.message);
-    }
-
-  }
-
-}
-
-// Save facts NOW, before calling Gemini - so even if the AI call
+          // Background mein AI se behtar custom design - ban jaye to isi link par badal dega
+          const stateForAI = JSON.parse(JSON.stringify(state));
+          generateAIWebsite(stateForAI)
+            .then(async (aiHtml) => {
+              if (aiHtml && supabase) {
+                const { error: upErr } = await supabase
+                  .from("client_websites")
+                  .upsert({ id: siteId, phone: userNumber, html: aiHtml });
+                console.log("FINAL WEBSITE: AI version", upErr ? "save fail" : "saved");
+              } else {
+                console.log("FINAL WEBSITE: AI version nahi bana, template version hi rahega");
+              }
+            })
+    // Save facts NOW, before calling Gemini - so even if the AI call
 // fails/times out below, we never lose what we already extracted.
 await persistState(userNumber, state);
 await persistConversation(userNumber, conversationHistory);
@@ -1659,7 +1737,7 @@ await persistConversation(userNumber, conversationHistory);
 // in this stage, and what's still missing in Discovery)
 // ==========================================================
 
-  let extraRule = "";
+let extraRule = "";
 
 if (state.stage === "DISCOVERY") {
 
@@ -1859,17 +1937,109 @@ Support customer politely. Agar deal nahi hui thi, warm note par close karo. For
 const recentHistory =
   conversationHistory.slice(-16);
 
+// "payment ho gaya" jaisa claim (FOLLOWUP aur PAYMENT dono blocks mein use hota hai)
+const claimsPaid = /ho gaya|ho gya|kar diya|kar di\b|kar dia|done|paid|bhej diya|bhej dia|sent|successful/i.test(lowerMsg);
+
+// ==========================================================
+// PAYMENT: customer ne screenshot bheja -> fixed jawab (Gemini nahi)
+// ==========================================================
+if (state.stage === "PAYMENT" && hasAttachedMedia && state.paymentPendingApproval) {
+
+  const gotText = "Sir 😊, aapka payment screenshot mil gaya hai. Hum verify kar rahe hain. Confirm hote hi aapko yahin bata denge aur website ka kaam shuru kar denge. 🙏";
+
+  conversationHistory.push({ role: "assistant", content: gotText });
+  await persistState(userNumber, state);
+  await persistConversation(userNumber, conversationHistory);
+  await sendWhatsAppReply(gotText);
+  return;
+}
+
+// ==========================================================
+// FOLLOWUP (advance confirm hone ke baad): photo + color lena, website ka
+// link dena, baaki 50% payment - sab code se, Gemini par depend nahi.
+// ==========================================================
+if (state.stage === "FOLLOWUP" && state.paymentReceived) {
+
+  const sendFixed = async (text, media) => {
+    conversationHistory.push({ role: "assistant", content: text });
+    await persistState(userNumber, state);
+    await persistConversation(userNumber, conversationHistory);
+    await sendWhatsAppReply(text, media);
+  };
+
+  const qrForFollowup = `${process.env.APP_URL || "https://ai-agent-h5dd.onrender.com"}/qr-code.png`;
+
+  // A) Photo + color abhi poore nahi hue
+  if (!state.requirementsLocked) {
+
+    const colorJustSet = !stateSnapshot.colorPreference && !!state.colorPreference;
+
+    if (hasAttachedMedia || colorJustSet) {
+
+      if (!state.productPhotos.length) {
+        await sendFixed(
+          hasAttachedMedia
+            ? "Sir 😊, photo save nahi ho paayi. Please ek baar dobara bhej dijiye."
+            : "Sir 😊, color note kar liya. Ab please apne business/products ki kam se kam ek photo WhatsApp par bhej dijiye."
+        );
+      } else {
+        await sendFixed("Sir 😊, photo mil gayi, shukriya! Ab bataiye website kis color theme mein chahiye? (jaise blue, red, gold, green, ya \"jaisa demo mein tha\")");
+      }
+      return;
+    }
+  }
+
+  // B) Website ban gayi: link + baaki payment ki details (ek hi baar)
+  if (state.requirementsLocked && state.finalWebsiteGenerated && state.finalWebsiteUrl && !state.finalWebsiteLinkSent) {
+
+    state.finalWebsiteLinkSent = true;
+
+    const readyText =
+      `Sir 😊, aapki website taiyar ho gayi hai! 🎉\n\n🌐 ${state.finalWebsiteUrl}\n\n` +
+      `Ek baar dekh lijiye. Koi badlaav chahiye to bata dijiye.\n\n` +
+      `Pasand aane par project complete karne ke liye baaki payment kar dijiye:\n\n` +
+      buildPaymentDetailsMessage(conversationHistory, "remaining");
+
+    await sendFixed(readyText, qrForFollowup);
+    return;
+  }
+
+  // C) Baaki payment: details maange / "ho gaya" bole / screenshot bheje
+  if (state.finalWebsiteGenerated && !state.remainingPaymentReceived) {
+
+    const asksPayNow = /upi|qr|bank|account|ifsc|scan|payment|pay\b|kispe|kahan|kaha|details|detail|number|bhejo|send/i.test(lowerMsg);
+
+    if (hasAttachedMedia && state.remainingPaymentPendingApproval) {
+      await sendFixed("Sir 😊, aapka payment screenshot mil gaya hai. Verify hote hi aapko yahin confirm kar denge. Dhanyavaad! 🙏");
+      return;
+    }
+
+    if (!hasAttachedMedia && claimsPaid) {
+      await sendFixed(
+        state.remainingPaymentPendingApproval
+          ? "Sir 😊, aapka payment screenshot mil chuka hai, verify ho raha hai. Confirm hote hi bata denge. 🙏"
+          : "Sir 😊, thank you! Payment confirm karne ke liye please payment ka screenshot yahan bhej dijiye. 🙏"
+      );
+      return;
+    }
+
+    if (!hasAttachedMedia && asksPayNow) {
+      await sendFixed(buildPaymentDetailsMessage(conversationHistory, "remaining"), qrForFollowup);
+      return;
+    }
+  }
+}
+
 // ==========================================================
 // PAYMENT STAGE: details/QR maangne par seedha code se bhejo (Gemini nahi)
 // ==========================================================
-const claimsPaid = /ho gaya|ho gya|kar diya|kar di\b|kar dia|done|paid|bhej diya|bhej dia|sent|successful/i.test(lowerMsg);
 
 // Deal ho chuki (NEGOTIATION) aur customer seedha UPI/QR/bank maange ya "kispe karu" bole:
 // stage ka intezaar mat karo, seedha PAYMENT par le aao.
 const strongPayIntent = /upi|qr|bank|account|ifsc|scan|kispe karu|kispar karu|kis par karu|kahan karu|kaha karu|kaise karu|kaise pay|payment karna|payment karunga|payment kar\b/i.test(lowerMsg);
 
-if (state.stage === "NEGOTIATION" && !hasAttachedMedia && strongPayIntent && !claimsPaid) {
-  console.log("STAGE: NEGOTIATION -> PAYMENT (customer ne payment details maangi)");
+if ((state.stage === "NEGOTIATION" || state.stage === "DEAL") && !hasAttachedMedia && strongPayIntent && !claimsPaid) {
+  console.log("STAGE:", state.stage, "-> PAYMENT (customer ne payment details maangi)");
   state.stage = "PAYMENT";
 }
 
@@ -1942,6 +2112,7 @@ if (isFallbackReply && !hasAttachedMedia) {
   for (const k of Object.keys(state)) delete state[k];
   Object.assign(state, stateSnapshot);
   conversationHistory.length = historyLenBefore;
+  noticePrefix = "";
   await sendWhatsAppReply(aiReply);
   return;
 }
@@ -2134,4 +2305,4 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-  
+    
