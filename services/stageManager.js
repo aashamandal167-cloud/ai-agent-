@@ -219,7 +219,12 @@ export function updateStage(state, userMessage, hasAttachedMedia = false) {
       message.includes("good") ||
       message.includes("nice") ||
       message.includes("mast") ||
-      message.includes("pasand")
+      message.includes("pasand") ||
+      message.includes("badhiya") ||
+      message.includes("dekh liya") ||
+      message.includes("dekha") ||
+      // Demo link bheja ja chuka hai: customer ka koi bhi jawab (reject chhodkar) = aage badho
+      (state.demoLinkSent && !hasKeyword(message, REJECT_WORDS))
     )
   ) {
 
@@ -351,4 +356,4 @@ export function updateStage(state, userMessage, hasAttachedMedia = false) {
 
 }
 
-  
+    
