@@ -136,6 +136,7 @@ ${gallery}
 <section id="contact">
   <h2>Sampark Karein</h2>
   <p>${name}${city ? ", " + city : ""}</p>
+  ${state.businessAddress ? `<p>${esc(state.businessAddress)}</p>` : ""}
   ${contactBtn}
 </section>
 <footer>&copy; ${new Date().getFullYear()} ${name}. All rights reserved.</footer>
@@ -217,4 +218,5 @@ Contact WhatsApp number (use for a wa.me button if present): ${state.contactNumb
   html = html.replace(/<script[^>]*\bsrc\s*=[^>]*>\s*<\/script>/gi, "");
 
   return html;
-}
+  }
+  
