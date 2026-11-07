@@ -98,13 +98,28 @@ Only write what is clearly visible. Never guess amounts or dates. The receiver i
 `.trim();
 
   try {
-    const { text, provider } = await callLLM({
+    // Webhook ke 13 sec ke andar rehne ke liye total 10.5 sec; pehli koshish fail ho to ek baar dobara
+    const deadline = Date.now() + 10500;
+    const callArgs = {
       system,
       messages: [{ role: "user", content: "Is image ko dekho aur sirf JSON do." }],
       image: { base64: imageBuffer.toString("base64"), mime },
       maxTokens: 500,
-      timeoutMs: 12000
-    });
+      timeoutMs: 9000,
+      deadline
+    };
+
+    let result;
+    try {
+      result = await callLLM(callArgs);
+    } catch (firstErr) {
+      if (Date.now() > deadline - 3500) throw firstErr;
+      console.log("IMAGE ANALYSIS retry after:", firstErr.message);
+      await new Promise((r) => setTimeout(r, 1200));
+      result = await callLLM(callArgs);
+    }
+
+    const { text, provider } = result;
 
     const start = text.indexOf("{");
     const end = text.lastIndexOf("}");
@@ -135,6 +150,8 @@ Only write what is clearly visible. Never guess amounts or dates. The receiver i
       date: typeof data.date === "string" ? data.date : null,
       summaryText: lines.join("\n"),
       suspicious: data.suspicious || "",
+      paidBy: typeof data.paid_by === "string" ? data.paid_by.trim() : "",
+      paidTo: typeof data.paid_to === "string" ? data.paid_to.trim() : "",
       receiverMatch: data.receiver_matches_expected === "yes" || data.receiver_matches_expected === "no" ? data.receiver_matches_expected : "unknown",
       txnId: typeof data.txn_id === "string" ? data.txn_id.trim() : "",
       unavailable: false
@@ -144,4 +161,5 @@ Only write what is clearly visible. Never guess amounts or dates. The receiver i
     console.log("IMAGE ANALYSIS FAILED:", err.message);
     return { ...fallback, summaryText: "AI services abhi busy hain, image padh nahi paya. Screenshot khud dekhkar confirm karein." };
   }
-}
+  }
+        
