@@ -161,7 +161,12 @@ async function callGemini(p, { system, messages, image, maxTokens, timeoutMs }) 
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: system }] },
           contents,
-          generationConfig: { maxOutputTokens: maxTokens, temperature: 0.6 }
+          generationConfig: {
+            maxOutputTokens: maxTokens,
+            temperature: 0.6,
+            // Gemini 2.5 ka "thinking" output token khata hai aur jawab khali/adhura reh jata tha: band karo
+            ...(/2\.5/.test(p.model) ? { thinkingConfig: { thinkingBudget: 0 } } : {})
+          }
         })
       }
     );
