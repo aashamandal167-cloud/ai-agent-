@@ -104,7 +104,7 @@ Only write what is clearly visible. Never guess amounts or dates. The receiver i
       system,
       messages: [{ role: "user", content: "Is image ko dekho aur sirf JSON do." }],
       image: { base64: imageBuffer.toString("base64"), mime },
-      maxTokens: 500,
+      maxTokens: 900,
       timeoutMs: 9000,
       deadline
     };
@@ -159,7 +159,8 @@ Only write what is clearly visible. Never guess amounts or dates. The receiver i
 
   } catch (err) {
     console.log("IMAGE ANALYSIS FAILED:", err.message);
-    return { ...fallback, summaryText: "AI services abhi busy hain, image padh nahi paya. Screenshot khud dekhkar confirm karein." };
+    const why = String(err.message || "").replace(/\s+/g, " ").slice(0, 160);
+    return { ...fallback, summaryText: `AI image padh nahi paya (kaaran: ${why}). Screenshot khud dekhkar confirm karein.` };
   }
-  }
-        
+      }
+      
