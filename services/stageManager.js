@@ -225,7 +225,8 @@ export function updateStage(state, userMessage, hasAttachedMedia = false) {
       message.includes("dekha") ||
       // Demo link bheja ja chuka hai: customer ka koi bhi jawab (reject chhodkar) = aage badho
       (state.demoLinkSent && !hasKeyword(message, REJECT_WORDS))
-    )
+    ) &&
+    !detectCategory(message)
   ) {
 
     state.stage = "CATEGORY";
@@ -237,8 +238,9 @@ export function updateStage(state, userMessage, hasAttachedMedia = false) {
   // CATEGORY → DEAL
   // ==========================================
 
+  // Demo dekhne ke baad customer seedha category bol de ("Premium 3D chahiye") to bhi aage badho
   if (
-    state.stage === "CATEGORY" &&
+    (state.stage === "CATEGORY" || (state.stage === "DEMO" && state.demoLinkSent)) &&
     detectCategory(message)
   ) {
 
@@ -254,9 +256,16 @@ export function updateStage(state, userMessage, hasAttachedMedia = false) {
   // DEAL → NEGOTIATION
   // ==========================================
 
+  // Customer ne seedha apna budget number likh diya ("20000", "5000 dunga")
+  const quotesBudget = (() => {
+    const nums = (message.match(/\d[\d,]{3,6}/g) || []).map((n) => parseInt(n.replace(/,/g, ""), 10));
+    return nums.some((n) => n >= 1000 && n <= 200000);
+  })();
+
   if (
     state.stage === "DEAL" &&
     (
+      quotesBudget ||
       hasKeyword(message, PRICE_WORDS) ||
       hasKeyword(message, PRICE_WORDS_EXTRA) ||
       hasKeyword(message, PAYMENT_WORDS)
@@ -356,4 +365,4 @@ export function updateStage(state, userMessage, hasAttachedMedia = false) {
 
 }
 
-    
+  
